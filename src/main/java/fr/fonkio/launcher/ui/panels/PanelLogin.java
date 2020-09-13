@@ -29,16 +29,17 @@ import java.nio.charset.StandardCharsets;
 
 
 public class PanelLogin extends Panel {
-    private final FileManager fileManager = new FileManager("mvwild");
+    private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
     private File dir = fileManager.createGameDir();
-    private HomePanel hp = new HomePanel(getStage());
+    private HomePanel hp;
     private Button validate = new Button("Valider");
     private TextField usernameTextField = new TextField();
     private Saver saver;
 
     public PanelLogin(Stage stage) {
         super(stage);
-        File f = new File(dir, "launcher.properties");
+
+        File f = fileManager.getLauncherProperties();
         if(!dir.exists()) {
             dir.mkdir();
         }
@@ -50,6 +51,7 @@ public class PanelLogin extends Panel {
             }
         }
         saver = new Saver(f);
+        hp = new HomePanel(getStage());
 
     }
 
@@ -58,16 +60,16 @@ public class PanelLogin extends Panel {
         super.init(panelManager);
 
         try{
-            URLConnection connection = (new URL("https://www.mvwild.org/launcher/version.php").openConnection());
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11");
+            URLConnection connection = (new URL(MvWildLauncher.SITE_URL +"launcher/version.php").openConnection());
+            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
             connection.connect();
             InputStream is = connection.getInputStream();
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String version = in.readLine();
-            if (!version.equals(this.versionActuelle)) {
-                switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : "+versionActuelle+"\nNouvelle version : "+version)) {
+            if (!version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+                switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : "+MvWildLauncher.LAUNCHER_VERSION+"\nNouvelle version : "+version)) {
                     case JOptionPane.OK_OPTION:
-                        Desktop.getDesktop().browse(new URI("https://mvwild.org/launcher/MvWildLauncher.jar"));
+                        Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL +"launcher/MvWildLauncher.jar"));
                         MvWildLauncher.stopRP();
                         System.exit(0);
                         break;
@@ -76,7 +78,7 @@ public class PanelLogin extends Panel {
                 }
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erreur de récupération de la version minecraft", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Erreur de récupération de la version du launcher", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
         }
 
         MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);

@@ -11,10 +11,7 @@ public class Panel implements IPanel {
 
     protected GridPane layout = new GridPane();
     protected PanelManager panelManager;
-    protected String versionActuelle = "0.2";
     private Stage stage;
-
-
 
     public Panel(Stage stage) {
         this.stage = stage;

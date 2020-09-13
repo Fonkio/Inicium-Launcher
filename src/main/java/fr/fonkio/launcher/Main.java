@@ -9,7 +9,7 @@ public class Main {
     public static AriLogger logger;
 
     public static void main(String[] args) {
-        logger = new AriLogger("MvWild");
+        logger = new AriLogger(MvWildLauncher.SERVEUR_NAME);
         try{
             Class.forName("javafx.application.Application");
             Application.launch(FxApplication.class, args);

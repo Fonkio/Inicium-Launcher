@@ -17,20 +17,18 @@ import javafx.stage.StageStyle;
 
 public class PanelManager {
 
-    private final MvWildLauncher mvWildLauncher;
     private final Stage stage;
     private GridPane layout;
     private TopPanel topPanel;
     private GridPane centerPanel = new GridPane();
 
-    public PanelManager(MvWildLauncher mvWildLauncher, Stage stage) {
+    public PanelManager(Stage stage) {
         topPanel = new TopPanel(stage);
-        this.mvWildLauncher = mvWildLauncher;
         this.stage = stage;
     }
 
     public void init() {
-        this.stage.setTitle("MvWild Launcher");
+        this.stage.setTitle(MvWildLauncher.SERVEUR_NAME + " Launcher");
         this.stage.setMinWidth(1280);
         this.stage.setWidth(1280);
         this.stage.setMinHeight(720);
@@ -56,9 +54,7 @@ public class PanelManager {
         GridPane.setVgrow(this.centerPanel, Priority.ALWAYS);
         GridPane.setHgrow(this.centerPanel, Priority.ALWAYS);
         ResizeHelper.addResizeListener(this.stage);
-        //this.stage.sizeToScene();
     }
-
 
     public void showPanel(IPanel panel) {
         this.centerPanel.getChildren().clear();
@@ -70,11 +66,4 @@ public class PanelManager {
         return stage;
     }
 
-    public MvWildLauncher getMvWildLauncher() {
-        return mvWildLauncher;
-    }
-
-    public TopPanel getTopPanel() {
-        return topPanel;
-    }
 }

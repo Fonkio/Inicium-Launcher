@@ -62,13 +62,13 @@ import java.util.Timer;
 
 public class HomePanel extends Panel {
 
-    private final FileManager fileManager = new FileManager("mvwild");
+    private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
     private GridPane centerPane = new GridPane();
     private AProgressBar leftDownloadBar;
     private Label status = new Label("");
     private String pseudo;
     private File dir = fileManager.getGameFolder();
-    private Saver saver = new Saver(new File(dir, "launcher.properties"));
+    private Saver saver = new Saver(fileManager.getLauncherProperties());
     private VBox vBoxMv;
     private VBox vBoxSettings;
     private ScrollPane scrollPane = new ScrollPane();
@@ -241,7 +241,7 @@ public class HomePanel extends Panel {
     //Affichage onglet jouer par defaut
     private void addTopPanel(GridPane pane) {
         //Titre et description
-        Label mvwildTitle = new Label("MvWild");
+        Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
         GridPane.setVgrow(mvwildTitle, Priority.ALWAYS);
         GridPane.setHgrow(mvwildTitle, Priority.ALWAYS);
         GridPane.setValignment(mvwildTitle, VPos.TOP);
@@ -255,12 +255,12 @@ public class HomePanel extends Panel {
         survie.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
         survie.setTranslateY(70);
 
-        Label desc = new Label("Mvwild, le serveur minecraft ou le Gamemode est, et restera sur 0 !\n" +
+        Label desc = new Label(MvWildLauncher.SERVEUR_NAME+", le serveur minecraft ou le Gamemode est, et restera sur 0 !\n" +
                 "Rejoignez une communauté de survivant se battant contre la faim, les autres joueurs,\n" +
                 "l'économies et des monstres divers parfois étranges et avec de redoutables pouvoirs...\n" +
                 "Tout cela dans un seul et unique but : rester en vie !\n" +
                 "Parviendrez vous à survivre selon les règles d'origines de minecraft ?\n" +
-                "Rejoignez nous dès maintenant avec l'adresse ip : survie.mvwild.org\n");
+                "Rejoignez nous dès maintenant avec l'adresse ip : "+MvWildLauncher.SERVEUR_IP);
         GridPane.setVgrow(desc, Priority.ALWAYS);
         GridPane.setHgrow(desc, Priority.ALWAYS);
         GridPane.setValignment(desc, VPos.TOP);
@@ -278,11 +278,11 @@ public class HomePanel extends Panel {
         twitter.setMinHeight(1500);
         twitter.setTranslateY(20);
         twitter.setTranslateX(30);
-        String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\"https://twitter.com/MvWild_Serveur?ref_src=twsrc%5Etfw\">Chargement ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
+        String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
         WebView webView = new WebView();
         webView.setOnMouseClicked(e-> {
             try {
-                Desktop.getDesktop().browse(new URI("https://twitter.com/MvWild_Serveur"));
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             } catch (URISyntaxException uriSyntaxException) {
@@ -309,13 +309,13 @@ public class HomePanel extends Panel {
         }
 
         //Recuperation des versions
-        String strVersion = getVersion("https://www.mvwild.org/version.php");
+        String strVersion = getVersion(MvWildLauncher.SITE_URL +"version.php");
         if (strVersion == null) return;
-        String strForgeVersion = getVersion("https://www.mvwild.org/launcher/forgeVersion.php");
+        String strForgeVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
         if (strForgeVersion == null) {
             return;
         }
-        String strMCPVersion = getVersion("https://www.mvwild.org/launcher/mcpVersion.php");
+        String strMCPVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
         if (strForgeVersion == null) {
             return;
         }
@@ -432,7 +432,7 @@ public class HomePanel extends Panel {
             imageViewSite.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
             imageViewSite.setOnMouseClicked(e-> {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://mvwild.org"));
+                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 } catch (URISyntaxException uriSyntaxException) {
@@ -453,7 +453,7 @@ public class HomePanel extends Panel {
             imageViewdiscord.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
             imageViewdiscord.setOnMouseClicked(e-> {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://discord.gg/5JcvM2B"));
+                    Desktop.getDesktop().browse(new URI(MvWildLauncher.DISCORD_URL));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 } catch (URISyntaxException uriSyntaxException) {
@@ -474,7 +474,7 @@ public class HomePanel extends Panel {
             twitterImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
             twitterImageView.setOnMouseClicked(e-> {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://twitter.com/MvWild_Serveur"));
+                    Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 } catch (URISyntaxException uriSyntaxException) {
@@ -495,7 +495,7 @@ public class HomePanel extends Panel {
             facebookImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
             facebookImageView.setOnMouseClicked(e-> {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://www.facebook.com/MvwildServeur/"));
+                    Desktop.getDesktop().browse(new URI(MvWildLauncher.FACEBOOK_URL));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 } catch (URISyntaxException uriSyntaxException) {
@@ -571,13 +571,15 @@ public class HomePanel extends Panel {
         String inputline = null;
         try{
             URLConnection connection = (new URL(url).openConnection());
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11");
+            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
             connection.connect();
             InputStream is = connection.getInputStream();
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             inputline = in.readLine();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erreur de récupération de la version minecraft. Merci de nous contacter si cela se reproduit.", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+            MvWildLauncher.stopRP();
+            System.exit(0);
         }
         if (inputline == null) {
             return null;
@@ -723,7 +725,7 @@ public class HomePanel extends Panel {
     private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
         final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
         final IVanillaVersion version = versionBuilder.build(false, VersionType.VANILLA);
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("[MvWild]", new File(dir+"/", "launcher.log"))).withProgressCallback(callback).build();
+        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog())).withProgressCallback(callback).build();
         return updater;
     }
 
@@ -731,9 +733,9 @@ public class HomePanel extends Panel {
 
         //Pas de mod pour l'instant
         List<Mod> mods = new ArrayList<>();
-        //List<Mod> mods = Mod.getModsFromJson("https://www.mvwild.org/launcher/mods.json");
+        //List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.URL+"launcher/mods.json");
 
-        Logger logger = new Logger("[MvWild]", new File(dir+"/", "launcher.log"));
+        Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
 
         final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(versionMc);
         final IVanillaVersion version = versionBuilder.build(false, VersionType.FORGE);
@@ -744,9 +746,9 @@ public class HomePanel extends Panel {
 
     public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
         GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
-        GameInfos gameInfos = new GameInfos("MvWild", gameVersion, new GameTweak[0]);
+        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
         GameFolder gameFolder = new GameFolder("/assets/", "/libraries/", "/natives/", "/client.jar");
-        AuthInfos authInfos = new AuthInfos(pseudo, "bla", "bla");
+        AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
         ExternalLauncher launcher = new ExternalLauncher(profile);

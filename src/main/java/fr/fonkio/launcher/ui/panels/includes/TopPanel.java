@@ -30,7 +30,7 @@ public class TopPanel extends Panel {
         this.layout.setStyle("-fx-background-color: rgb(31,35,37);");
         GridPane topBarButton = new GridPane();
         this.layout.getChildren().add(topBarButton);
-        Label title = new Label("MvWild Launcher");
+        Label title = new Label(MvWildLauncher.SERVEUR_NAME+" Launcher");
         this.layout.getChildren().add(title);
         title.setFont(Font.font("Consolas", FontWeight.THIN, FontPosture.REGULAR, 22.0f));
         title.setStyle("-fx-text-fill: white;");

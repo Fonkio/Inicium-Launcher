@@ -28,7 +28,8 @@ public class FileManager {
     public File getAssetsFolder() {
         return new File(createGameDir(), "assets");
     }
-
+    public File getLauncherLog() { return new File(createGameDir()+"/", "launcher.log"); }
+    public File getLauncherProperties() { return new File(createGameDir()+"/", "launcher.properties"); }
     public File getNativesFolder() {
         return new File(createGameDir(), "natives");
     }
