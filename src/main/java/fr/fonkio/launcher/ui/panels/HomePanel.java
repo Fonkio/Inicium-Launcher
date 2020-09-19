@@ -4,15 +4,16 @@ import com.sun.webkit.WebPage;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import fr.arinonia.arilibfx.ui.component.AProgressBar;
+import fr.flowarg.flowlogger.ILogger;
 import fr.flowarg.flowlogger.Logger;
 import fr.flowarg.flowupdater.FlowUpdater;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
 import fr.flowarg.flowupdater.download.json.Mod;
-import fr.flowarg.flowupdater.utils.BuilderArgumentException;
 import fr.flowarg.flowupdater.utils.UpdaterOptions;
-import fr.flowarg.flowupdater.versions.IVanillaVersion;
+import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.flowarg.flowupdater.versions.NewForgeVersion;
+import fr.flowarg.flowupdater.versions.VanillaVersion;
 import fr.flowarg.flowupdater.versions.VersionType;
 import fr.flowarg.openlauncherlib.NewForgeVersionDiscriminator;
 import fr.fonkio.launcher.Main;
@@ -156,7 +157,13 @@ public class HomePanel extends Panel {
         topPanel.setMaxWidth(880);
         topPanel.setMinHeight(340);
         topPanel.setMaxHeight(340);
-        addTopPanel(topPanel);
+        try {
+            addTopPanel(topPanel);
+        } catch (BuilderException e) {
+            JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft", "Erreur updater", JOptionPane.ERROR_MESSAGE);
+            MvWildLauncher.stopRP();
+            System.exit(0);
+        }
 
         GridPane topPanelSettings = new GridPane();
         GridPane.setVgrow(topPanelSettings, Priority.ALWAYS);
@@ -239,7 +246,7 @@ public class HomePanel extends Panel {
     }
 
     //Affichage onglet jouer par defaut
-    private void addTopPanel(GridPane pane) {
+    private void addTopPanel(GridPane pane) throws BuilderException {
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
         GridPane.setVgrow(mvwildTitle, Priority.ALWAYS);
@@ -323,237 +330,235 @@ public class HomePanel extends Panel {
         if (!fileManager.createGameDir().exists()) {
             fileManager.createGameDir().mkdir();
         }
-        try {
-
-            IProgressCallback dlCallback = new IProgressCallback() {
-                private String status = "";
-                @Override
-                public void init() {
-                    Main.logger.log("Création callback "+this.getClass().getName());
-                }
-                @Override
-                public void step(Step step) {
-                    switch (step.toString()) {
-                        case "READ":
-                            this.status = "Verification des fichiers ";
-                            break;
-                        case "DL_LIBS":
-                            this.status = "Téléchargement des librairies ";
-                            break;
-                        case "DL_ASSETS":
-                            this.status = "Téléchargement des assets ";
-                            break;
-                        case "EXTRACT_NATIVES":
-                            this.status = "Extraction en cours, veuillez patienter ";
-                            break;
-                        case "MODS":
-                            this.status = "Récupération des mods ";
-                            break;
-                        case "FORGE":
-                            this.status = "Installation de forge ";
-                            break;
-                        case "INTERNAL_FORGE_HACKS":
-                            this.status = "Forge installé, lancement ";
-                            break;
-                        case "END":
-                            this.status = "Le jeu a été lancé !";
-                            break;
-                        default:
-                            this.status = "Chargement ";
-                            Main.logger.warn(step.toString());
-                            break;
-                    }
-                    Platform.runLater(()-> {
-                        setStatus(this.status+"...");
-                    });
-                }
-                @Override
-                public void update(int downloaded, int max) {
-                    Platform.runLater(()-> {
-                        setStatus(this.status + downloaded+"/"+max +"...");
-                    });
-                }
-            };//Fin déclaration Callback
-
-            //Recuperation updater
-            //Version vanilla
-            //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
-            //Version forge
-            final FlowUpdater updater = updateForge(dir, dlCallback, strVersion, strForgeVersion);
-            if (updater == null) {
-                JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft", "Erreur updater", JOptionPane.ERROR_MESSAGE);
-                return;
+        IProgressCallback dlCallback = new IProgressCallback() {
+            private String status = "";
+            @Override
+            public void init(ILogger logger) {
+                Main.logger.log("Création callback "+this.getClass().getName());
             }
 
-            //Install et dlBar
-            installButton = new Button("Jouer");
-            GridPane.setVgrow(installButton, Priority.ALWAYS);
-            GridPane.setHgrow(installButton, Priority.ALWAYS);
-            GridPane.setValignment(installButton, VPos.TOP);
-            GridPane.setHalignment(installButton, HPos.LEFT);
-
-            AProgressBar progressBar = new AProgressBar(400, 20);
-            progressBar.setBackgroundColor(Color.rgb(3, 48, 90));
-            Stop[] stops = new Stop[]{new Stop(0, Color.rgb(7, 85, 136)), new Stop(1, Color.rgb(3, 163, 219))};
-            LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
-            progressBar.setForegroundColor(lg);
-            GridPane.setVgrow(progressBar, Priority.ALWAYS);
-            GridPane.setHgrow(progressBar, Priority.ALWAYS);
-            GridPane.setValignment(progressBar, VPos.TOP);
-            GridPane.setHalignment(progressBar, HPos.LEFT);
-            progressBar.setTranslateY(330);
-            progressBar.setProgress(100,150);
-
-            this.status = new Label("Version "+strVersion + "/ Forge : "+strForgeVersion);
-            GridPane.setVgrow(this.status, Priority.ALWAYS);
-            GridPane.setHgrow(this.status, Priority.ALWAYS);
-            GridPane.setValignment(this.status, VPos.TOP);
-            this.status.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
-            this.status.setTranslateY(350);
-
-            installButton.setTranslateY(280);
-            installButton.setMinWidth(140);
-            installButton.setMaxHeight(40);
-            installButton.setStyle("-fx-background-color: #115faa; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
-            installButton.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-            installButton.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-
-            //Socials
-            Image siteImage = new Image(Main.class.getResource("/site.png").toExternalForm());
-            ImageView imageViewSite = new ImageView(siteImage);
-            GridPane.setVgrow(imageViewSite, Priority.ALWAYS);
-            GridPane.setHgrow(imageViewSite, Priority.ALWAYS);
-            GridPane.setValignment(imageViewSite, VPos.TOP);
-            GridPane.setHalignment(imageViewSite, HPos.LEFT);
-            imageViewSite.setTranslateY(500);
-            imageViewSite.setFitHeight(60);
-            imageViewSite.setFitWidth(60);
-            imageViewSite.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-            imageViewSite.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-            imageViewSite.setOnMouseClicked(e-> {
-                try {
-                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
+            @Override
+            public void step(Step step) {
+                switch (step.toString()) {
+                    case "READ":
+                        this.status = "Verification des fichiers ";
+                        break;
+                    case "DL_LIBS":
+                        this.status = "Téléchargement des librairies ";
+                        break;
+                    case "DL_ASSETS":
+                        this.status = "Téléchargement des assets ";
+                        break;
+                    case "EXTRACT_NATIVES":
+                        this.status = "Extraction en cours, veuillez patienter ";
+                        break;
+                    case "MODS":
+                        this.status = "Récupération des mods ";
+                        break;
+                    case "FORGE":
+                        this.status = "Installation de forge ";
+                        break;
+                    case "INTERNAL_FORGE_HACKS":
+                        this.status = "Forge installé, lancement ";
+                        break;
+                    case "END":
+                        this.status = "Le jeu a été lancé !";
+                        break;
+                    default:
+                        this.status = "Chargement ";
+                        Main.logger.warn(step.toString());
+                        break;
                 }
-            });
-            Image discordImage = new Image(Main.class.getResource("/discord.png").toExternalForm());
-            ImageView imageViewdiscord = new ImageView(discordImage);
-            GridPane.setVgrow(imageViewdiscord, Priority.ALWAYS);
-            GridPane.setHgrow(imageViewdiscord, Priority.ALWAYS);
-            GridPane.setValignment(imageViewdiscord, VPos.TOP);
-            GridPane.setHalignment(imageViewdiscord, HPos.LEFT);
-            imageViewdiscord.setTranslateY(500);
-            imageViewdiscord.setTranslateX(100);
-            imageViewdiscord.setFitHeight(60);
-            imageViewdiscord.setFitWidth(60);
-            imageViewdiscord.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-            imageViewdiscord.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-            imageViewdiscord.setOnMouseClicked(e-> {
-                try {
-                    Desktop.getDesktop().browse(new URI(MvWildLauncher.DISCORD_URL));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
-                }
+                Platform.runLater(()-> {
+                    setStatus(this.status+"...");
                 });
-            Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
-            ImageView twitterImageView = new ImageView(twitterImage);
-            GridPane.setVgrow(twitterImageView, Priority.ALWAYS);
-            GridPane.setHgrow(twitterImageView, Priority.ALWAYS);
-            GridPane.setValignment(twitterImageView, VPos.TOP);
-            GridPane.setHalignment(twitterImageView, HPos.LEFT);
-            twitterImageView.setTranslateY(500);
-            twitterImageView.setTranslateX(200);
-            twitterImageView.setFitHeight(60);
-            twitterImageView.setFitWidth(60);
-            twitterImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-            twitterImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-            twitterImageView.setOnMouseClicked(e-> {
-                try {
-                    Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
-                }
-            });
-            Image facebookImage = new Image(Main.class.getResource("/facebook.png").toExternalForm());
-            ImageView facebookImageView = new ImageView(facebookImage);
-            GridPane.setVgrow(facebookImageView, Priority.ALWAYS);
-            GridPane.setHgrow(facebookImageView, Priority.ALWAYS);
-            GridPane.setValignment(facebookImageView, VPos.TOP);
-            GridPane.setHalignment(facebookImageView, HPos.LEFT);
-            facebookImageView.setTranslateY(500);
-            facebookImageView.setTranslateX(300);
-            facebookImageView.setFitHeight(60);
-            facebookImageView.setFitWidth(60);
-            facebookImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-            facebookImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-            facebookImageView.setOnMouseClicked(e-> {
-                try {
-                    Desktop.getDesktop().browse(new URI(MvWildLauncher.FACEBOOK_URL));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
-                }
-            });
+            }
+            @Override
+            public void update(int downloaded, int max) {
+                Platform.runLater(()-> {
+                    setStatus(this.status + downloaded+"/"+max +"...");
+                });
+            }
+        };//Fin déclaration Callback
 
-            progressBar.setProgress(0,100);
-            leftDownloadBar.setProgress(0,100);
-
-            installButton.setOnMouseClicked(e-> {
-                MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
-                installButton.setDisable(true);
-                TimerTask updateBar = new TimerTask() {
-                    public void run() {
-                        float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
-                        float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
-                        leftDownloadBar.setProgress(dl, dlTot);
-                        progressBar.setProgress(dl, dlTot);
-                    }
-                };
-                Timer timerUpdateBar = new Timer("timerUpdateBar");
-                long delay  = 50L;
-                long period = 50L;
-                timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
-                Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            updater.update(dir, false);
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                            installButton.setText("Erreur");
-                            installButton.setDisable(true);
-                        } finally {
-                            timerUpdateBar.cancel();
-                        }
-                        Platform.runLater(() -> {
-                                status.setText("Lancement ...");
-                                try {
-                                    launch(strVersion, strForgeVersion, strMCPVersion);
-                                } catch (LaunchException l) {
-                                    getStage().setIconified(false);
-                                    MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-                                    installButton.setText("Relancer");
-                                    installButton.setDisable(false);
-                                    l.printStackTrace();
-                                }
-                            });
-                    }
-                };
-                t.start();
-            });
-            //Ajout des éléments
-            pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, imageViewSite, imageViewdiscord, twitterImageView, facebookImageView, progressBar, status);
-        } catch (BuilderArgumentException e) {
-            e.printStackTrace();
+        //Recuperation updater
+        //Version vanilla
+        //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
+        //Version forge
+        final FlowUpdater updater = updateForge(dir, dlCallback, strVersion, strForgeVersion);
+        if (updater == null) {
+            JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
+            MvWildLauncher.stopRP();
+            System.exit(0);
         }
+
+        //Install et dlBar
+        installButton = new Button("Jouer");
+        GridPane.setVgrow(installButton, Priority.ALWAYS);
+        GridPane.setHgrow(installButton, Priority.ALWAYS);
+        GridPane.setValignment(installButton, VPos.TOP);
+        GridPane.setHalignment(installButton, HPos.LEFT);
+
+        AProgressBar progressBar = new AProgressBar(400, 20);
+        progressBar.setBackgroundColor(Color.rgb(3, 48, 90));
+        Stop[] stops = new Stop[]{new Stop(0, Color.rgb(7, 85, 136)), new Stop(1, Color.rgb(3, 163, 219))};
+        LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
+        progressBar.setForegroundColor(lg);
+        GridPane.setVgrow(progressBar, Priority.ALWAYS);
+        GridPane.setHgrow(progressBar, Priority.ALWAYS);
+        GridPane.setValignment(progressBar, VPos.TOP);
+        GridPane.setHalignment(progressBar, HPos.LEFT);
+        progressBar.setTranslateY(330);
+        progressBar.setProgress(100,150);
+
+        this.status = new Label("Version "+strVersion + "/ Forge : "+strForgeVersion);
+        GridPane.setVgrow(this.status, Priority.ALWAYS);
+        GridPane.setHgrow(this.status, Priority.ALWAYS);
+        GridPane.setValignment(this.status, VPos.TOP);
+        this.status.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
+        this.status.setTranslateY(350);
+
+        installButton.setTranslateY(280);
+        installButton.setMinWidth(140);
+        installButton.setMaxHeight(40);
+        installButton.setStyle("-fx-background-color: #115faa; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        installButton.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        installButton.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+
+        //Socials
+        Image siteImage = new Image(Main.class.getResource("/site.png").toExternalForm());
+        ImageView imageViewSite = new ImageView(siteImage);
+        GridPane.setVgrow(imageViewSite, Priority.ALWAYS);
+        GridPane.setHgrow(imageViewSite, Priority.ALWAYS);
+        GridPane.setValignment(imageViewSite, VPos.TOP);
+        GridPane.setHalignment(imageViewSite, HPos.LEFT);
+        imageViewSite.setTranslateY(500);
+        imageViewSite.setFitHeight(60);
+        imageViewSite.setFitWidth(60);
+        imageViewSite.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        imageViewSite.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        imageViewSite.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
+        Image discordImage = new Image(Main.class.getResource("/discord.png").toExternalForm());
+        ImageView imageViewdiscord = new ImageView(discordImage);
+        GridPane.setVgrow(imageViewdiscord, Priority.ALWAYS);
+        GridPane.setHgrow(imageViewdiscord, Priority.ALWAYS);
+        GridPane.setValignment(imageViewdiscord, VPos.TOP);
+        GridPane.setHalignment(imageViewdiscord, HPos.LEFT);
+        imageViewdiscord.setTranslateY(500);
+        imageViewdiscord.setTranslateX(100);
+        imageViewdiscord.setFitHeight(60);
+        imageViewdiscord.setFitWidth(60);
+        imageViewdiscord.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        imageViewdiscord.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        imageViewdiscord.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.DISCORD_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+            });
+        Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
+        ImageView twitterImageView = new ImageView(twitterImage);
+        GridPane.setVgrow(twitterImageView, Priority.ALWAYS);
+        GridPane.setHgrow(twitterImageView, Priority.ALWAYS);
+        GridPane.setValignment(twitterImageView, VPos.TOP);
+        GridPane.setHalignment(twitterImageView, HPos.LEFT);
+        twitterImageView.setTranslateY(500);
+        twitterImageView.setTranslateX(200);
+        twitterImageView.setFitHeight(60);
+        twitterImageView.setFitWidth(60);
+        twitterImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        twitterImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        twitterImageView.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
+        Image facebookImage = new Image(Main.class.getResource("/facebook.png").toExternalForm());
+        ImageView facebookImageView = new ImageView(facebookImage);
+        GridPane.setVgrow(facebookImageView, Priority.ALWAYS);
+        GridPane.setHgrow(facebookImageView, Priority.ALWAYS);
+        GridPane.setValignment(facebookImageView, VPos.TOP);
+        GridPane.setHalignment(facebookImageView, HPos.LEFT);
+        facebookImageView.setTranslateY(500);
+        facebookImageView.setTranslateX(300);
+        facebookImageView.setFitHeight(60);
+        facebookImageView.setFitWidth(60);
+        facebookImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        facebookImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        facebookImageView.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.FACEBOOK_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
+
+        progressBar.setProgress(0,100);
+        leftDownloadBar.setProgress(0,100);
+
+        installButton.setOnMouseClicked(e-> {
+            MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
+            installButton.setDisable(true);
+            TimerTask updateBar = new TimerTask() {
+                public void run() {
+                    float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
+                    float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
+                    leftDownloadBar.setProgress(dl, dlTot);
+                    progressBar.setProgress(dl, dlTot);
+                }
+            };
+            Timer timerUpdateBar = new Timer("timerUpdateBar");
+            long delay  = 50L;
+            long period = 50L;
+            timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        updater.update(dir, false);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                        installButton.setText("Erreur");
+                        installButton.setDisable(true);
+                    } finally {
+                        timerUpdateBar.cancel();
+                    }
+                    Platform.runLater(() -> {
+                            status.setText("Lancement ...");
+                            try {
+                                launch(strVersion, strForgeVersion, strMCPVersion);
+                            } catch (LaunchException l) {
+                                getStage().setIconified(false);
+                                MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
+                                installButton.setText("Relancer");
+                                installButton.setDisable(false);
+                                l.printStackTrace();
+                            }
+                        });
+                }
+            };
+            t.start();
+        });
+        //Ajout des éléments
+        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, imageViewSite, imageViewdiscord, twitterImageView, facebookImageView, progressBar, status);
+
     }
 
     //Modification texte barre de dl
@@ -722,14 +727,14 @@ public class HomePanel extends Panel {
         pane.getChildren().addAll(bluePlaySelSeparator, imageViewMvWild, jouerLabel, leftDownloadBar, blueSettingSelSeparator, logoSetting, settingLabel, pseudo, imageViewTete);
     } //Fin showLeftBar
 
-    private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
+    /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
         final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
         final IVanillaVersion version = versionBuilder.build(false, VersionType.VANILLA);
         final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog())).withProgressCallback(callback).build();
         return updater;
-    }
+    }*/
 
-    private FlowUpdater updateForge(File dir, IProgressCallback callback, String versionMc, String versionForge) throws BuilderArgumentException {
+    private FlowUpdater updateForge(File dir, IProgressCallback callback, String versionMc, String versionForge) throws BuilderException {
 
         //Pas de mod pour l'instant
         List<Mod> mods = new ArrayList<>();
@@ -737,10 +742,9 @@ public class HomePanel extends Panel {
 
         Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
 
-        final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(versionMc);
-        final IVanillaVersion version = versionBuilder.build(false, VersionType.FORGE);
+        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder().withName(versionMc).withSnapshot(false).withVersionType(VersionType.FORGE).build();
         NewForgeVersion forge = new NewForgeVersion(versionForge, version, logger, callback, mods, false );
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withForgeVersion(forge).withLogger(logger).withUpdaterOptions(new UpdaterOptions(true, false, false)).withProgressCallback(callback).build();
+        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withForgeVersion(forge).withLogger(logger).withUpdaterOptions(new UpdaterOptions(false, true)).withProgressCallback(callback).build();
         return updater;
     }
 
