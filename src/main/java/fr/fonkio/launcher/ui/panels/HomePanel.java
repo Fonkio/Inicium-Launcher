@@ -9,6 +9,7 @@ import fr.flowarg.flowlogger.Logger;
 import fr.flowarg.flowupdater.FlowUpdater;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
+import fr.flowarg.flowupdater.download.json.ExternalFile;
 import fr.flowarg.flowupdater.download.json.Mod;
 import fr.flowarg.flowupdater.utils.UpdaterOptions;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
@@ -159,7 +160,7 @@ public class HomePanel extends Panel {
         topPanel.setMaxHeight(340);
         try {
             addTopPanel(topPanel);
-        } catch (BuilderException e) {
+        } catch (BuilderException | URISyntaxException | MalformedURLException e) {
             JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft", "Erreur updater", JOptionPane.ERROR_MESSAGE);
             MvWildLauncher.stopRP();
             System.exit(0);
@@ -246,7 +247,7 @@ public class HomePanel extends Panel {
     }
 
     //Affichage onglet jouer par defaut
-    private void addTopPanel(GridPane pane) throws BuilderException {
+    private void addTopPanel(GridPane pane) throws BuilderException, URISyntaxException, MalformedURLException {
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
         GridPane.setVgrow(mvwildTitle, Priority.ALWAYS);
@@ -364,6 +365,9 @@ public class HomePanel extends Panel {
                     case "END":
                         this.status = "Le jeu a été lancé !";
                         break;
+                    case "EXTERNAL_FILES":
+                        this.status = "Téléchargement de la configuration...";
+                        break;
                     default:
                         this.status = "Chargement ";
                         Main.logger.warn(step.toString());
@@ -385,7 +389,7 @@ public class HomePanel extends Panel {
         //Version vanilla
         //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
         //Version forge
-        final FlowUpdater updater = updateForge(dir, dlCallback, strVersion, strForgeVersion);
+        final FlowUpdater updater = updateForge(dlCallback, strVersion, strForgeVersion);
         if (updater == null) {
             JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
             MvWildLauncher.stopRP();
@@ -734,17 +738,22 @@ public class HomePanel extends Panel {
         return updater;
     }*/
 
-    private FlowUpdater updateForge(File dir, IProgressCallback callback, String versionMc, String versionForge) throws BuilderException {
+    private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
 
         //Pas de mod pour l'instant
-        List<Mod> mods = new ArrayList<>();
-        //List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.URL+"launcher/mods.json");
-
+        //List<Mod> mods = new ArrayList<>();
+        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.json");
         Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
 
         final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder().withName(versionMc).withSnapshot(false).withVersionType(VersionType.FORGE).build();
-        NewForgeVersion forge = new NewForgeVersion(versionForge, version, logger, callback, mods, false );
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withForgeVersion(forge).withLogger(logger).withUpdaterOptions(new UpdaterOptions(false, true)).withProgressCallback(callback).build();
+        NewForgeVersion forge = new NewForgeVersion(versionForge, version, logger, callback, mods, true);
+        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().
+                withVersion(version).
+                withForgeVersion(forge).
+                withUpdaterOptions(new UpdaterOptions(false, false))
+                .withExternaFiles(ExternalFile.fromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles.json").toURL()))
+                .withProgressCallback(callback)
+                .build();
         return updater;
     }
 
@@ -755,23 +764,36 @@ public class HomePanel extends Panel {
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
+        if(saver.get("RAM")!=null) {
+            profile.getVmArgs().add("-Xmx"+saver.get("RAM")+"M");
+        }
+
         ExternalLauncher launcher = new ExternalLauncher(profile);
         //Lancement
         MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
+        setStatus("Jeu lancé");
         Process p = launcher.launch();
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {}
         getStage().setIconified(true);
-        try {
-            p.waitFor(); //Attente fermeture du jeu
-        } catch (InterruptedException e) {
-        }
-        getStage().setIconified(false);
-        installButton.setDisable(false);
-        installButton.setText("Relancer");
-        MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
-        setStatus("");
+        Runnable target;
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    p.waitFor(); //Attente fermeture du jeu
+                    Platform.runLater(()->{
+                        getStage().setIconified(false);
+                        installButton.setDisable(false);
+                        installButton.setText("Relancer");
+                        setStatus("");
+                    });
+
+                    MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
+
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+        t.start();
     }
 
 }

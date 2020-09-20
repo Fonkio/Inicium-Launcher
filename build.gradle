@@ -21,6 +21,7 @@ dependencies {
     compile group: 'fr.arinonia', name: 'arilibfx', version: '1.0.6'
     compile 'club.minnced:java-discord-rpc:2.0.1'
     compile 'fr.flowarg:flowupdater:1.1.13'
+    compile 'fr.litarvan:openlauncherlib:3.1.3-FLOWARGVERSION'
     implementation 'fr.flowarg:flowmultitools:1.0.4'
     compile fileTree(dir: 'libs', include: '*.jar')
 }

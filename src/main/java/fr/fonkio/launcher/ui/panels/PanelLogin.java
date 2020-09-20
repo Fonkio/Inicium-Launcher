@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -67,18 +68,30 @@ public class PanelLogin extends Panel {
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String version = in.readLine();
             if (!version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
-                switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : "+MvWildLauncher.LAUNCHER_VERSION+"\nNouvelle version : "+version)) {
-                    case JOptionPane.OK_OPTION:
-                        Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL +"launcher/MvWildLauncher.jar"));
-                        MvWildLauncher.stopRP();
-                        System.exit(0);
-                        break;
-                    default:
-                        break;
-                }
+                Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : " + MvWildLauncher.LAUNCHER_VERSION + "\nNouvelle version : " + version)) {
+                            case JOptionPane.OK_OPTION:
+                                try {
+                                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/MvWildLauncher.jar"));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (URISyntaxException e) {
+                                    e.printStackTrace();
+                                }
+                                MvWildLauncher.stopRP();
+                                System.exit(0);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                };
+                t.start();
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erreur de récupération de la version du launcher", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+
         }
 
         MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
