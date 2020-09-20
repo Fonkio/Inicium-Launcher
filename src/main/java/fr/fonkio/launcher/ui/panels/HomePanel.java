@@ -263,12 +263,12 @@ public class HomePanel extends Panel {
         survie.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
         survie.setTranslateY(70);
 
-        Label desc = new Label(MvWildLauncher.SERVEUR_NAME+", le serveur minecraft ou le Gamemode est, et restera sur 0 !\n" +
-                "Rejoignez une communauté de survivant se battant contre la faim, les autres joueurs,\n" +
-                "l'économies et des monstres divers parfois étranges et avec de redoutables pouvoirs...\n" +
+        Label desc = new Label(MvWildLauncher.SERVEUR_NAME+", le serveur minecraft où le Gamemode est, et restera sur 0 !\n" +
+                "Rejoignez une communauté de survivants se battant contre la faim, les autres joueurs,\n" +
+                "l'économie et des monstres divers parfois étranges et avec de redoutables pouvoirs...\n" +
                 "Tout cela dans un seul et unique but : rester en vie !\n" +
-                "Parviendrez vous à survivre selon les règles d'origines de minecraft ?\n" +
-                "Rejoignez nous dès maintenant avec l'adresse ip : "+MvWildLauncher.SERVEUR_IP);
+                "Parviendrez-vous à survivre selon les règles d'origine de minecraft ?\n" +
+                "Rejoignez-nous dès maintenant avec l'adresse ip : "+MvWildLauncher.SERVEUR_IP);
         GridPane.setVgrow(desc, Priority.ALWAYS);
         GridPane.setHgrow(desc, Priority.ALWAYS);
         GridPane.setValignment(desc, VPos.TOP);
@@ -450,6 +450,27 @@ public class HomePanel extends Panel {
                 uriSyntaxException.printStackTrace();
             }
         });
+        Image voteImage = new Image(Main.class.getResource("/vote.png").toExternalForm());
+        ImageView voteImageView = new ImageView(voteImage);
+        GridPane.setVgrow(voteImageView, Priority.ALWAYS);
+        GridPane.setHgrow(voteImageView, Priority.ALWAYS);
+        GridPane.setValignment(voteImageView, VPos.TOP);
+        GridPane.setHalignment(voteImageView, HPos.LEFT);
+        voteImageView.setTranslateY(500);
+        voteImageView.setTranslateX(100);
+        voteImageView.setFitHeight(60);
+        voteImageView.setFitWidth(60);
+        voteImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        voteImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        voteImageView.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.VOTE_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
         Image discordImage = new Image(Main.class.getResource("/discord.png").toExternalForm());
         ImageView imageViewdiscord = new ImageView(discordImage);
         GridPane.setVgrow(imageViewdiscord, Priority.ALWAYS);
@@ -457,7 +478,7 @@ public class HomePanel extends Panel {
         GridPane.setValignment(imageViewdiscord, VPos.TOP);
         GridPane.setHalignment(imageViewdiscord, HPos.LEFT);
         imageViewdiscord.setTranslateY(500);
-        imageViewdiscord.setTranslateX(100);
+        imageViewdiscord.setTranslateX(200);
         imageViewdiscord.setFitHeight(60);
         imageViewdiscord.setFitWidth(60);
         imageViewdiscord.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
@@ -478,7 +499,7 @@ public class HomePanel extends Panel {
         GridPane.setValignment(twitterImageView, VPos.TOP);
         GridPane.setHalignment(twitterImageView, HPos.LEFT);
         twitterImageView.setTranslateY(500);
-        twitterImageView.setTranslateX(200);
+        twitterImageView.setTranslateX(300);
         twitterImageView.setFitHeight(60);
         twitterImageView.setFitWidth(60);
         twitterImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
@@ -499,7 +520,7 @@ public class HomePanel extends Panel {
         GridPane.setValignment(facebookImageView, VPos.TOP);
         GridPane.setHalignment(facebookImageView, HPos.LEFT);
         facebookImageView.setTranslateY(500);
-        facebookImageView.setTranslateX(300);
+        facebookImageView.setTranslateX(400);
         facebookImageView.setFitHeight(60);
         facebookImageView.setFitWidth(60);
         facebookImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
@@ -513,6 +534,7 @@ public class HomePanel extends Panel {
                 uriSyntaxException.printStackTrace();
             }
         });
+
 
         progressBar.setProgress(0,100);
         leftDownloadBar.setProgress(0,100);
@@ -561,7 +583,7 @@ public class HomePanel extends Panel {
             t.start();
         });
         //Ajout des éléments
-        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, imageViewSite, imageViewdiscord, twitterImageView, facebookImageView, progressBar, status);
+        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, imageViewSite, imageViewdiscord, twitterImageView, facebookImageView, voteImageView, progressBar, status);
 
     }
 
