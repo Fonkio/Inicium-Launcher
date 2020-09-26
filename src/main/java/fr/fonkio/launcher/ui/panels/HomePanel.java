@@ -41,10 +41,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -74,7 +71,9 @@ public class HomePanel extends Panel {
     private VBox vBoxMv;
     private VBox vBoxSettings;
     private ScrollPane scrollPane = new ScrollPane();
-    private Button installButton;
+    private Button installButton = new Button("Jouer");
+    private boolean offline = false;
+    private Timer timerUpdateBar;
 
     public HomePanel(Stage stage) {
         super(stage);
@@ -288,7 +287,12 @@ public class HomePanel extends Panel {
         twitter.setTranslateX(30);
         String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
         WebView webView = new WebView();
+        webView.setStyle("overflow-x: hidden; overflow-y: hidden");
+        WebEngine webEngine = webView.getEngine();
+        webEngine.loadContent(content_url);
+        twitter.getChildren().add(webView);
         webView.setOnMouseClicked(e-> {
+            webEngine.loadContent(content_url);
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
             } catch (IOException ioException) {
@@ -297,10 +301,6 @@ public class HomePanel extends Panel {
                 uriSyntaxException.printStackTrace();
             }
         });
-        webView.setStyle("overflow-x: hidden; overflow-y: hidden");
-        WebEngine webEngine = webView.getEngine();
-        webEngine.loadContent(content_url);
-        twitter.getChildren().add(webView);
         webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) change ->{
             Set<Node> deadSeaScroll = webView.lookupAll(".scroll-bar");
             for(Node scroll : deadSeaScroll) {
@@ -317,13 +317,13 @@ public class HomePanel extends Panel {
         }
 
         //Recuperation des versions
-        String strVersion = getVersion(MvWildLauncher.SITE_URL +"version.php");
+        String strVersion = getVersion(MvWildLauncher.SITE_URL +"version.php", "mcVersion");
         if (strVersion == null) return;
-        String strForgeVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
+        String strForgeVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php", "forgeVersion");
         if (strForgeVersion == null) {
             return;
         }
-        String strMCPVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
+        String strMCPVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php", "mcpVersion");
         if (strForgeVersion == null) {
             return;
         }
@@ -390,14 +390,12 @@ public class HomePanel extends Panel {
         //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
         //Version forge
         final FlowUpdater updater = updateForge(dlCallback, strVersion, strForgeVersion);
-        if (updater == null) {
+
+        if (updater == null && !offline) {
             JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
-            MvWildLauncher.stopRP();
-            System.exit(0);
         }
 
         //Install et dlBar
-        installButton = new Button("Jouer");
         GridPane.setVgrow(installButton, Priority.ALWAYS);
         GridPane.setHgrow(installButton, Priority.ALWAYS);
         GridPane.setValignment(installButton, VPos.TOP);
@@ -432,16 +430,20 @@ public class HomePanel extends Panel {
         //Socials
         Image siteImage = new Image(Main.class.getResource("/site.png").toExternalForm());
         ImageView imageViewSite = new ImageView(siteImage);
-        GridPane.setVgrow(imageViewSite, Priority.ALWAYS);
-        GridPane.setHgrow(imageViewSite, Priority.ALWAYS);
-        GridPane.setValignment(imageViewSite, VPos.TOP);
-        GridPane.setHalignment(imageViewSite, HPos.LEFT);
-        imageViewSite.setTranslateY(500);
         imageViewSite.setFitHeight(60);
         imageViewSite.setFitWidth(60);
-        imageViewSite.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        imageViewSite.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        imageViewSite.setOnMouseClicked(e-> {
+        Button buttonSite = new Button();
+        GridPane.setVgrow(buttonSite, Priority.ALWAYS);
+        GridPane.setHgrow(buttonSite, Priority.ALWAYS);
+        GridPane.setValignment(buttonSite, VPos.TOP);
+        GridPane.setHalignment(buttonSite, HPos.LEFT);
+        buttonSite.setTranslateY(450);
+        buttonSite.setBackground(Background.EMPTY);
+        buttonSite.setGraphic(imageViewSite);
+        buttonSite.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonSite.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonSite.setTooltip(new Tooltip("Site WEB"));
+        buttonSite.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL));
             } catch (IOException ioException) {
@@ -452,17 +454,21 @@ public class HomePanel extends Panel {
         });
         Image voteImage = new Image(Main.class.getResource("/vote.png").toExternalForm());
         ImageView voteImageView = new ImageView(voteImage);
-        GridPane.setVgrow(voteImageView, Priority.ALWAYS);
-        GridPane.setHgrow(voteImageView, Priority.ALWAYS);
-        GridPane.setValignment(voteImageView, VPos.TOP);
-        GridPane.setHalignment(voteImageView, HPos.LEFT);
-        voteImageView.setTranslateY(500);
-        voteImageView.setTranslateX(100);
         voteImageView.setFitHeight(60);
         voteImageView.setFitWidth(60);
-        voteImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        voteImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        voteImageView.setOnMouseClicked(e-> {
+        Button buttonVote = new Button();
+        GridPane.setVgrow(buttonVote, Priority.ALWAYS);
+        GridPane.setHgrow(buttonVote, Priority.ALWAYS);
+        GridPane.setValignment(buttonVote, VPos.TOP);
+        GridPane.setHalignment(buttonVote, HPos.LEFT);
+        buttonVote.setTranslateY(450);
+        buttonVote.setTranslateX(100);
+        buttonVote.setBackground(Background.EMPTY);
+        buttonVote.setGraphic(voteImageView);
+        buttonVote.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonVote.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonVote.setTooltip(new Tooltip("Voter"));
+        buttonVote.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.VOTE_URL));
             } catch (IOException ioException) {
@@ -473,17 +479,21 @@ public class HomePanel extends Panel {
         });
         Image discordImage = new Image(Main.class.getResource("/discord.png").toExternalForm());
         ImageView imageViewdiscord = new ImageView(discordImage);
-        GridPane.setVgrow(imageViewdiscord, Priority.ALWAYS);
-        GridPane.setHgrow(imageViewdiscord, Priority.ALWAYS);
-        GridPane.setValignment(imageViewdiscord, VPos.TOP);
-        GridPane.setHalignment(imageViewdiscord, HPos.LEFT);
-        imageViewdiscord.setTranslateY(500);
-        imageViewdiscord.setTranslateX(200);
         imageViewdiscord.setFitHeight(60);
         imageViewdiscord.setFitWidth(60);
-        imageViewdiscord.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        imageViewdiscord.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        imageViewdiscord.setOnMouseClicked(e-> {
+        Button buttonDiscord = new Button();
+        GridPane.setVgrow(buttonDiscord, Priority.ALWAYS);
+        GridPane.setHgrow(buttonDiscord, Priority.ALWAYS);
+        GridPane.setValignment(buttonDiscord, VPos.TOP);
+        GridPane.setHalignment(buttonDiscord, HPos.LEFT);
+        buttonDiscord.setTranslateY(550);
+        buttonDiscord.setTranslateX(200);
+        buttonDiscord.setBackground(Background.EMPTY);
+        buttonDiscord.setGraphic(imageViewdiscord);
+        buttonDiscord.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonDiscord.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonDiscord.setTooltip(new Tooltip("Discord"));
+        buttonDiscord.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.DISCORD_URL));
             } catch (IOException ioException) {
@@ -494,17 +504,21 @@ public class HomePanel extends Panel {
             });
         Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
         ImageView twitterImageView = new ImageView(twitterImage);
-        GridPane.setVgrow(twitterImageView, Priority.ALWAYS);
-        GridPane.setHgrow(twitterImageView, Priority.ALWAYS);
-        GridPane.setValignment(twitterImageView, VPos.TOP);
-        GridPane.setHalignment(twitterImageView, HPos.LEFT);
-        twitterImageView.setTranslateY(500);
-        twitterImageView.setTranslateX(300);
         twitterImageView.setFitHeight(60);
         twitterImageView.setFitWidth(60);
-        twitterImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        twitterImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        twitterImageView.setOnMouseClicked(e-> {
+        Button buttonTwitter = new Button();
+        GridPane.setVgrow(buttonTwitter, Priority.ALWAYS);
+        GridPane.setHgrow(buttonTwitter, Priority.ALWAYS);
+        GridPane.setValignment(buttonTwitter, VPos.TOP);
+        GridPane.setHalignment(buttonTwitter, HPos.LEFT);
+        buttonTwitter.setTranslateY(550);
+        buttonTwitter.setTranslateX(100);
+        buttonTwitter.setBackground(Background.EMPTY);
+        buttonTwitter.setGraphic(twitterImageView);
+        buttonTwitter.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonTwitter.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonTwitter.setTooltip(new Tooltip("Twitter"));
+        buttonTwitter.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
             } catch (IOException ioException) {
@@ -513,19 +527,48 @@ public class HomePanel extends Panel {
                 uriSyntaxException.printStackTrace();
             }
         });
+        Image instagramImage = new Image(Main.class.getResource("/instagram.png").toExternalForm());
+        ImageView instagramImageView = new ImageView(instagramImage);
+        instagramImageView.setFitHeight(60);
+        instagramImageView.setFitWidth(60);
+        Button buttonInstagram = new Button();
+        GridPane.setVgrow(buttonInstagram, Priority.ALWAYS);
+        GridPane.setHgrow(buttonInstagram, Priority.ALWAYS);
+        GridPane.setValignment(buttonInstagram, VPos.TOP);
+        GridPane.setHalignment(buttonInstagram, HPos.LEFT);
+        buttonInstagram.setTranslateY(550);
+        buttonInstagram.setTranslateX(0);
+        buttonInstagram.setBackground(Background.EMPTY);
+        buttonInstagram.setGraphic(instagramImageView);
+        buttonInstagram.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonInstagram.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonInstagram.setTooltip(new Tooltip("Instagram"));
+        buttonInstagram.setOnMouseClicked(e-> {
+            try {
+                Desktop.getDesktop().browse(new URI(MvWildLauncher.INSTAGRAM_URL));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            } catch (URISyntaxException uriSyntaxException) {
+                uriSyntaxException.printStackTrace();
+            }
+        });
         Image facebookImage = new Image(Main.class.getResource("/facebook.png").toExternalForm());
         ImageView facebookImageView = new ImageView(facebookImage);
-        GridPane.setVgrow(facebookImageView, Priority.ALWAYS);
-        GridPane.setHgrow(facebookImageView, Priority.ALWAYS);
-        GridPane.setValignment(facebookImageView, VPos.TOP);
-        GridPane.setHalignment(facebookImageView, HPos.LEFT);
-        facebookImageView.setTranslateY(500);
-        facebookImageView.setTranslateX(400);
         facebookImageView.setFitHeight(60);
         facebookImageView.setFitWidth(60);
-        facebookImageView.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        facebookImageView.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        facebookImageView.setOnMouseClicked(e-> {
+        Button buttonFacebook = new Button();
+        GridPane.setVgrow(buttonFacebook, Priority.ALWAYS);
+        GridPane.setHgrow(buttonFacebook, Priority.ALWAYS);
+        GridPane.setValignment(buttonFacebook, VPos.TOP);
+        GridPane.setHalignment(buttonFacebook, HPos.LEFT);
+        buttonFacebook.setTranslateY(550);
+        buttonFacebook.setTranslateX(300);
+        buttonFacebook.setBackground(Background.EMPTY);
+        buttonFacebook.setGraphic(facebookImageView);
+        buttonFacebook.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonFacebook.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        buttonFacebook.setTooltip(new Tooltip("Facebook"));
+        buttonFacebook.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.FACEBOOK_URL));
             } catch (IOException ioException) {
@@ -538,44 +581,60 @@ public class HomePanel extends Panel {
 
         progressBar.setProgress(0,100);
         leftDownloadBar.setProgress(0,100);
+        leftDownloadBar.setVisible(false);
 
         installButton.setOnMouseClicked(e-> {
             MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
             installButton.setDisable(true);
-            TimerTask updateBar = new TimerTask() {
-                public void run() {
-                    float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
-                    float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
-                    leftDownloadBar.setProgress(dl, dlTot);
-                    progressBar.setProgress(dl, dlTot);
-                }
-            };
-            Timer timerUpdateBar = new Timer("timerUpdateBar");
-            long delay  = 50L;
-            long period = 50L;
-            timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
+            if (offline) {
+                leftDownloadBar.setProgress(100, 100);
+                leftDownloadBar.setVisible(false);
+                progressBar.setProgress(100, 100);
+            } else {
+                leftDownloadBar.setVisible(true);
+                TimerTask updateBar = new TimerTask() {
+                    public void run() {
+                        float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
+                        float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
+                        leftDownloadBar.setProgress(dl, dlTot);
+                        progressBar.setProgress(dl, dlTot);
+                    }
+                };
+                this.timerUpdateBar = new Timer("timerUpdateBar");
+                long delay  = 50L;
+                long period = 50L;
+                timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
+            }
+
             Thread t = new Thread() {
                 @Override
                 public void run() {
-                    try {
-                        updater.update(dir, false);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                        installButton.setText("Erreur");
-                        installButton.setDisable(true);
-                    } finally {
-                        timerUpdateBar.cancel();
+                    if (!offline) {
+                        try {
+                            updater.update(dir, false);
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                            installButton.setText("Erreur");
+                            installButton.setDisable(true);
+                        } finally {
+                            timerUpdateBar.cancel();
+                        }
                     }
                     Platform.runLater(() -> {
                             status.setText("Lancement ...");
                             try {
                                 launch(strVersion, strForgeVersion, strMCPVersion);
-                            } catch (LaunchException l) {
+                            } catch (Exception e) {
                                 getStage().setIconified(false);
                                 MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
                                 installButton.setText("Relancer");
                                 installButton.setDisable(false);
-                                l.printStackTrace();
+                                if(offline) {
+                                    JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu ! L'installation n'est pas complète, il est nécessaire d'être en ligne pour lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
+                                }
+                                setStatus("");
                             }
                         });
                 }
@@ -583,7 +642,7 @@ public class HomePanel extends Panel {
             t.start();
         });
         //Ajout des éléments
-        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, imageViewSite, imageViewdiscord, twitterImageView, facebookImageView, voteImageView, progressBar, status);
+        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
 
     }
 
@@ -598,7 +657,7 @@ public class HomePanel extends Panel {
     }
 
     //Récupération du texte sur un URL pour les versions
-    private String getVersion(String url) {
+    private String getVersion(String url, String name) {
         String inputline = null;
         try{
             URLConnection connection = (new URL(url).openConnection());
@@ -608,14 +667,27 @@ public class HomePanel extends Panel {
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             inputline = in.readLine();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erreur de récupération de la version minecraft. Merci de nous contacter si cela se reproduit.", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
-            MvWildLauncher.stopRP();
-            System.exit(0);
+            if (!offline) {
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+            }
+
+
+            if (saver.get(name) == null) {
+                MvWildLauncher.stopRP();
+                System.exit(0);
+            } else {
+                installButton.setText("Jouer hors ligne");
+                this.offline = true;
+                return saver.get(name);
+            }
+
         }
         if (inputline == null) {
             return null;
         }
         Main.logger.log("Version recupérée : "+inputline);
+        saver.set(name, inputline);
+        saver.save();
         return inputline;
     }
 
@@ -761,7 +833,9 @@ public class HomePanel extends Panel {
     }*/
 
     private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
-
+        if (offline) {
+            return null;
+        }
         //Pas de mod pour l'instant
         //List<Mod> mods = new ArrayList<>();
         List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.json");
