@@ -616,6 +616,8 @@ public class HomePanel extends Panel {
                             ioException.printStackTrace();
                             installButton.setText("Erreur");
                             installButton.setDisable(true);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
                         } finally {
                             timerUpdateBar.cancel();
                         }
