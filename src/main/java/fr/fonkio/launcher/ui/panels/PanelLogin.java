@@ -74,7 +74,7 @@ public class PanelLogin extends Panel {
                         switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : " + MvWildLauncher.LAUNCHER_VERSION + "\nNouvelle version : " + version)) {
                             case JOptionPane.OK_OPTION:
                                 try {
-                                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/MvWildLauncher.jar"));
+                                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/"));
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 } catch (URISyntaxException e) {
