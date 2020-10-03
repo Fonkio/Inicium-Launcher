@@ -6,9 +6,11 @@ import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.ui.panel.IPanel;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
+import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
@@ -21,6 +23,8 @@ public class PanelManager {
     private GridPane layout;
     private TopPanel topPanel;
     private GridPane centerPanel = new GridPane();
+    private Double xOffset;
+    private Double yOffset;
 
     public PanelManager(Stage stage) {
         topPanel = new TopPanel(stage);
@@ -53,7 +57,21 @@ public class PanelManager {
         this.layout.add(this.centerPanel, 0, 1);
         GridPane.setVgrow(this.centerPanel, Priority.ALWAYS);
         GridPane.setHgrow(this.centerPanel, Priority.ALWAYS);
-        ResizeHelper.addResizeListener(this.stage);
+        //ResizeHelper.addResizeListener(this.stage);
+        this.layout.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = stage.getX() - event.getScreenX();
+                yOffset = stage.getY() - event.getScreenY();
+            }
+        });
+        this.layout.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                stage.setX(event.getScreenX() + xOffset);
+                stage.setY(event.getScreenY() + yOffset);
+            }
+        });
     }
 
     public void showPanel(IPanel panel) {

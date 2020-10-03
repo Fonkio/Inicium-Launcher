@@ -32,7 +32,7 @@ public class TopPanel extends Panel {
         this.layout.getChildren().add(topBarButton);
         Label title = new Label(MvWildLauncher.SERVEUR_NAME+" Launcher");
         this.layout.getChildren().add(title);
-        title.setFont(Font.font("Consolas", FontWeight.THIN, FontPosture.REGULAR, 22.0f));
+        title.setFont(Font.font("Helvetica", FontWeight.THIN, FontPosture.REGULAR, 15.0f));
         title.setStyle("-fx-text-fill: white;");
         GridPane.setHalignment(title, HPos.CENTER);
         topBarButton.setMinWidth(100.0d);

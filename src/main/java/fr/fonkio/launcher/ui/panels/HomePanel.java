@@ -63,7 +63,6 @@ public class HomePanel extends Panel {
 
     private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
     private GridPane centerPane = new GridPane();
-    private AProgressBar leftDownloadBar;
     private Label status = new Label("");
     private String pseudo;
     private File dir = fileManager.getGameFolder();
@@ -228,7 +227,7 @@ public class HomePanel extends Panel {
         GridPane.setHalignment(save, HPos.RIGHT);
         save.setMinWidth(140);
         save.setMaxHeight(40);
-        save.setStyle("-fx-background-color: dodgerblue; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         save.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         save.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         save.setOnMouseClicked(e-> {
@@ -236,11 +235,11 @@ public class HomePanel extends Panel {
             saver.set("RAM", (Math.round(ramD)+""));
             saver.save();
             save.setText("Sauvegardé !");
-            save.setStyle("-fx-background-color: green; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+            save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
         slider.setOnDragDetected(e-> {
             save.setText("Sauvegarder");
-            save.setStyle("-fx-background-color: dodgerblue; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+            save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
         topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save);
     }
@@ -259,7 +258,7 @@ public class HomePanel extends Panel {
         GridPane.setVgrow(survie, Priority.ALWAYS);
         GridPane.setHgrow(survie, Priority.ALWAYS);
         GridPane.setValignment(survie, VPos.TOP);
-        survie.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
+        survie.setStyle("-fx-font-size: 14px; -fx-text-fill: #ffffff; -fx-opacity: 70%;");
         survie.setTranslateY(70);
 
         Label desc = new Label(MvWildLauncher.SERVEUR_NAME+", le serveur minecraft où le Gamemode est, et restera sur 0 !\n" +
@@ -402,28 +401,27 @@ public class HomePanel extends Panel {
         GridPane.setHalignment(installButton, HPos.LEFT);
 
         AProgressBar progressBar = new AProgressBar(400, 20);
-        progressBar.setBackgroundColor(Color.rgb(3, 48, 90));
-        Stop[] stops = new Stop[]{new Stop(0, Color.rgb(7, 85, 136)), new Stop(1, Color.rgb(3, 163, 219))};
+        progressBar.setBackgroundColor(Color.rgb(92, 92, 92));
+        Stop[] stops = new Stop[]{new Stop(0, Color.rgb(48, 85, 22)), new Stop(1, Color.rgb(82, 135, 47))};
         LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
         progressBar.setForegroundColor(lg);
         GridPane.setVgrow(progressBar, Priority.ALWAYS);
         GridPane.setHgrow(progressBar, Priority.ALWAYS);
         GridPane.setValignment(progressBar, VPos.TOP);
         GridPane.setHalignment(progressBar, HPos.LEFT);
-        progressBar.setTranslateY(330);
-        progressBar.setProgress(100,150);
+        progressBar.setTranslateY(280);
 
         this.status = new Label("Version "+strVersion + "/ Forge : "+strForgeVersion);
         GridPane.setVgrow(this.status, Priority.ALWAYS);
         GridPane.setHgrow(this.status, Priority.ALWAYS);
         GridPane.setValignment(this.status, VPos.TOP);
         this.status.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-opacity: 70%;");
-        this.status.setTranslateY(350);
+        this.status.setTranslateY(300);
 
-        installButton.setTranslateY(280);
+        installButton.setTranslateY(330);
         installButton.setMinWidth(140);
         installButton.setMaxHeight(40);
-        installButton.setStyle("-fx-background-color: #115faa; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        installButton.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         installButton.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         installButton.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
 
@@ -580,23 +578,17 @@ public class HomePanel extends Panel {
 
 
         progressBar.setProgress(0,100);
-        leftDownloadBar.setProgress(0,100);
-        leftDownloadBar.setVisible(false);
 
         installButton.setOnMouseClicked(e-> {
             MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
             installButton.setDisable(true);
             if (offline) {
-                leftDownloadBar.setProgress(100, 100);
-                leftDownloadBar.setVisible(false);
                 progressBar.setProgress(100, 100);
             } else {
-                leftDownloadBar.setVisible(true);
                 TimerTask updateBar = new TimerTask() {
                     public void run() {
                         float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
                         float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
-                        leftDownloadBar.setProgress(dl, dlTot);
                         progressBar.setProgress(dl, dlTot);
                     }
                 };
@@ -734,7 +726,7 @@ public class HomePanel extends Panel {
         bluePlaySelSeparator.setMaxWidth(3);
         bluePlaySelSeparator.setMinHeight(60);
         bluePlaySelSeparator.setMaxHeight(60);
-        bluePlaySelSeparator.setStyle("-fx-background-color: rgb(5,179,242); -fx-border-width: 3 3 3 0; -fx-border-color: rgb(5,179,242);");
+        bluePlaySelSeparator.setStyle("-fx-background-color: #52872F; -fx-border-width: 3 3 3 0; -fx-border-color: #52872F;");
         Image logoImageMvWild = new Image(Main.class.getResource("/logoPlay.png").toExternalForm());
         ImageView imageViewMvWild = new ImageView(logoImageMvWild);
         GridPane.setVgrow(imageViewMvWild, Priority.ALWAYS);
@@ -753,14 +745,6 @@ public class HomePanel extends Panel {
         jouerLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white");
         jouerLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         jouerLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        leftDownloadBar = new AProgressBar(150, 3);
-        leftDownloadBar.setBackgroundColor(Color.rgb(222, 222, 222, 0.3d));
-        leftDownloadBar.setForegroundColor(Color.rgb(255 ,255,255));
-        leftDownloadBar.setTranslateX(110.0d);
-        leftDownloadBar.setTranslateY(12.0d);
-        leftDownloadBar.setProgress(0,100);
-        leftDownloadBar.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        leftDownloadBar.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
 
         //Parametres
         Separator blueSettingSelSeparator = new Separator();
@@ -772,7 +756,7 @@ public class HomePanel extends Panel {
         blueSettingSelSeparator.setMinHeight(60);
         blueSettingSelSeparator.setMaxHeight(60);
         blueSettingSelSeparator.setTranslateY(70);
-        blueSettingSelSeparator.setStyle("-fx-background-color: rgb(5,179,242); -fx-border-width: 3 3 3 0; -fx-border-color: rgb(5,179,242);");
+        blueSettingSelSeparator.setStyle("-fx-background-color: #52872F; -fx-border-width: 3 3 3 0; -fx-border-color: #52872F;");
         blueSettingSelSeparator.setVisible(false);
         MaterialDesignIconView logoSetting = new MaterialDesignIconView(MaterialDesignIcon.SETTINGS);
         GridPane.setVgrow(logoSetting, Priority.ALWAYS);
@@ -796,11 +780,6 @@ public class HomePanel extends Panel {
         settingLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
 
         //Control affichage
-        leftDownloadBar.setOnMouseClicked(e->{
-            scrollPane.setContent(vBoxMv);
-            bluePlaySelSeparator.setVisible(true);
-            blueSettingSelSeparator.setVisible(false);
-        });
         jouerLabel.setOnMouseClicked(e->{
             scrollPane.setContent(vBoxMv);
             bluePlaySelSeparator.setVisible(true);
@@ -824,7 +803,7 @@ public class HomePanel extends Panel {
         //Fin selection onglet
 
         //Ajout des éléments
-        pane.getChildren().addAll(bluePlaySelSeparator, imageViewMvWild, jouerLabel, leftDownloadBar, blueSettingSelSeparator, logoSetting, settingLabel, pseudo, imageViewTete);
+        pane.getChildren().addAll(bluePlaySelSeparator, imageViewMvWild, jouerLabel, blueSettingSelSeparator, logoSetting, settingLabel, pseudo, imageViewTete);
     } //Fin showLeftBar
 
     /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {

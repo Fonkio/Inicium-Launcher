@@ -123,9 +123,10 @@ public class PanelLogin extends Panel {
         GridPane.setVgrow(bienvenue, Priority.ALWAYS);
         GridPane.setHgrow(bienvenue, Priority.ALWAYS);
         GridPane.setValignment(bienvenue, VPos.TOP);
+        GridPane.setHalignment(bienvenue, HPos.CENTER);
         bienvenue.setTranslateY(27);
-        bienvenue.setTranslateX(37.5);
-        bienvenue.setStyle("-fx-text-fill: #bcc6e7; -fx-font-size: 16px;");
+
+        bienvenue.setStyle("-fx-text-fill: white; -fx-font-size: 20px;");
 
         Separator connectSeparator = new Separator();
         GridPane.setVgrow(connectSeparator, Priority.ALWAYS);
@@ -142,7 +143,7 @@ public class PanelLogin extends Panel {
         GridPane.setHgrow(usernameLabel, Priority.ALWAYS);
         GridPane.setValignment(usernameLabel, VPos.CENTER);
         GridPane.setHalignment(usernameLabel, HPos.LEFT);
-        usernameLabel.setStyle("-fx-text-fill: #95bad3; -fx-font-size: 14px;");
+        usernameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
         usernameLabel.setTranslateY(-70);
         usernameLabel.setTranslateX(37.5);
 
@@ -201,7 +202,7 @@ public class PanelLogin extends Panel {
         validate.setTranslateY(20);
         validate.setMinWidth(325);
         validate.setMaxHeight(50);
-        validate.setStyle("-fx-background-color: #007dbe; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font: 14px; -fx-text-fill: white");
+        validate.setStyle("-fx-background-color: #52872F; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font: 14px; -fx-text-fill: white");
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         validate.setOnMouseClicked(e->{
