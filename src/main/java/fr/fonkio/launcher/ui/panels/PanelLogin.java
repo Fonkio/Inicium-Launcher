@@ -224,6 +224,7 @@ public class PanelLogin extends Panel {
             this.validate.setText("Récupération des versions ...");
             Main.logger.log("Connexion avec le pseudo : "+pseudo);
             saver.set("pseudo", pseudo);
+            saver.save();
             hp.setPseudo(pseudo);
             this.panelManager.showPanel(hp);
         }
