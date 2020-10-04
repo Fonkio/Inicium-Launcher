@@ -7,6 +7,8 @@ import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class MvWildLauncher {
 
     public static final String LAUNCHER_VERSION = "1.3";
@@ -22,7 +24,7 @@ public class MvWildLauncher {
     public static final String CONFIG_WEB = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11";
     private static DiscordRPC library = DiscordRPC.INSTANCE;
     private static Thread threadRP;
-    public void init(Stage stage) {
+    public void init(Stage stage) throws IOException {
 
         String appName = "752142344240889867";
         String steam = "";

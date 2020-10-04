@@ -37,21 +37,15 @@ public class PanelLogin extends Panel {
     private TextField usernameTextField = new TextField();
     private Saver saver;
 
-    public PanelLogin(Stage stage) {
+    public PanelLogin(Stage stage) throws IOException {
         super(stage);
-
-        File f = fileManager.getLauncherProperties();
         if(!dir.exists()) {
             dir.mkdir();
         }
-        if (!f.exists()) {
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if(!fileManager.getLauncherProperties().exists()){
+            fileManager.getLauncherProperties().createNewFile();
         }
-        saver = new Saver(f);
+        saver = new Saver(fileManager.getLauncherProperties());
         hp = new HomePanel(getStage());
 
     }
@@ -147,7 +141,7 @@ public class PanelLogin extends Panel {
         usernameLabel.setTranslateY(-70);
         usernameLabel.setTranslateX(37.5);
 
-        String savePseudo = saver.get("pseudo");
+        String savePseudo = saver.get("name");
         if (savePseudo != null) {
             usernameTextField.setText(savePseudo);
         }
@@ -224,8 +218,6 @@ public class PanelLogin extends Panel {
             MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
             this.validate.setText("Récupération des versions ...");
             Main.logger.log("Connexion avec le pseudo : "+pseudo);
-            saver.set("pseudo", pseudo);
-            saver.save();
             hp.setPseudo(pseudo);
             this.panelManager.showPanel(hp);
         }

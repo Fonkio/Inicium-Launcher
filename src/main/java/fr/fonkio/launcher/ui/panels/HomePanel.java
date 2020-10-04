@@ -608,6 +608,8 @@ public class HomePanel extends Panel {
         progressBar.setProgress(0,100);
 
         installButton.setOnMouseClicked(e-> {
+            saver.set("name", pseudo);
+            saver.save();
             MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
             installButton.setDisable(true);
             if (offline) {
@@ -786,8 +788,20 @@ public class HomePanel extends Panel {
         pseudo.setTooltip(tt);
         pseudo.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         pseudo.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        imageViewTete.setOnMouseClicked(e->this.panelManager.showPanel(new PanelLogin(getStage())));
-        pseudo.setOnMouseClicked(e->this.panelManager.showPanel(new PanelLogin(getStage())));
+        imageViewTete.setOnMouseClicked(e-> {
+            try {
+                this.panelManager.showPanel(new PanelLogin(getStage()));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+        pseudo.setOnMouseClicked(e-> {
+            try {
+                this.panelManager.showPanel(new PanelLogin(getStage()));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
         //Fin affichage pseudo + tete joueur
 
         //Selection de l'onglet
@@ -923,6 +937,8 @@ public class HomePanel extends Panel {
         //Lancement
         MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
         setStatus("Jeu lancé");
+        saver.set("name", pseudo);
+        saver.save();
         Process p = launcher.launch();
         getStage().setIconified(true);
         Runnable target;
