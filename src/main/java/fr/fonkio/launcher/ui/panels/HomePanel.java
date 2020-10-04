@@ -782,22 +782,35 @@ public class HomePanel extends Panel {
         imageViewTete.setTranslateY(570);
         imageViewTete.setFitHeight(60);
         imageViewTete.setFitWidth(60);
-        imageViewTete.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        imageViewTete.setOnMouseEntered(e->{
+            this.layout.setCursor(Cursor.HAND);
+        });
         imageViewTete.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        Tooltip tt = new Tooltip("Se déconnecter");
-        pseudo.setTooltip(tt);
-        pseudo.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        pseudo.setTooltip(new Tooltip("Se déconnecter"));
+        pseudo.setOnMouseEntered(e-> {
+            this.layout.setCursor(Cursor.HAND);
+            if (installButton.isDisabled()) {
+                pseudo.setTooltip(new Tooltip("Impossible de se déconnecter quand l'installation / le lancement est en cours"));
+            } else {
+                pseudo.setTooltip(new Tooltip("Se déconnecter"));
+            }
+        });
         pseudo.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         imageViewTete.setOnMouseClicked(e-> {
             try {
-                this.panelManager.showPanel(new PanelLogin(getStage()));
+                if (!installButton.isDisabled()) {
+                    this.panelManager.showPanel(new PanelLogin(getStage()));
+                }
+
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
         });
         pseudo.setOnMouseClicked(e-> {
             try {
-                this.panelManager.showPanel(new PanelLogin(getStage()));
+                if (!installButton.isDisabled()) {
+                    this.panelManager.showPanel(new PanelLogin(getStage()));
+                }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
