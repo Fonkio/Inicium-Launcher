@@ -273,6 +273,34 @@ public class HomePanel extends Panel {
         desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #bcc6e7; -fx-opacity: 70%;");
         desc.setTranslateY(130);
 
+        //ListeConnectés
+        Image playerImage = new Image(Main.class.getResource("/users.png").toExternalForm());
+        ImageView playerImageView = new ImageView(playerImage);
+        playerImageView.setFitHeight(40);
+        playerImageView.setFitWidth(40);
+        Button buttonPlayer = new Button();
+        GridPane.setVgrow(buttonPlayer, Priority.ALWAYS);
+        GridPane.setHgrow(buttonPlayer, Priority.ALWAYS);
+        GridPane.setValignment(buttonPlayer, VPos.TOP);
+        GridPane.setHalignment(buttonPlayer, HPos.LEFT);
+        buttonPlayer.setTranslateY(10);
+        buttonPlayer.setTranslateX(450);
+        buttonPlayer.setBackground(Background.EMPTY);
+        buttonPlayer.setGraphic(playerImageView);
+        buttonPlayer.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");;
+        Tooltip tt = new Tooltip(getList());
+        buttonPlayer.setTooltip(tt);
+
+        //NbConnectés
+        Label nbCo = new Label(getNbCo());
+        GridPane.setVgrow(nbCo, Priority.ALWAYS);
+        GridPane.setHgrow(nbCo, Priority.ALWAYS);
+        GridPane.setValignment(nbCo, VPos.TOP);
+        nbCo.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
+        nbCo.setTranslateX(520);
+        nbCo.setTranslateY(20);
+        nbCo.setTooltip(tt);
+
         //IFRAME Twitter
         GridPane twitter = new GridPane();
         GridPane.setVgrow(twitter, Priority.ALWAYS);
@@ -636,7 +664,7 @@ public class HomePanel extends Panel {
             t.start();
         });
         //Ajout des éléments
-        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
+        pane.getChildren().addAll(mvwildTitle, survie, desc, buttonPlayer, nbCo, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
 
     }
 
@@ -683,6 +711,52 @@ public class HomePanel extends Panel {
         saver.set(name, inputline);
         saver.save();
         return inputline;
+    }
+    private String getList() {
+        StringBuilder stringBuilder = new StringBuilder("");
+        try{
+            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/playerList.php").openConnection());
+            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
+            connection.connect();
+            InputStream is = connection.getInputStream();
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (!line.startsWith(" ")) {
+                    stringBuilder.append(line+System.lineSeparator());
+                }
+
+            }
+        } catch (Exception e) {
+            if (!offline) {
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private String getNbCo() {
+        String nbCo = null;
+        try{
+            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/status.php").openConnection());
+            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
+            connection.connect();
+            InputStream is = connection.getInputStream();
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.contains("connect")) {
+                    nbCo = line;
+                }
+            }
+        } catch (Exception e) {
+            if (!offline) {
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+                return "";
+            }
+        }
+
+        return nbCo.split(" joueur")[0].replaceAll(" ", "");
     }
 
     //Partie gauche du home panel
