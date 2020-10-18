@@ -4,30 +4,13 @@ import com.sun.webkit.WebPage;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import fr.arinonia.arilibfx.ui.component.AProgressBar;
-import fr.flowarg.flowlogger.ILogger;
-import fr.flowarg.flowlogger.Logger;
-import fr.flowarg.flowupdater.FlowUpdater;
-import fr.flowarg.flowupdater.download.IProgressCallback;
-import fr.flowarg.flowupdater.download.Step;
-import fr.flowarg.flowupdater.download.json.ExternalFile;
-import fr.flowarg.flowupdater.download.json.Mod;
-import fr.flowarg.flowupdater.utils.UpdaterOptions;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
-import fr.flowarg.flowupdater.versions.NewForgeVersion;
-import fr.flowarg.flowupdater.versions.VanillaVersion;
-import fr.flowarg.flowupdater.versions.VersionType;
-import fr.flowarg.openlauncherlib.NewForgeVersionDiscriminator;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
-import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
-import fr.theshark34.openlauncherlib.LaunchException;
-import fr.theshark34.openlauncherlib.external.ExternalLaunchProfile;
-import fr.theshark34.openlauncherlib.external.ExternalLauncher;
-import fr.theshark34.openlauncherlib.minecraft.*;
-import fr.theshark34.openlauncherlib.util.Saver;
-import javafx.application.Platform;
+import fr.fonkio.launcher.utils.HttpRecup;
+import fr.fonkio.launcher.utils.MainPanel;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
@@ -54,35 +37,31 @@ import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.List;
-import java.util.Timer;
 
 public class HomePanel extends Panel {
 
-    private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
+
     private GridPane centerPane = new GridPane();
     private Label status = new Label("");
-    private String pseudo;
-    private File dir = fileManager.getGameFolder();
-    private Saver saver = new Saver(fileManager.getLauncherProperties());
+    private Label pseudo = new Label("");
+    private Image teteJ;
     private VBox vBoxMv;
     private VBox vBoxSettings;
     private ScrollPane scrollPane = new ScrollPane();
     private Button installButton = new Button("Jouer");
-    private boolean offline = false;
-    private Timer timerUpdateBar;
+    ImageView imageViewTete = new ImageView();
+    AProgressBar progressBar = new AProgressBar(400, 20);
 
-    public HomePanel(Stage stage) {
+    public HomePanel(Stage stage, PanelManager panelManager) {
         super(stage);
-        this.pseudo = "";
+        this.panelManager = panelManager;
     }
 
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-
+        setPseudo(panelManager.getPseudo());
         //Affichage principal
         ColumnConstraints mainPainConstraint = new ColumnConstraints();
         mainPainConstraint.setHalignment(HPos.LEFT);
@@ -156,13 +135,17 @@ public class HomePanel extends Panel {
         topPanel.setMaxWidth(880);
         topPanel.setMinHeight(340);
         topPanel.setMaxHeight(340);
+
         try {
             addTopPanel(topPanel);
-        } catch (BuilderException | URISyntaxException | MalformedURLException e) {
-            JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft", "Erreur updater", JOptionPane.ERROR_MESSAGE);
-            MvWildLauncher.stopRP();
-            System.exit(0);
+        } catch (BuilderException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
+
 
         GridPane topPanelSettings = new GridPane();
         GridPane.setVgrow(topPanelSettings, Priority.ALWAYS);
@@ -203,7 +186,7 @@ public class HomePanel extends Panel {
         ram0.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
         ram0.setTranslateY(110);
 
-        String ramStr = saver.get("RAM");
+        String ramStr = panelManager.getRAM();
         int ram = 0;
         if (ramStr != null) {
             ram = Integer.parseInt(ramStr);
@@ -219,6 +202,28 @@ public class HomePanel extends Panel {
         slider.setMinorTickCount(1);
         slider.setSnapToTicks(true);
 
+        CheckBox checkBox = new CheckBox();
+        if(this.panelManager.getDRP() != null) {
+            checkBox.setSelected(this.panelManager.getDRP());
+        }
+        checkBox.setTranslateY(25);
+        Label checkText = new Label("Désactiver le Discord Rich Presence");
+        checkText.setTranslateY(25);
+        checkText.setTranslateX(20);
+        checkText.setOnMouseEntered(e->{
+            this.layout.setCursor(Cursor.HAND);
+        });
+        checkText.setOnMouseExited(e->{
+            this.layout.setCursor(Cursor.DEFAULT);
+        });
+        checkBox.setOnMouseEntered(e->{
+            this.layout.setCursor(Cursor.HAND);
+        });
+        checkBox.setOnMouseExited(e->{
+            this.layout.setCursor(Cursor.DEFAULT);
+        });
+
+        checkText.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
 
         Button save = new Button("Sauvegarder");
         GridPane.setVgrow(save, Priority.ALWAYS);
@@ -232,8 +237,8 @@ public class HomePanel extends Panel {
         save.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         save.setOnMouseClicked(e-> {
             double ramD = slider.getValue()*1024;
-            saver.set("RAM", (Math.round(ramD)+""));
-            saver.save();
+            panelManager.setRAM(ramD);
+            panelManager.setDRP(checkBox.isSelected());
             save.setText("Sauvegardé !");
             save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
@@ -241,7 +246,16 @@ public class HomePanel extends Panel {
             save.setText("Sauvegarder");
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
-        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save);
+        checkText.setOnMouseClicked(e->{
+            checkBox.setSelected(!checkBox.isSelected());
+            save.setText("Sauvegarder");
+            save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        });
+        checkBox.setOnMouseClicked(e -> {
+            save.setText("Sauvegarder");
+            save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        });
+        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, checkBox, checkText);
     }
 
     //Affichage onglet jouer par defaut
@@ -288,11 +302,11 @@ public class HomePanel extends Panel {
         buttonPlayer.setBackground(Background.EMPTY);
         buttonPlayer.setGraphic(playerImageView);
         buttonPlayer.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");;
-        Tooltip tt = new Tooltip(getList());
+        Tooltip tt = new Tooltip(HttpRecup.getList());
         buttonPlayer.setTooltip(tt);
 
         //NbConnectés
-        Label nbCo = new Label(getNbCo());
+        Label nbCo = new Label(HttpRecup.getNbCo());
         GridPane.setVgrow(nbCo, Priority.ALWAYS);
         GridPane.setHgrow(nbCo, Priority.ALWAYS);
         GridPane.setValignment(nbCo, VPos.TOP);
@@ -343,92 +357,12 @@ public class HomePanel extends Panel {
             e.printStackTrace();
         }
 
-        //Recuperation des versions
-        String strVersion = getVersion(MvWildLauncher.SITE_URL +"version.php", "mcVersion");
-        if (strVersion == null) return;
-        String strForgeVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php", "forgeVersion");
-        if (strForgeVersion == null) {
-            return;
-        }
-        String strMCPVersion = getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php", "mcpVersion");
-        if (strForgeVersion == null) {
-            return;
-        }
-
-        if (!fileManager.createGameDir().exists()) {
-            fileManager.createGameDir().mkdir();
-        }
-        IProgressCallback dlCallback = new IProgressCallback() {
-            private String status = "";
-            @Override
-            public void init(ILogger logger) {
-                Main.logger.log("Création callback "+this.getClass().getName());
-            }
-
-            @Override
-            public void step(Step step) {
-                switch (step.toString()) {
-                    case "READ":
-                        this.status = "Verification des fichiers ";
-                        break;
-                    case "DL_LIBS":
-                        this.status = "Téléchargement des librairies ";
-                        break;
-                    case "DL_ASSETS":
-                        this.status = "Téléchargement des assets ";
-                        break;
-                    case "EXTRACT_NATIVES":
-                        this.status = "Extraction en cours, veuillez patienter ";
-                        break;
-                    case "MODS":
-                        this.status = "Récupération des mods ";
-                        break;
-                    case "FORGE":
-                        this.status = "Installation de forge ";
-                        break;
-                    case "INTERNAL_FORGE_HACKS":
-                        this.status = "Forge installé, lancement ";
-                        break;
-                    case "END":
-                        this.status = "Le jeu a été lancé !";
-                        break;
-                    case "EXTERNAL_FILES":
-                        this.status = "Téléchargement de la configuration...";
-                        break;
-                    default:
-                        this.status = "Chargement ";
-                        Main.logger.warn(step.toString());
-                        break;
-                }
-                Platform.runLater(()-> {
-                    setStatus(this.status+"...");
-                });
-            }
-            @Override
-            public void update(int downloaded, int max) {
-                Platform.runLater(()-> {
-                    setStatus(this.status + downloaded+"/"+max +"...");
-                });
-            }
-        };//Fin déclaration Callback
-
-        //Recuperation updater
-        //Version vanilla
-        //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
-        //Version forge
-        final FlowUpdater updater = updateForge(dlCallback, strVersion, strForgeVersion);
-
-        if (updater == null && !offline) {
-            JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
-        }
-
         //Install et dlBar
         GridPane.setVgrow(installButton, Priority.ALWAYS);
         GridPane.setHgrow(installButton, Priority.ALWAYS);
         GridPane.setValignment(installButton, VPos.TOP);
         GridPane.setHalignment(installButton, HPos.LEFT);
 
-        AProgressBar progressBar = new AProgressBar(400, 20);
         progressBar.setBackgroundColor(Color.rgb(92, 92, 92));
         Stop[] stops = new Stop[]{new Stop(0, Color.rgb(48, 85, 22)), new Stop(1, Color.rgb(82, 135, 47))};
         LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
@@ -439,7 +373,6 @@ public class HomePanel extends Panel {
         GridPane.setHalignment(progressBar, HPos.LEFT);
         progressBar.setTranslateY(280);
 
-        this.status = new Label("Version "+strVersion + "/ Forge : "+strForgeVersion);
         GridPane.setVgrow(this.status, Priority.ALWAYS);
         GridPane.setHgrow(this.status, Priority.ALWAYS);
         GridPane.setValignment(this.status, VPos.TOP);
@@ -604,70 +537,11 @@ public class HomePanel extends Panel {
             }
         });
 
-
-        progressBar.setProgress(0,100);
-
         installButton.setOnMouseClicked(e-> {
-            saver.set("name", pseudo);
-            saver.save();
-            MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
-            installButton.setDisable(true);
-            if (offline) {
-                progressBar.setProgress(100, 100);
-            } else {
-                TimerTask updateBar = new TimerTask() {
-                    public void run() {
-                        float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
-                        float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
-                        progressBar.setProgress(dl, dlTot);
-                    }
-                };
-                this.timerUpdateBar = new Timer("timerUpdateBar");
-                long delay  = 50L;
-                long period = 50L;
-                timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
-            }
-
-            Thread t = new Thread() {
-                @Override
-                public void run() {
-                    if (!offline) {
-                        try {
-                            updater.update(dir, false);
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                            installButton.setText("Erreur");
-                            installButton.setDisable(true);
-                        } catch (Exception exception) {
-                            exception.printStackTrace();
-                        } finally {
-                            timerUpdateBar.cancel();
-                        }
-                    }
-                    Platform.runLater(() -> {
-                            status.setText("Lancement ...");
-                            try {
-                                launch(strVersion, strForgeVersion, strMCPVersion);
-                            } catch (Exception e) {
-                                getStage().setIconified(false);
-                                MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-                                installButton.setText("Relancer");
-                                installButton.setDisable(false);
-                                if(offline) {
-                                    JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu ! L'installation n'est pas complète, il est nécessaire d'être en ligne pour lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                                } else {
-                                    JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                                }
-                                setStatus("");
-                            }
-                        });
-                }
-            };
-            t.start();
+            panelManager.install();
         });
         //Ajout des éléments
         pane.getChildren().addAll(mvwildTitle, survie, desc, buttonPlayer, nbCo, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
-
     }
 
     //Modification texte barre de dl
@@ -675,105 +549,17 @@ public class HomePanel extends Panel {
         this.status.setText(status);
     }
 
-    //Modif pseudo
-    public void setPseudo(String pseudo) {
-        this.pseudo = pseudo;
-    }
-
-    //Récupération du texte sur un URL pour les versions
-    private String getVersion(String url, String name) {
-        String inputline = null;
-        try{
-            URLConnection connection = (new URL(url).openConnection());
-            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
-            connection.connect();
-            InputStream is = connection.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            inputline = in.readLine();
-        } catch (Exception e) {
-            if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
-            }
-
-
-            if (saver.get(name) == null) {
-                MvWildLauncher.stopRP();
-                System.exit(0);
-            } else {
-                installButton.setText("Jouer hors ligne");
-                this.offline = true;
-                return saver.get(name);
-            }
-
-        }
-        if (inputline == null) {
-            return null;
-        }
-        Main.logger.log("Version recupérée : "+inputline);
-        saver.set(name, inputline);
-        saver.save();
-        return inputline;
-    }
-    private String getList() {
-        StringBuilder stringBuilder = new StringBuilder("");
-        try{
-            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/playerList.php").openConnection());
-            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
-            connection.connect();
-            InputStream is = connection.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            String line;
-            while ((line = in.readLine()) != null) {
-                if (!line.startsWith(" ")) {
-                    stringBuilder.append(line+System.lineSeparator());
-                }
-
-            }
-        } catch (Exception e) {
-            if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        return stringBuilder.toString();
-    }
-
-    private String getNbCo() {
-        String nbCo = null;
-        try{
-            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/status.php").openConnection());
-            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
-            connection.connect();
-            InputStream is = connection.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            String line;
-            while ((line = in.readLine()) != null) {
-                if (line.contains("connect")) {
-                    nbCo = line;
-                }
-            }
-        } catch (Exception e) {
-            if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
-                return "";
-            }
-        }
-
-        return nbCo.split(" joueur")[0].replaceAll(" ", "");
-    }
-
     //Partie gauche du home panel
     private void showLeftBar(GridPane pane) {
         // Affichage de la tête du joueur avec son pseudo
-        Label pseudo = new Label(this.pseudo);
         GridPane.setVgrow(pseudo, Priority.ALWAYS);
         GridPane.setHgrow(pseudo, Priority.ALWAYS);
         GridPane.setValignment(pseudo, VPos.BOTTOM);
         pseudo.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
         pseudo.setTranslateX(110);
         pseudo.setTranslateY(560);
-        String path = "https://minotar.net/avatar/"+this.pseudo+"/100.png";
-        Image teteJ = new Image(path);
-        ImageView imageViewTete = new ImageView(teteJ);
+
+
         GridPane.setVgrow(imageViewTete, Priority.ALWAYS);
         GridPane.setHgrow(imageViewTete, Priority.ALWAYS);
         GridPane.setValignment(imageViewTete, VPos.TOP);
@@ -789,31 +575,15 @@ public class HomePanel extends Panel {
         pseudo.setTooltip(new Tooltip("Se déconnecter"));
         pseudo.setOnMouseEntered(e-> {
             this.layout.setCursor(Cursor.HAND);
-            if (installButton.isDisabled()) {
-                pseudo.setTooltip(new Tooltip("Impossible de se déconnecter quand l'installation / le lancement est en cours"));
-            } else {
-                pseudo.setTooltip(new Tooltip("Se déconnecter"));
-            }
+            pseudo.setTooltip(new Tooltip("Se déconnecter"));
+
         });
         pseudo.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         imageViewTete.setOnMouseClicked(e-> {
-            try {
-                if (!installButton.isDisabled()) {
-                    this.panelManager.showPanel(new PanelLogin(getStage()));
-                }
-
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            this.panelManager.showPanel(MainPanel.LOGIN);
         });
         pseudo.setOnMouseClicked(e-> {
-            try {
-                if (!installButton.isDisabled()) {
-                    this.panelManager.showPanel(new PanelLogin(getStage()));
-                }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            this.panelManager.showPanel(MainPanel.LOGIN);
         });
         //Fin affichage pseudo + tete joueur
 
@@ -907,73 +677,23 @@ public class HomePanel extends Panel {
         pane.getChildren().addAll(bluePlaySelSeparator, imageViewMvWild, jouerLabel, blueSettingSelSeparator, logoSetting, settingLabel, pseudo, imageViewTete);
     } //Fin showLeftBar
 
-    /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
-        final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
-        final IVanillaVersion version = versionBuilder.build(false, VersionType.VANILLA);
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog())).withProgressCallback(callback).build();
-        return updater;
-    }*/
 
-    private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
-        if (offline) {
-            return null;
-        }
-        //Pas de mod pour l'instant
-        //List<Mod> mods = new ArrayList<>();
-        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.json");
-        Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
-
-        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder().withName(versionMc).withSnapshot(false).withVersionType(VersionType.FORGE).build();
-        NewForgeVersion forge = new NewForgeVersion(versionForge, version, logger, callback, mods, true);
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().
-                withVersion(version).
-                withForgeVersion(forge).
-                withUpdaterOptions(new UpdaterOptions(false, false))
-                .withExternaFiles(ExternalFile.fromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles.json").toURL()))
-                .withProgressCallback(callback)
-                .build();
-        return updater;
+    public void setInstallButtonText(String s) {
+        installButton.setText(s);
     }
 
-    public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
-        GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
-        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
-        GameFolder gameFolder = new GameFolder("/assets/", "/libraries/", "/natives/", "/client.jar");
-        AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
-
-        ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
-        if(saver.get("RAM")!=null) {
-            profile.getVmArgs().add("-Xmx"+saver.get("RAM")+"M");
-        }
-
-        ExternalLauncher launcher = new ExternalLauncher(profile);
-        //Lancement
-        MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
-        setStatus("Jeu lancé");
-        saver.set("name", pseudo);
-        saver.save();
-        Process p = launcher.launch();
-        getStage().setIconified(true);
-        Runnable target;
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    p.waitFor(); //Attente fermeture du jeu
-                    Platform.runLater(()->{
-                        getStage().setIconified(false);
-                        installButton.setDisable(false);
-                        installButton.setText("Relancer");
-                        setStatus("");
-                    });
-
-                    MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
-
-                } catch (InterruptedException e) {
-                }
-            }
-        };
-        t.start();
+    public void setDisableInstall(boolean disabled) {
+        installButton.setDisable(disabled);
     }
 
+    public void setProgress(float avancee, float fin) {
+        progressBar.setProgress(avancee, fin);
+    }
+
+    public void setPseudo(String pseudo) {
+        this.pseudo.setText(pseudo);
+        String path = "https://minotar.net/avatar/"+pseudo+"/100.png";
+        teteJ = new Image(path);
+        imageViewTete.setImage(teteJ);
+    }
 }

@@ -2,10 +2,17 @@ package fr.fonkio.launcher.ui;
 
 import fr.arinonia.arilibfx.AriLibFX;
 import fr.arinonia.arilibfx.ui.utils.ResizeHelper;
+import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
+import fr.fonkio.launcher.launcher.Launcher;
 import fr.fonkio.launcher.ui.panel.IPanel;
+import fr.fonkio.launcher.ui.panel.Panel;
+import fr.fonkio.launcher.ui.panels.HomePanel;
+import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
+import fr.fonkio.launcher.utils.HttpRecup;
+import fr.fonkio.launcher.utils.MainPanel;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
@@ -17,6 +24,15 @@ import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+
 public class PanelManager {
 
     private final Stage stage;
@@ -25,10 +41,23 @@ public class PanelManager {
     private GridPane centerPanel = new GridPane();
     private Double xOffset;
     private Double yOffset;
+    PanelLogin panelLogin;
+    boolean loginInit = false;
+    HomePanel homePanel;
+    boolean homeInit = false;
+    MainPanel currentPanel;
+    Launcher launcher;
 
-    public PanelManager(Stage stage) {
+    public PanelManager(Stage stage) throws URISyntaxException, BuilderException, MalformedURLException {
         topPanel = new TopPanel(stage);
         this.stage = stage;
+        launcher = new Launcher(this);
+        homePanel = new HomePanel(stage, this);
+        try {
+            panelLogin = new PanelLogin(stage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void init() {
@@ -72,16 +101,139 @@ public class PanelManager {
                 stage.setY(event.getScreenY() + yOffset);
             }
         });
+        checkVersion();
+        showPanel(MainPanel.LOGIN);
+
+        MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
     }
 
-    public void showPanel(IPanel panel) {
-        this.centerPanel.getChildren().clear();
-        this.centerPanel.getChildren().add(panel.getLayout());
-        panel.init(this);
+    public void showPanel(MainPanel name) {
+        Panel panel = null;
+        boolean changementPanel = true;
+        boolean initPanel = true;
+        switch (name) {
+            case HOME:
+                panel = homePanel;
+                changementPanel = currentPanel.equals(MainPanel.LOGIN);
+                initPanel = !homeInit;
+                homeInit = true;
+                currentPanel = MainPanel.HOME;
+                break;
+            case PARAMETRES:
+                panel = homePanel;
+                changementPanel = currentPanel.equals(MainPanel.LOGIN);
+                initPanel = !homeInit;
+                homeInit = true;
+                currentPanel = MainPanel.PARAMETRES;
+                break;
+            case LOGIN:
+                currentPanel = MainPanel.LOGIN;
+                initPanel = !loginInit;
+                loginInit = true;
+                panel = panelLogin;
+                break;
+        }
+        if(changementPanel) {
+            this.centerPanel.getChildren().clear();
+            this.centerPanel.getChildren().add(panel.getLayout());
+        }
+        if(initPanel) {
+            panel.init(this);
+        }
         panel.onShow();
     }
+
     public Stage getStage() {
         return stage;
     }
+    public void setInstallButtonText(String s) {
+        if (homeInit) {
+            homePanel.setInstallButtonText(s);
+        }
+    }
 
+    public void setDisableInstallButton(boolean b) {
+        if (homeInit) {
+            homePanel.setDisableInstall(b);
+        }
+    }
+    public void setProgress(float avancee, float fin) {
+        if (homeInit) {
+            homePanel.setProgress(avancee, fin);
+        }
+    }
+    public void setPseudo(String pseudo) {
+        this.launcher.setPseudo(pseudo);
+        if(homeInit) {
+            homePanel.setPseudo(pseudo);
+        }
+    }
+
+    public void setStatus(String s) {
+        if(homeInit) {
+            homePanel.setStatus(s);
+        }
+    }
+
+    public String getRAM() {
+        return this.launcher.getRAM();
+    }
+
+    public void setRAM(double ramD) {
+        this.launcher.setRAM(ramD);
+    }
+
+    public String getPseudo() {
+        return this.launcher.getPseudo();
+    }
+
+    public String getPseudoTextField() {
+        if (loginInit) {
+            return panelLogin.getPseudoTextField();
+        }
+        return "";
+    }
+
+    public void connexion() {
+        this.launcher.connexion();
+    }
+
+    private void checkVersion() {
+        String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
+        if (!version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : " + MvWildLauncher.LAUNCHER_VERSION + "\nNouvelle version : " + version)) {
+                        case JOptionPane.OK_OPTION:
+                            try {
+                                Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (URISyntaxException e) {
+                                e.printStackTrace();
+                            }
+                            MvWildLauncher.stopRP();
+                            System.exit(0);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            };
+            t.start();
+        }
+    }
+
+    public void install() {
+        this.launcher.install();
+    }
+
+    public void setDRP(boolean selected) {
+        this.launcher.setDRP(selected);
+    }
+
+    public Boolean getDRP() {
+        return this.launcher.getDRP();
+    }
 }

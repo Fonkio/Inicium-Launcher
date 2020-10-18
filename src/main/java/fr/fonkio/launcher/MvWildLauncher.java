@@ -3,11 +3,15 @@ package fr.fonkio.launcher;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
+import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
+import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class MvWildLauncher {
 
@@ -24,7 +28,9 @@ public class MvWildLauncher {
     public static final String CONFIG_WEB = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11";
     private static DiscordRPC library = DiscordRPC.INSTANCE;
     private static Thread threadRP;
-    public void init(Stage stage) throws IOException {
+    private static final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
+    private static Saver saver = new Saver(fileManager.getLauncherProperties());
+    public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
         String appName = "752142344240889867";
         String steam = "";
@@ -44,7 +50,6 @@ public class MvWildLauncher {
 
         this.panelManager = new PanelManager(stage);
         this.panelManager.init();
-        this.panelManager.showPanel(new PanelLogin(stage));
     }
     public static void stopRP() {
         Main.logger.log("Arret - RP");
@@ -52,20 +57,23 @@ public class MvWildLauncher {
         library.Discord_Shutdown();
     }
     public static void updatePresence(String version, String state, String largeImageKey, String pseudo) {
-        DiscordRichPresence presence = new DiscordRichPresence();
-        presence.startTimestamp = System.currentTimeMillis() / 1000;
-        if (version == null) {
-            presence.details = SERVEUR_IP;
-        } else {
-            presence.details = SERVEUR_IP+" - " + version;
+        if(saver.get("DRP") != null && (!Boolean.parseBoolean(saver.get("DRP")))) {
+            DiscordRichPresence presence = new DiscordRichPresence();
+            presence.startTimestamp = System.currentTimeMillis() / 1000;
+            if (version == null) {
+                presence.details = SERVEUR_IP;
+            } else {
+                presence.details = SERVEUR_IP+" - " + version;
+            }
+            presence.state = state;
+            presence.largeImageKey = largeImageKey;
+            presence.largeImageText = "Serveur Minecraft 100% Survie [Crack OK]";
+            presence.smallImageKey = "minecraft";
+            if (pseudo != null) {
+                presence.smallImageText = "Pseudo : "+pseudo;
+            }
+            library.Discord_UpdatePresence(presence);
         }
-        presence.state = state;
-        presence.largeImageKey = largeImageKey;
-        presence.largeImageText = "Serveur Minecraft 100% Survie [Crack OK]";
-        presence.smallImageKey = "minecraft";
-        if (pseudo != null) {
-            presence.smallImageText = "Pseudo : "+pseudo;
-        }
-        library.Discord_UpdatePresence(presence);
+
     }
 }

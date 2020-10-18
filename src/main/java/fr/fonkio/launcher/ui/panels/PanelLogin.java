@@ -5,6 +5,7 @@ import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
+import fr.fonkio.launcher.utils.MainPanel;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -32,7 +33,6 @@ import java.nio.charset.StandardCharsets;
 public class PanelLogin extends Panel {
     private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
     private File dir = fileManager.createGameDir();
-    private HomePanel hp;
     private Button validate = new Button("Valider");
     private TextField usernameTextField = new TextField();
     private Saver saver;
@@ -46,49 +46,12 @@ public class PanelLogin extends Panel {
             fileManager.getLauncherProperties().createNewFile();
         }
         saver = new Saver(fileManager.getLauncherProperties());
-        hp = new HomePanel(getStage());
-
     }
 
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
 
-        try{
-            URLConnection connection = (new URL(MvWildLauncher.SITE_URL +"launcher/version.php").openConnection());
-            connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
-            connection.connect();
-            InputStream is = connection.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            String version = in.readLine();
-            if (!version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
-                Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : " + MvWildLauncher.LAUNCHER_VERSION + "\nNouvelle version : " + version)) {
-                            case JOptionPane.OK_OPTION:
-                                try {
-                                    Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/"));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                } catch (URISyntaxException e) {
-                                    e.printStackTrace();
-                                }
-                                MvWildLauncher.stopRP();
-                                System.exit(0);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                };
-                t.start();
-            }
-        } catch (Exception e) {
-
-        }
-
-        MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
         GridPane loginPanel = new GridPane();
         GridPane mainPanel = new GridPane();
 
@@ -156,7 +119,7 @@ public class PanelLogin extends Panel {
         usernameTextField.setTranslateY(-40);
         usernameTextField.setOnKeyReleased(e->{
             if(e.getCode().equals(KeyCode.ENTER)) {
-                connexion();
+                this.panelManager.connexion();
             }
             if(usernameTextField.getText().length() < 3) {
                 validate.setDisable(true);
@@ -200,7 +163,7 @@ public class PanelLogin extends Panel {
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         validate.setOnMouseClicked(e->{
-            connexion();
+            this.panelManager.connexion();
         });
         if(usernameTextField.getText().length() < 3) {
             validate.setDisable(true);
@@ -210,16 +173,8 @@ public class PanelLogin extends Panel {
         this.layout.getChildren().add(loginPanel);
     }
 
-    private void connexion() {
-        String pseudo = this.usernameTextField.getText();
-        if (pseudo.length()<3) {
-            JOptionPane.showMessageDialog(null, "Le pseudo est trop court !", "Erreur pseudo", JOptionPane.ERROR_MESSAGE);
-        } else {
-            MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-            this.validate.setText("Récupération des versions ...");
-            Main.logger.log("Connexion avec le pseudo : "+pseudo);
-            hp.setPseudo(pseudo);
-            this.panelManager.showPanel(hp);
-        }
+
+    public String getPseudoTextField() {
+        return this.usernameTextField.getText();
     }
 }
