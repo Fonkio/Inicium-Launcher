@@ -1,18 +1,15 @@
 package fr.fonkio.launcher.ui;
 
 import fr.arinonia.arilibfx.AriLibFX;
-import fr.arinonia.arilibfx.ui.utils.ResizeHelper;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.launcher.Launcher;
-import fr.fonkio.launcher.ui.panel.IPanel;
 import fr.fonkio.launcher.ui.panel.Panel;
-import fr.fonkio.launcher.ui.panels.HomePanel;
+import fr.fonkio.launcher.ui.panels.PanelMain;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
 import fr.fonkio.launcher.utils.HttpRecup;
-import fr.fonkio.launcher.utils.MainPanel;
 import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
@@ -26,12 +23,8 @@ import javafx.stage.StageStyle;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 
 public class PanelManager {
 
@@ -43,16 +36,16 @@ public class PanelManager {
     private Double yOffset;
     PanelLogin panelLogin;
     boolean loginInit = false;
-    HomePanel homePanel;
+    PanelMain panelMain;
     boolean homeInit = false;
-    MainPanel currentPanel;
+    fr.fonkio.launcher.utils.MainPanel currentPanel;
     Launcher launcher;
 
     public PanelManager(Stage stage) throws URISyntaxException, BuilderException, MalformedURLException {
         topPanel = new TopPanel(stage);
         this.stage = stage;
         launcher = new Launcher(this);
-        homePanel = new HomePanel(stage, this);
+        panelMain = new PanelMain(stage, this);
         try {
             panelLogin = new PanelLogin(stage);
         } catch (IOException e) {
@@ -102,32 +95,32 @@ public class PanelManager {
             }
         });
         checkVersion();
-        showPanel(MainPanel.LOGIN);
+        showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
 
         MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
     }
 
-    public void showPanel(MainPanel name) {
+    public void showPanel(fr.fonkio.launcher.utils.MainPanel name) {
         Panel panel = null;
         boolean changementPanel = true;
         boolean initPanel = true;
         switch (name) {
             case HOME:
-                panel = homePanel;
-                changementPanel = currentPanel.equals(MainPanel.LOGIN);
+                panel = panelMain;
+                changementPanel = currentPanel.equals(fr.fonkio.launcher.utils.MainPanel.LOGIN);
                 initPanel = !homeInit;
                 homeInit = true;
-                currentPanel = MainPanel.HOME;
+                currentPanel = fr.fonkio.launcher.utils.MainPanel.HOME;
                 break;
             case PARAMETRES:
-                panel = homePanel;
-                changementPanel = currentPanel.equals(MainPanel.LOGIN);
+                panel = panelMain;
+                changementPanel = currentPanel.equals(fr.fonkio.launcher.utils.MainPanel.LOGIN);
                 initPanel = !homeInit;
                 homeInit = true;
-                currentPanel = MainPanel.PARAMETRES;
+                currentPanel = fr.fonkio.launcher.utils.MainPanel.PARAMETRES;
                 break;
             case LOGIN:
-                currentPanel = MainPanel.LOGIN;
+                currentPanel = fr.fonkio.launcher.utils.MainPanel.LOGIN;
                 initPanel = !loginInit;
                 loginInit = true;
                 panel = panelLogin;
@@ -148,30 +141,30 @@ public class PanelManager {
     }
     public void setInstallButtonText(String s) {
         if (homeInit) {
-            homePanel.setInstallButtonText(s);
+            panelMain.setInstallButtonText(s);
         }
     }
 
     public void setDisableInstallButton(boolean b) {
         if (homeInit) {
-            homePanel.setDisableInstall(b);
+            panelMain.setDisableInstall(b);
         }
     }
     public void setProgress(float avancee, float fin) {
         if (homeInit) {
-            homePanel.setProgress(avancee, fin);
+            panelMain.setProgress(avancee, fin);
         }
     }
     public void setPseudo(String pseudo) {
         this.launcher.setPseudo(pseudo);
         if(homeInit) {
-            homePanel.setPseudo(pseudo);
+            panelMain.setPseudo(pseudo);
         }
     }
 
     public void setStatus(String s) {
         if(homeInit) {
-            homePanel.setStatus(s);
+            panelMain.setStatus(s);
         }
     }
 
