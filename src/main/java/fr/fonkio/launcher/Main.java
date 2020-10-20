@@ -14,7 +14,7 @@ public class Main {
             Class.forName("javafx.application.Application");
             Application.launch(FxApplication.class, args);
 
-        }catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             logger.warn("JavaFX introuvable");
             JOptionPane.showMessageDialog(null, "Erreur : \n"+e.getMessage()+ " not found","Erreur Java", JOptionPane.ERROR_MESSAGE);
         }

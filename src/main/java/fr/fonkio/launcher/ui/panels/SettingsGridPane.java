@@ -65,7 +65,7 @@ public class SettingsGridPane {
         checkBox.setTranslateY(25);
         Label checkText = new Label("Désactiver le Discord Rich Presence");
         checkText.setTranslateY(25);
-        checkText.setTranslateX(20);
+        checkText.setTranslateX(25);
         checkText.setOnMouseEntered(e->{
             this.panelMain.getLayout().setCursor(Cursor.HAND);
         });

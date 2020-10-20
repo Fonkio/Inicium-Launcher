@@ -57,7 +57,7 @@ public class MvWildLauncher {
         library.Discord_Shutdown();
     }
     public static void updatePresence(String version, String state, String largeImageKey, String pseudo) {
-        if(saver.get("DRP") != null && (!Boolean.parseBoolean(saver.get("DRP")))) {
+        if(saver.get("DRP") != null || (!Boolean.parseBoolean(saver.get("DRP")))) {
             DiscordRichPresence presence = new DiscordRichPresence();
             presence.startTimestamp = System.currentTimeMillis() / 1000;
             if (version == null) {
