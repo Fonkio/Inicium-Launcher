@@ -1,10 +1,14 @@
 package fr.fonkio.launcher.ui.panels;
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +17,7 @@ public class PlayerListGridPane {
 
     private final PanelMain panelMain;
     private GridPane gpConnect = new GridPane();
-    private Label settingsTitle;
+    private Label playerListTitle;
     private FlowPane listeConnecte;
 
     public PlayerListGridPane(PanelMain panelMain) {
@@ -22,14 +26,26 @@ public class PlayerListGridPane {
 
     //Affichage onglet paramètres
     public void addTopPanel(GridPane topPanel) {
-        this.settingsTitle = new Label("Liste des joueurs");
-        GridPane.setVgrow(settingsTitle, Priority.ALWAYS);
-        GridPane.setHgrow(settingsTitle, Priority.ALWAYS);
-        GridPane.setValignment(settingsTitle, VPos.TOP);
-        settingsTitle.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
-        settingsTitle.setTranslateY(20);
+        this.playerListTitle = new Label("Liste des joueurs");
+        GridPane.setVgrow(playerListTitle, Priority.ALWAYS);
+        GridPane.setHgrow(playerListTitle, Priority.ALWAYS);
+        GridPane.setValignment(playerListTitle, VPos.TOP);
+        playerListTitle.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
+        playerListTitle.setTranslateY(20);
+        MaterialDesignIconView logoRefresh = new MaterialDesignIconView(MaterialDesignIcon.REFRESH);
+        GridPane.setVgrow(logoRefresh, Priority.ALWAYS);
+        GridPane.setHgrow(logoRefresh, Priority.ALWAYS);
+        GridPane.setValignment(logoRefresh, VPos.TOP);
+        logoRefresh.setTranslateX(220);
+        logoRefresh.setTranslateY(20);
+        logoRefresh.setFill(Color.rgb(255, 255, 255));
+        logoRefresh.setSize("30px");
+        logoRefresh.setStyle("-fx-background-color: white");
+        logoRefresh.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
+        logoRefresh.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+        logoRefresh.setOnMouseClicked(e->this.panelMain.refreshList());
         createGridConnect();
-        topPanel.getChildren().addAll(settingsTitle, this.listeConnecte);
+        topPanel.getChildren().addAll(playerListTitle, logoRefresh, this.listeConnecte);
 
     }
 
