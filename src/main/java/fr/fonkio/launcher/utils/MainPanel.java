@@ -3,5 +3,6 @@ package fr.fonkio.launcher.utils;
 public enum MainPanel {
     PARAMETRES,
     HOME,
-    LOGIN
+    LOGIN,
+    PLAYER_LIST
 }

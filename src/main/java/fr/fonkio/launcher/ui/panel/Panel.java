@@ -2,10 +2,13 @@ package fr.fonkio.launcher.ui.panel;
 
 import fr.fonkio.launcher.ui.PanelManager;
 import javafx.animation.FadeTransition;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.geometry.Insets;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.awt.*;
 
 public class Panel implements IPanel {
 
@@ -26,6 +29,8 @@ public class Panel implements IPanel {
         this.panelManager = panelManager;
         GridPane.setHgrow(layout, Priority.ALWAYS);
         GridPane.setVgrow(layout, Priority.ALWAYS);
+
+
     }
 
 

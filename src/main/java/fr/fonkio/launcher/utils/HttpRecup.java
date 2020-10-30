@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class HttpRecup {
 
@@ -38,27 +39,38 @@ public class HttpRecup {
         return nbCo.split(" joueur")[0].replaceAll(" ", "");
     }
 
-    public static String getList() {
+
+    public static Map<String, List<String>> getList() {
         StringBuilder stringBuilder = new StringBuilder("");
         try{
-            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/playerList.php").openConnection());
+            URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/jsonPlayerList.php").openConnection());
             connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
             connection.connect();
             InputStream is = connection.getInputStream();
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String line;
             while ((line = in.readLine()) != null) {
-                if (!line.startsWith(" ")) {
-                    stringBuilder.append(line+System.lineSeparator());
-                }
-
+                    stringBuilder.append(line);
             }
         } catch (Exception e) {
             if (!offline) {
                 JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
             }
         }
-        return stringBuilder.toString();
+        String res = stringBuilder.toString();
+        res.replace(" ", "");
+        res.replace("/n", "");
+        res.split("/");
+        String tabResServPlayerList[] = res.split("/");
+        Map<String, List<String>> map = new HashMap<>();
+        if (tabResServPlayerList.length >= 2) {
+            for(int i = 1; i < tabResServPlayerList.length; i++) {
+                if (i%2==0) { //Liste joueurs
+                    map.put(tabResServPlayerList[i-1], Arrays.asList(tabResServPlayerList[i].split(",")));
+                }
+            }
+        }
+        return map;
     }
 
     //Récupération du texte sur un URL pour les versions

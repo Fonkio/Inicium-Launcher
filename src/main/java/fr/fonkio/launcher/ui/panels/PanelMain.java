@@ -2,16 +2,13 @@ package fr.fonkio.launcher.ui.panels;
 
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
-import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
+import fr.fonkio.launcher.utils.HttpRecup;
 import fr.fonkio.launcher.utils.MainPanel;
 import javafx.animation.TranslateTransition;
-import javafx.geometry.HPos;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
@@ -20,18 +17,15 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.awt.*;
-import java.net.*;
 
 public class PanelMain extends Panel {
 
     private HomeGridPane home = new HomeGridPane(this);
     private SettingsGridPane settings = new SettingsGridPane(this);
+    private PlayerListGridPane playerList = new PlayerListGridPane(this);
 
     private GridPane centerPane = new GridPane();
 
@@ -39,10 +33,12 @@ public class PanelMain extends Panel {
     private Image teteJ;
     private VBox vBoxMv;
     private VBox vBoxSettings;
+    private VBox vBoxPlayerList;
     private ScrollPane scrollPane = new ScrollPane();
     private Rectangle rectangleSelect = new Rectangle();
 
     ImageView imageViewTete = new ImageView();
+    private Label playerListLabel;
 
 
     public PanelMain(Stage stage, PanelManager panelManager) {
@@ -100,7 +96,7 @@ public class PanelMain extends Panel {
         GridPane.setVgrow(this.scrollPane, Priority.ALWAYS);
         GridPane.setHgrow(this.scrollPane, Priority.ALWAYS);
         this.scrollPane.getStylesheets().addAll(Main.class.getResource("/css/scrollbar.css").toExternalForm());
-
+        //PLAY
         this.vBoxMv = new VBox();
         GridPane.setVgrow(this.vBoxMv, Priority.ALWAYS);
         GridPane.setHgrow(this.vBoxMv, Priority.ALWAYS);
@@ -109,15 +105,6 @@ public class PanelMain extends Panel {
         this.vBoxMv.setMaxWidth(900);
         this.vBoxMv.setAlignment(Pos.CENTER);
         this.vBoxMv.setTranslateX(30);
-
-        this.vBoxSettings = new VBox();
-        GridPane.setVgrow(this.vBoxSettings, Priority.ALWAYS);
-        GridPane.setHgrow(this.vBoxSettings, Priority.ALWAYS);
-        this.vBoxSettings.setMinHeight(200);
-        this.vBoxSettings.setMinWidth(900);
-        this.vBoxSettings.setMaxWidth(900);
-        this.vBoxSettings.setAlignment(Pos.CENTER);
-        this.vBoxSettings.setTranslateX(30);
 
         GridPane topPanel = new GridPane();
         GridPane.setVgrow(topPanel, Priority.ALWAYS);
@@ -128,16 +115,15 @@ public class PanelMain extends Panel {
         topPanel.setMinHeight(340);
         topPanel.setMaxHeight(340);
 
-        try {
-            this.home.addTopPanel(topPanel);
-        } catch (BuilderException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
+        //SETTINGS
+        this.vBoxSettings = new VBox();
+        GridPane.setVgrow(this.vBoxSettings, Priority.ALWAYS);
+        GridPane.setHgrow(this.vBoxSettings, Priority.ALWAYS);
+        this.vBoxSettings.setMinHeight(200);
+        this.vBoxSettings.setMinWidth(900);
+        this.vBoxSettings.setMaxWidth(900);
+        this.vBoxSettings.setAlignment(Pos.CENTER);
+        this.vBoxSettings.setTranslateX(30);
 
         GridPane topPanelSettings = new GridPane();
         GridPane.setVgrow(topPanelSettings, Priority.ALWAYS);
@@ -147,12 +133,34 @@ public class PanelMain extends Panel {
         topPanelSettings.setMaxWidth(880);
         topPanelSettings.setMinHeight(340);
         topPanelSettings.setMaxHeight(340);
-        this.settings.addTopPanelSettings(topPanelSettings);
+
+
+
+        //PLAYERLIST
+        this.vBoxPlayerList = new VBox();
+        GridPane.setVgrow(this.vBoxPlayerList, Priority.ALWAYS);
+        GridPane.setHgrow(this.vBoxPlayerList, Priority.ALWAYS);
+
+        this.vBoxPlayerList.setAlignment(Pos.TOP_CENTER);
+        this.vBoxPlayerList.setTranslateX(30);
+
+        GridPane topPanelPlayerList = new GridPane();
+        GridPane.setVgrow(topPanelPlayerList, Priority.ALWAYS);
+        GridPane.setHgrow(topPanelPlayerList, Priority.ALWAYS);
+        GridPane.setValignment(topPanelPlayerList, VPos.TOP);
+
+        //Chargement des panels
+        this.home.addTopPanel(topPanel);
+        this.settings.addTopPanel(topPanelSettings);
+        this.playerList.addTopPanel(topPanelPlayerList);
 
         this.centerPane.getChildren().add(this.scrollPane);
         this.scrollPane.setContent(this.vBoxMv);
         this.vBoxMv.getChildren().add(0, topPanel);
         this.vBoxSettings.getChildren().add(0, topPanelSettings);
+        VBox.setVgrow(vBoxPlayerList, Priority.ALWAYS);
+        vBoxPlayerList.setMinHeight(5000);
+        this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
     }
 
 
@@ -241,7 +249,31 @@ public class PanelMain extends Panel {
         settingLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         settingLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
 
+        // ListeJoueurs
+
+        MaterialDesignIconView logoUsers = new MaterialDesignIconView(MaterialDesignIcon.ACCOUNT_MULTIPLE);
+        GridPane.setVgrow(logoUsers, Priority.ALWAYS);
+        GridPane.setHgrow(logoUsers, Priority.ALWAYS);
+        GridPane.setValignment(logoUsers, VPos.CENTER);
+        logoUsers.setTranslateX(34);
+        logoUsers.setTranslateY(140);
+        logoUsers.setFill(Color.rgb(255, 255, 255));
+        logoUsers.setSize("60px");
+        logoUsers.setStyle("-fx-background-color: white");
+        logoUsers.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        logoUsers.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        this.playerListLabel = new Label("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
+        GridPane.setVgrow(playerListLabel, Priority.ALWAYS);
+        GridPane.setHgrow(playerListLabel, Priority.ALWAYS);
+        GridPane.setValignment(playerListLabel, VPos.CENTER);
+        playerListLabel.setTranslateX(110);
+        playerListLabel.setTranslateY(140);
+        playerListLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-weight: bold");
+        playerListLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        playerListLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+
         //Control affichage
+
         jouerLabel.setOnMouseClicked(e->{
             afficher(MainPanel.HOME);
         });
@@ -254,10 +286,17 @@ public class PanelMain extends Panel {
         settingLabel.setOnMouseClicked(e->{
             afficher(MainPanel.PARAMETRES);
         });
+        logoUsers.setOnMouseClicked(e->{
+            afficher(MainPanel.PLAYER_LIST);
+        });
+        playerListLabel.setOnMouseClicked(e->{
+            afficher(MainPanel.PLAYER_LIST);
+        });
+
         //Fin selection onglet
 
         //Ajout des éléments
-        pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, logoSetting, settingLabel, pseudo, imageViewTete);
+        pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, logoSetting, settingLabel, pseudo, imageViewTete, logoUsers, playerListLabel);
     } //Fin showLeftBar
 
     public void setPseudo(String pseudo) {
@@ -318,7 +357,27 @@ public class PanelMain extends Panel {
                 this.scrollPane.setContent(vBoxSettings);
                 tt.setToY(70);
                 break;
+            case PLAYER_LIST:
+                this.scrollPane.setContent(vBoxPlayerList);
+                refreshList();
+                tt.setToY(140);
+                break;
         }
         tt.play();
+    }
+
+    public void refreshList() {
+        this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
+        GridPane topPanelPlayerList = new GridPane();
+        GridPane.setVgrow(topPanelPlayerList, Priority.ALWAYS);
+        GridPane.setHgrow(topPanelPlayerList, Priority.ALWAYS);
+        GridPane.setValignment(topPanelPlayerList, VPos.TOP);
+        topPanelPlayerList.setMinWidth(880);
+        topPanelPlayerList.setMaxWidth(880);
+        topPanelPlayerList.setMinHeight(340);
+        topPanelPlayerList.setMaxHeight(340);
+        this.playerList.addTopPanel(topPanelPlayerList);
+        this.vBoxPlayerList.getChildren().remove(0);
+        this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
     }
 }

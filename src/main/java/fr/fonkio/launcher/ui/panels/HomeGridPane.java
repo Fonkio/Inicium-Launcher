@@ -6,24 +6,30 @@ import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.HttpRecup;
+import javafx.animation.TranslateTransition;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
+import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,13 +46,14 @@ public class HomeGridPane {
     private Label status = new Label("");
     private Button installButton = new Button("Jouer");
     AProgressBar progressBar = new AProgressBar(400, 20);
+    private GridPane twitter;
 
     public HomeGridPane(PanelMain panelMain) {
         this.panelMain = panelMain;
     }
 
     //Affichage onglet jouer par defaut
-    public void addTopPanel(GridPane pane) throws BuilderException, URISyntaxException, MalformedURLException {
+    public void addTopPanel(GridPane pane) {
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
         GridPane.setVgrow(mvwildTitle, Priority.ALWAYS);
@@ -62,10 +69,11 @@ public class HomeGridPane {
         survie.setStyle("-fx-font-size: 14px; -fx-text-fill: #ffffff; -fx-opacity: 70%;");
         survie.setTranslateY(70);
 
+
         Label desc = new Label(MvWildLauncher.SERVEUR_NAME+", le serveur minecraft où le Gamemode est, et restera sur 0 !\n" +
-                "Rejoignez une communauté de survivants se battant contre la faim, les autres joueurs,\n" +
-                "l'économie et des monstres divers parfois étranges et avec de redoutables pouvoirs...\n" +
-                "Tout cela dans un seul et unique but : rester en vie !\n" +
+                "Rejoignez une communauté de survivants se battant contre la faim, les autres\n" +
+                "joueurs, l'économie et des monstres divers parfois étranges et avec de redoutables\n" +
+                "pouvoirs... Tout cela dans un seul et unique but : rester en vie !\n" +
                 "Parviendrez-vous à survivre selon les règles d'origine de minecraft ?\n" +
                 "Rejoignez-nous dès maintenant avec l'adresse ip : "+MvWildLauncher.SERVEUR_IP);
         GridPane.setVgrow(desc, Priority.ALWAYS);
@@ -74,36 +82,10 @@ public class HomeGridPane {
         desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #bcc6e7; -fx-opacity: 70%;");
         desc.setTranslateY(130);
 
-        //ListeConnectés
-        Image playerImage = new Image(Main.class.getResource("/users.png").toExternalForm());
-        ImageView playerImageView = new ImageView(playerImage);
-        playerImageView.setFitHeight(40);
-        playerImageView.setFitWidth(40);
-        Button buttonPlayer = new Button();
-        GridPane.setVgrow(buttonPlayer, Priority.ALWAYS);
-        GridPane.setHgrow(buttonPlayer, Priority.ALWAYS);
-        GridPane.setValignment(buttonPlayer, VPos.TOP);
-        GridPane.setHalignment(buttonPlayer, HPos.LEFT);
-        buttonPlayer.setTranslateY(10);
-        buttonPlayer.setTranslateX(450);
-        buttonPlayer.setBackground(Background.EMPTY);
-        buttonPlayer.setGraphic(playerImageView);
-        buttonPlayer.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");;
-        Tooltip tt = new Tooltip(HttpRecup.getList());
-        buttonPlayer.setTooltip(tt);
-
-        //NbConnectés
-        Label nbCo = new Label(HttpRecup.getNbCo());
-        GridPane.setVgrow(nbCo, Priority.ALWAYS);
-        GridPane.setHgrow(nbCo, Priority.ALWAYS);
-        GridPane.setValignment(nbCo, VPos.TOP);
-        nbCo.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
-        nbCo.setTranslateX(520);
-        nbCo.setTranslateY(20);
-        nbCo.setTooltip(tt);
+        Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
 
         //IFRAME Twitter
-        GridPane twitter = new GridPane();
+        twitter = new GridPane();
         GridPane.setVgrow(twitter, Priority.ALWAYS);
         GridPane.setHgrow(twitter, Priority.ALWAYS);
         GridPane.setValignment(twitter, VPos.CENTER);
@@ -113,6 +95,7 @@ public class HomeGridPane {
         twitter.setMinHeight(1500);
         twitter.setTranslateY(20);
         twitter.setTranslateX(30);
+
         String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
         WebView webView = new WebView();
         webView.setStyle("overflow-x: hidden; overflow-y: hidden");
@@ -248,7 +231,6 @@ public class HomeGridPane {
                 uriSyntaxException.printStackTrace();
             }
         });
-        Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
         ImageView twitterImageView = new ImageView(twitterImage);
         twitterImageView.setFitHeight(60);
         twitterImageView.setFitWidth(60);
@@ -328,7 +310,7 @@ public class HomeGridPane {
             this.panelMain.install();
         });
         //Ajout des éléments
-        pane.getChildren().addAll(mvwildTitle, survie, desc, buttonPlayer, nbCo, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
+        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
     }
 
     //Modification texte barre de dl
@@ -347,4 +329,5 @@ public class HomeGridPane {
     public void setProgress(float avancee, float fin) {
         progressBar.setProgress(avancee, fin);
     }
+
 }

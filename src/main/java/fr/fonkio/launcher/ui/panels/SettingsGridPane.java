@@ -20,7 +20,7 @@ public class SettingsGridPane {
     }
 
     //Affichage onglet paramètres
-    public void addTopPanelSettings(GridPane topPanelSettings) {
+    public void addTopPanel(GridPane topPanelSettings) {
         Label settingsTitle = new Label("Paramètres");
         GridPane.setVgrow(settingsTitle, Priority.ALWAYS);
         GridPane.setHgrow(settingsTitle, Priority.ALWAYS);
