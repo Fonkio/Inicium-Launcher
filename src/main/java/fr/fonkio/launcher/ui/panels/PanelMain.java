@@ -346,6 +346,18 @@ public class PanelMain extends Panel {
         this.home.setInstallButtonText(s);
     }
 
+    public String getVersion() {
+        return this.panelManager.getVersion();
+    }
+
+    public String getMCPVersion() {
+        return this.panelManager.getMCPVersion();
+    }
+
+    public String getForgeVersion() {
+        return this.panelManager.getForgeVersion();
+    }
+
     public void afficher(MainPanel mainPanel) {
         TranslateTransition tt = new TranslateTransition(Duration.millis(100), this.rectangleSelect);
         switch (mainPanel) {

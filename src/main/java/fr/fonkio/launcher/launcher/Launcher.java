@@ -41,9 +41,9 @@ public class Launcher {
     private Saver saver = new Saver(fileManager.getLauncherProperties());
     private PanelManager panelManager;
     String pseudo;
-    String strVersion;
-    String strForgeVersion;
-    String strMCPVersion;
+    String strVersion = null;
+    String strForgeVersion = null;
+    String strMCPVersion = null;
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
@@ -61,46 +61,54 @@ public class Launcher {
 
         //Recuperation des versions
         strVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"version.php");
-        if (strVersion == null) {
+        Main.logger.log("Version MC : "+ strVersion);
+        if (HttpRecup.offline || strVersion == null) {
             if (saver.get("mcVersion") == null) {
                 MvWildLauncher.stopRP();
                 System.exit(0);
             } else {
-                this.panelManager.setInstallButtonText("Jouer hors ligne");
-                this.offline = true;
+
+                HttpRecup.offline = true;
                 strVersion = saver.get("mcVersion");
+                Main.logger.log("Mode hors ligne ... Version mc recuperee : "+strVersion);
             }
         }
         saver.set("mcVersion", strVersion);
 
-        strForgeVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
-        if (offline || strForgeVersion == null) {
+        if (!HttpRecup.offline) {
+            strForgeVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
+            Main.logger.log("Version Forge : "+ strForgeVersion);
+        }
+        if (strForgeVersion == null) {
             if (saver.get("forgeVersion") == null) {
                 MvWildLauncher.stopRP();
                 System.exit(0);
             } else {
                 this.panelManager.setInstallButtonText("Jouer hors ligne");
-                this.offline = true;
+                HttpRecup.offline = true;
                 strForgeVersion = saver.get("forgeVersion");
+                Main.logger.log("Mode hors ligne ... Version Forge recuperee : "+strForgeVersion);
             }
-            saver.set("mcVersion", strForgeVersion);
+
         }
+        saver.set("forgeVersion", strForgeVersion);
 
-
-
-        strMCPVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
-        if (offline || strMCPVersion == null) {
+        if (!HttpRecup.offline) {
+            strMCPVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
+            Main.logger.log("Version MCP : "+ strMCPVersion);
+        }
+        if (strMCPVersion == null) {
             if (saver.get("mcpVersion") == null) {
                 MvWildLauncher.stopRP();
                 System.exit(0);
             } else {
                 this.panelManager.setInstallButtonText("Jouer hors ligne");
-                this.offline = true;
+                HttpRecup.offline = true;
                 strMCPVersion = saver.get("mcpVersion");
+                Main.logger.log("Mode hors ligne ... Version MCP recuperee : "+strMCPVersion);
             }
-            saver.set("mcVersion", strMCPVersion);
         }
-
+        saver.set("mcpVersion", strMCPVersion);
         saver.save();
         //Recuperation updater
         //Version vanilla
@@ -108,10 +116,10 @@ public class Launcher {
         //Version forge
         updater = updateForge(dlCallback, strVersion, strForgeVersion);
 
-        if (updater == null && !offline) {
+        if (updater == null && !HttpRecup.offline) {
             JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
         }
-        this.panelManager.setStatus("Version "+strVersion + "/ Forge : "+strForgeVersion);
+
     }
     /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
         final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
@@ -121,7 +129,7 @@ public class Launcher {
     }*/
 
     private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
-        if (offline) {
+        if (HttpRecup.offline) {
             return null;
         }
         //Pas de mod pour l'instant
@@ -287,5 +295,17 @@ public class Launcher {
 
     public Boolean getDRP() {
         return Boolean.parseBoolean(saver.get("DRP"));
+    }
+
+    public String getVersion() {
+        return strVersion;
+    }
+
+    public String getForgeVersion() {
+        return strForgeVersion;
+    }
+
+    public String getMCPVersion() {
+        return strMCPVersion;
     }
 }

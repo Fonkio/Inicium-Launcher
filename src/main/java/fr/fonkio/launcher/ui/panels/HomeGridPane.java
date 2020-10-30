@@ -43,8 +43,8 @@ import java.util.Set;
 public class HomeGridPane {
 
     private PanelMain panelMain;
-    private Label status = new Label("");
-    private Button installButton = new Button("Jouer");
+    private Label status;
+    private Button installButton;
     AProgressBar progressBar = new AProgressBar(400, 20);
     private GridPane twitter;
 
@@ -54,6 +54,13 @@ public class HomeGridPane {
 
     //Affichage onglet jouer par defaut
     public void addTopPanel(GridPane pane) {
+        if (HttpRecup.offline) {
+            installButton = new Button("Mode Hors-Ligne");
+        } else {
+            installButton = new Button("Jouer");
+        }
+        status = new Label("Version "+this.panelMain.getVersion() + "/ Forge : "+this.panelMain.getForgeVersion());
+
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
         GridPane.setVgrow(mvwildTitle, Priority.ALWAYS);

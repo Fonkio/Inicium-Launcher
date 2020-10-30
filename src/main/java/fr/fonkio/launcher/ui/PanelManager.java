@@ -193,7 +193,7 @@ public class PanelManager {
 
     private void checkVersion() {
         String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
-        if (!version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+        if ((!HttpRecup.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
             Thread t = new Thread() {
                 @Override
                 public void run() {
@@ -220,6 +220,18 @@ public class PanelManager {
 
     public void install() {
         this.launcher.install();
+    }
+
+    public String getVersion() {
+        return this.launcher.getVersion();
+    }
+
+    public String getMCPVersion() {
+        return this.launcher.getMCPVersion();
+    }
+
+    public String getForgeVersion() {
+        return this.launcher.getForgeVersion();
     }
 
     public void setDRP(boolean selected) {

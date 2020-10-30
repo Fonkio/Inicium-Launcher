@@ -32,11 +32,13 @@ public class HttpRecup {
             }
         } catch (Exception e) {
             if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+                offline = true;
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nPassage en mode hors-ligne", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
                 return "";
             }
         }
-        return nbCo.split(" joueur")[0].replaceAll(" ", "");
+
+        return offline?"":nbCo.split(" joueur")[0].replaceAll(" ", "");
     }
 
 
@@ -54,7 +56,8 @@ public class HttpRecup {
             }
         } catch (Exception e) {
             if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+                offline = true;
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la liste des joueurs.\nPassage en mode hors-ligne", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
             }
         }
         String res = stringBuilder.toString();
@@ -85,7 +88,8 @@ public class HttpRecup {
             inputline = in.readLine();
         } catch (Exception e) {
             if (!offline) {
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nContactez-nous si le problème persiste", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
+                offline = true;
+                JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nPassage en mode hors-ligne", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
             }
             return null;
         }
