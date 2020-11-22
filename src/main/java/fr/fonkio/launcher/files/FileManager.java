@@ -1,5 +1,6 @@
 package fr.fonkio.launcher.files;
 
+import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.utils.OperatingSystem;
 
 import java.io.File;
@@ -14,15 +15,24 @@ public class FileManager {
 
     public File createGameDir() {
         final String userHome = System.getProperty("user.home");
+
         final String fileSeparator = File.separator;
+        File f = null;
         switch (OperatingSystem.getCurrentPlatform()) {
             case WINDOWS:
-                return new File(userHome + fileSeparator + "AppData" + fileSeparator + "Roaming" + fileSeparator + "." + this.serverName);
+                 f = new File(userHome + fileSeparator + "AppData" + fileSeparator + "Roaming" + fileSeparator + "." + this.serverName);
+                 break;
             case MACOS:
-                return new File(userHome + fileSeparator + "Library" + fileSeparator + "Application Support" + fileSeparator + this.serverName);
+                f = new File(userHome + fileSeparator + "Library" + fileSeparator + "Application Support" + fileSeparator + this.serverName);
+                break;
             default:
-                return new File(userHome + fileSeparator + "." + this.serverName);
+                f = new File(userHome + fileSeparator + "." + this.serverName);
+                break;
         }
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
     }
 
     public File getAssetsFolder() {

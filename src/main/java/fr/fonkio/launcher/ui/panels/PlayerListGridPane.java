@@ -1,12 +1,14 @@
 package fr.fonkio.launcher.ui.panels;
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
+import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
@@ -32,20 +34,24 @@ public class PlayerListGridPane {
         GridPane.setValignment(playerListTitle, VPos.TOP);
         playerListTitle.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold");
         playerListTitle.setTranslateY(20);
-        MaterialDesignIconView logoRefresh = new MaterialDesignIconView(MaterialDesignIcon.REFRESH);
-        GridPane.setVgrow(logoRefresh, Priority.ALWAYS);
-        GridPane.setHgrow(logoRefresh, Priority.ALWAYS);
-        GridPane.setValignment(logoRefresh, VPos.TOP);
-        logoRefresh.setTranslateX(220);
-        logoRefresh.setTranslateY(20);
-        logoRefresh.setFill(Color.rgb(255, 255, 255));
-        logoRefresh.setSize("30px");
-        logoRefresh.setStyle("-fx-background-color: white");
-        logoRefresh.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
-        logoRefresh.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
-        logoRefresh.setOnMouseClicked(e->this.panelMain.refreshList());
+
+        Image refreshImage = new Image(Main.class.getResource("/reload.png").toExternalForm());
+        ImageView imageRefresh = new ImageView(refreshImage);
+        imageRefresh.setFitHeight(30);
+        imageRefresh.setFitWidth(30);
+        Button buttonRefresh = new Button();
+        buttonRefresh.setBackground(Background.EMPTY);
+        buttonRefresh.setGraphic(imageRefresh);
+        GridPane.setVgrow(buttonRefresh, Priority.ALWAYS);
+        GridPane.setHgrow(buttonRefresh, Priority.ALWAYS);
+        GridPane.setValignment(buttonRefresh, VPos.TOP);
+        buttonRefresh.setTranslateX(220);
+        buttonRefresh.setTranslateY(20);
+        buttonRefresh.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
+        buttonRefresh.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+        buttonRefresh.setOnMouseClicked(e->this.panelMain.refreshList());
         createGridConnect();
-        topPanel.getChildren().addAll(playerListTitle, logoRefresh, this.listeConnecte);
+        topPanel.getChildren().addAll(playerListTitle, buttonRefresh, this.listeConnecte);
 
     }
 

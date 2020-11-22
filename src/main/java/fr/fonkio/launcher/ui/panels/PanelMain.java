@@ -1,7 +1,5 @@
 package fr.fonkio.launcher.ui.panels;
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
@@ -228,17 +226,20 @@ public class PanelMain extends Panel {
 
         //Parametres
 
-        MaterialDesignIconView logoSetting = new MaterialDesignIconView(MaterialDesignIcon.SETTINGS);
-        GridPane.setVgrow(logoSetting, Priority.ALWAYS);
-        GridPane.setHgrow(logoSetting, Priority.ALWAYS);
-        GridPane.setValignment(logoSetting, VPos.CENTER);
-        logoSetting.setTranslateX(34);
-        logoSetting.setTranslateY(70);
-        logoSetting.setFill(Color.rgb(255, 255, 255));
-        logoSetting.setSize("60px");
-        logoSetting.setStyle("-fx-background-color: white");
-        logoSetting.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        logoSetting.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        Image settingImage = new Image(Main.class.getResource("/setting.png").toExternalForm());
+        ImageView imageSetting = new ImageView(settingImage);
+        imageSetting.setFitHeight(50);
+        imageSetting.setFitWidth(50);
+        Button buttonSetting = new Button();
+        buttonSetting.setBackground(Background.EMPTY);
+        buttonSetting.setGraphic(imageSetting);
+        GridPane.setVgrow(buttonSetting, Priority.ALWAYS);
+        GridPane.setHgrow(buttonSetting, Priority.ALWAYS);
+        GridPane.setValignment(buttonSetting, VPos.CENTER);
+        buttonSetting.setTranslateX(34);
+        buttonSetting.setTranslateY(70);
+        buttonSetting.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonSetting.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         Label settingLabel = new Label("Paramètres");
         GridPane.setVgrow(settingLabel, Priority.ALWAYS);
         GridPane.setHgrow(settingLabel, Priority.ALWAYS);
@@ -251,17 +252,20 @@ public class PanelMain extends Panel {
 
         // ListeJoueurs
 
-        MaterialDesignIconView logoUsers = new MaterialDesignIconView(MaterialDesignIcon.ACCOUNT_MULTIPLE);
-        GridPane.setVgrow(logoUsers, Priority.ALWAYS);
-        GridPane.setHgrow(logoUsers, Priority.ALWAYS);
-        GridPane.setValignment(logoUsers, VPos.CENTER);
-        logoUsers.setTranslateX(34);
-        logoUsers.setTranslateY(140);
-        logoUsers.setFill(Color.rgb(255, 255, 255));
-        logoUsers.setSize("60px");
-        logoUsers.setStyle("-fx-background-color: white");
-        logoUsers.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        logoUsers.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        Image playersImage = new Image(Main.class.getResource("/group.png").toExternalForm());
+        ImageView imagePlayer = new ImageView(playersImage);
+        imagePlayer.setFitHeight(50);
+        imagePlayer.setFitWidth(50);
+        Button buttonPlayer = new Button();
+        buttonPlayer.setBackground(Background.EMPTY);
+        buttonPlayer.setGraphic(imagePlayer);
+        GridPane.setVgrow(buttonPlayer, Priority.ALWAYS);
+        GridPane.setHgrow(buttonPlayer, Priority.ALWAYS);
+        GridPane.setValignment(buttonPlayer, VPos.CENTER);
+        buttonPlayer.setTranslateX(34);
+        buttonPlayer.setTranslateY(140);
+        buttonPlayer.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonPlayer.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         this.playerListLabel = new Label("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
         GridPane.setVgrow(playerListLabel, Priority.ALWAYS);
         GridPane.setHgrow(playerListLabel, Priority.ALWAYS);
@@ -280,13 +284,13 @@ public class PanelMain extends Panel {
         imageViewMvWild.setOnMouseClicked(e->{
             afficher(MainPanel.HOME);
         });
-        logoSetting.setOnMouseClicked(e->{
+        buttonSetting.setOnMouseClicked(e->{
             afficher(MainPanel.PARAMETRES);
         });
         settingLabel.setOnMouseClicked(e->{
             afficher(MainPanel.PARAMETRES);
         });
-        logoUsers.setOnMouseClicked(e->{
+        buttonPlayer.setOnMouseClicked(e->{
             afficher(MainPanel.PLAYER_LIST);
         });
         playerListLabel.setOnMouseClicked(e->{
@@ -296,7 +300,7 @@ public class PanelMain extends Panel {
         //Fin selection onglet
 
         //Ajout des éléments
-        pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, logoSetting, settingLabel, pseudo, imageViewTete, logoUsers, playerListLabel);
+        pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, buttonSetting, settingLabel, pseudo, imageViewTete, buttonPlayer, playerListLabel);
     } //Fin showLeftBar
 
     public void setPseudo(String pseudo) {
@@ -389,7 +393,9 @@ public class PanelMain extends Panel {
         topPanelPlayerList.setMinHeight(340);
         topPanelPlayerList.setMaxHeight(340);
         this.playerList.addTopPanel(topPanelPlayerList);
-        this.vBoxPlayerList.getChildren().remove(0);
+        if (this.vBoxPlayerList.getChildren().size() != 0) {
+            this.vBoxPlayerList.getChildren().remove(0);
+        }
         this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
     }
 }

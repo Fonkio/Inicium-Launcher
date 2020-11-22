@@ -104,34 +104,39 @@ public class HomeGridPane {
         twitter.setTranslateX(30);
 
         String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
-        WebView webView = new WebView();
-        webView.setStyle("overflow-x: hidden; overflow-y: hidden");
-        WebEngine webEngine = webView.getEngine();
-        webEngine.loadContent(content_url);
-        twitter.getChildren().add(webView);
-        webView.setOnMouseClicked(e-> {
-            webEngine.loadContent(content_url);
-            try {
-                Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
-            }
-        });
-        webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) change ->{
-            Set<Node> deadSeaScroll = webView.lookupAll(".scroll-bar");
-            for(Node scroll : deadSeaScroll) {
-                scroll.setVisible(false);
-            }
-        });
+        boolean webEnabled = true;
         try {
-            Field field = webEngine.getClass().getDeclaredField("page");
-            field.setAccessible(true);
-            WebPage page = (WebPage)field.get(webEngine);
-            SwingUtilities.invokeLater(()->page.setBackgroundColor(new java.awt.Color(255, 255, 255, 0).getRGB()));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            WebView webView = new WebView();
+            webView.setStyle("overflow-x: hidden; overflow-y: hidden");
+            WebEngine webEngine = webView.getEngine();
+            webEngine.loadContent(content_url);
+            twitter.getChildren().add(webView);
+            webView.setOnMouseClicked(e-> {
+                webEngine.loadContent(content_url);
+                try {
+                    Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } catch (URISyntaxException uriSyntaxException) {
+                    uriSyntaxException.printStackTrace();
+                }
+            });
+            webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) change ->{
+                Set<Node> deadSeaScroll = webView.lookupAll(".scroll-bar");
+                for(Node scroll : deadSeaScroll) {
+                    scroll.setVisible(false);
+                }
+            });
+            try {
+                Field field = webEngine.getClass().getDeclaredField("page");
+                field.setAccessible(true);
+                WebPage page = (WebPage)field.get(webEngine);
+                SwingUtilities.invokeLater(()->page.setBackgroundColor(new java.awt.Color(255, 255, 255, 0).getRGB()));
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } catch (NoClassDefFoundError e) {
+            webEnabled = false;
         }
 
         //Install et dlBar
@@ -317,7 +322,10 @@ public class HomeGridPane {
             this.panelMain.install();
         });
         //Ajout des éléments
-        pane.getChildren().addAll(mvwildTitle, survie, desc, twitter, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
+        pane.getChildren().addAll(mvwildTitle, survie, desc, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
+        if (webEnabled) {
+            pane.getChildren().add(twitter);
+        }
     }
 
     //Modification texte barre de dl
