@@ -220,11 +220,12 @@ public class PanelLogin extends Panel {
                 });
             }
         };
-
-        if (saveName.isSelected()) {
-            saver.set("name", usernameTextField.getText());
-        } else {
-            saver.remove("name");
+        if (!saveName.isDisable()) {
+            if (saveName.isSelected()) {
+                saver.set("name", usernameTextField.getText());
+            } else {
+                saver.remove("name");
+            }
         }
         saver.save();
         Timer timer = new Timer("Timer");
