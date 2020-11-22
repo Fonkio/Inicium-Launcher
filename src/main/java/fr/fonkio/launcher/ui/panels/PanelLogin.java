@@ -7,18 +7,22 @@ import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
 import fr.fonkio.launcher.utils.MainPanel;
 import fr.theshark34.openlauncherlib.util.Saver;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +32,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class PanelLogin extends Panel {
@@ -36,6 +42,9 @@ public class PanelLogin extends Panel {
     private Button validate = new Button("Valider");
     private TextField usernameTextField = new TextField();
     private Saver saver;
+    private GridPane loginPanel;
+    private CheckBox saveName = new CheckBox();
+    Label saveNameLabel = new Label("Se connecter automatiquement");
 
     public PanelLogin(Stage stage) throws IOException {
         super(stage);
@@ -51,19 +60,27 @@ public class PanelLogin extends Panel {
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
+        String savePseudo = saver.get("name");
+        if (savePseudo != null) { //pseudo save
+            connexionAnimation(panelManager);
+            setDisableAll(true);
+        } else {
+            setDisableAll(false);
+        }
 
-        GridPane loginPanel = new GridPane();
+
+        this.loginPanel = new GridPane();
         GridPane mainPanel = new GridPane();
 
-        loginPanel.setMaxWidth(400);
-        loginPanel.setMinWidth(400);
-        loginPanel.setMinHeight(580);
-        loginPanel.setMaxHeight(580);
+        loginPanel.setMaxWidth(1280);
+        loginPanel.setMinWidth(1280);
+        loginPanel.setMinHeight(1000);
+        loginPanel.setMaxHeight(1080);
 
         GridPane.setVgrow(loginPanel, Priority.ALWAYS);
         GridPane.setHgrow(loginPanel, Priority.ALWAYS);
-        GridPane.setValignment(loginPanel, VPos.CENTER);
-        GridPane.setHalignment(loginPanel, HPos.CENTER);
+        GridPane.setValignment(loginPanel, VPos.TOP);
+        GridPane.setHalignment(loginPanel, HPos.LEFT);
 
         RowConstraints bottomConstraints = new RowConstraints();
         bottomConstraints.setValignment(VPos.BOTTOM);
@@ -98,33 +115,34 @@ public class PanelLogin extends Panel {
         Label usernameLabel = new Label("Pseudo");
         GridPane.setVgrow(usernameLabel, Priority.ALWAYS);
         GridPane.setHgrow(usernameLabel, Priority.ALWAYS);
-        GridPane.setValignment(usernameLabel, VPos.CENTER);
-        GridPane.setHalignment(usernameLabel, HPos.LEFT);
+        GridPane.setValignment(usernameLabel, VPos.TOP);
+        GridPane.setHalignment(usernameLabel, HPos.CENTER);
         usernameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
-        usernameLabel.setTranslateY(-70);
-        usernameLabel.setTranslateX(37.5);
+        usernameLabel.setTranslateY(270);
+        usernameLabel.setTranslateX(-135);
 
-        String savePseudo = saver.get("name");
+
         if (savePseudo != null) {
             usernameTextField.setText(savePseudo);
         }
         GridPane.setVgrow(usernameTextField, Priority.ALWAYS);
         GridPane.setHgrow(usernameTextField, Priority.ALWAYS);
-        GridPane.setValignment(usernameTextField, VPos.CENTER);
-        GridPane.setHalignment(usernameTextField, HPos.LEFT);
+        GridPane.setValignment(usernameTextField, VPos.TOP);
+        GridPane.setHalignment(usernameTextField, HPos.CENTER);
         usernameTextField.setStyle("-fx-background-color: #1e1e1e; -fx-font-size: 16px; -fx-text-fill: #e5e5e5");
         usernameTextField.setMaxWidth(325);
         usernameTextField.setMaxHeight(40);
-        usernameTextField.setTranslateX(37.5);
-        usernameTextField.setTranslateY(-40);
+        usernameTextField.setTranslateY(300);
         usernameTextField.setOnKeyReleased(e->{
-            if(e.getCode().equals(KeyCode.ENTER)) {
-                this.panelManager.connexion();
-            }
-            if(usernameTextField.getText().length() < 3) {
-                validate.setDisable(true);
+
+            if(usernameTextField.getText().length() >= 3) {
+                if (e.getCode().equals(KeyCode.ENTER)) {
+                    connexionAnimation(panelManager);
+                } else {
+                    validate.setDisable(false);
+                }
             } else {
-                validate.setDisable(false);
+                validate.setDisable(true);
             }
 
         });
@@ -152,6 +170,24 @@ public class PanelLogin extends Panel {
         validateSeparator.setStyle("-fx-background-color: white; -fx-opacity: 50%;");
 
 
+        saveName.setSelected(savePseudo != null);
+        GridPane.setVgrow(saveName, Priority.ALWAYS);
+        GridPane.setHgrow(saveName, Priority.ALWAYS);
+        GridPane.setValignment(saveName, VPos.TOP);
+        GridPane.setHalignment(saveName, HPos.CENTER);
+        saveName.setTranslateY(400);
+        saveName.setTranslateX(-150);
+
+        GridPane.setVgrow(saveNameLabel, Priority.ALWAYS);
+        GridPane.setHgrow(saveNameLabel, Priority.ALWAYS);
+        GridPane.setValignment(saveNameLabel, VPos.TOP);
+        GridPane.setHalignment(saveNameLabel, HPos.CENTER);
+        saveNameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        saveNameLabel.setTranslateY(400);
+        saveNameLabel.setTranslateX(-40);
+        saveNameLabel.setOnMouseClicked(e -> saveName.setSelected(!saveName.isSelected()));
+
+
         GridPane.setVgrow(validate, Priority.ALWAYS);
         GridPane.setHgrow(validate, Priority.ALWAYS);
         GridPane.setValignment(validate, VPos.CENTER);
@@ -163,16 +199,62 @@ public class PanelLogin extends Panel {
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         validate.setOnMouseClicked(e->{
-            this.panelManager.connexion();
+            connexionAnimation(panelManager);
         });
         if(usernameTextField.getText().length() < 3) {
             validate.setDisable(true);
         }
 
-        mainPanel.getChildren().addAll(bienvenue, connectSeparator, usernameLabel, usernameTextField, usernameSeparator, validate);
+        mainPanel.getChildren().addAll(bienvenue, connectSeparator, usernameLabel, usernameTextField, usernameSeparator, saveName, saveNameLabel, validate);
         this.layout.getChildren().add(loginPanel);
     }
 
+    private void connexionAnimation(PanelManager panelManager) {
+        TimerTask task = new TimerTask() {
+            public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        panelManager.connexion();
+                    }
+                });
+            }
+        };
+
+        if (saveName.isSelected()) {
+            saver.set("name", usernameTextField.getText());
+        } else {
+            saver.remove("name");
+        }
+        saver.save();
+        Timer timer = new Timer("Timer");
+
+        long delay = 1000L;
+        TranslateTransition tt = new TranslateTransition(Duration.millis(500), loginPanel);
+        tt.setToX(1280);
+        tt.play();
+
+        timer.schedule(task, delay);
+    }
+
+    public void showPanel() {
+        TranslateTransition tt = new TranslateTransition(Duration.millis(500), loginPanel);
+        tt.setToX(0);
+        tt.play();
+        setDisableAll(false);
+    }
+
+    private void setDisableAll(boolean disabled) {
+        saveName.setDisable(disabled);
+        usernameTextField.setDisable(disabled);
+        saveNameLabel.setDisable(disabled);
+        if (disabled) {
+            validate.setText("Connexion en cours ...");
+        } else {
+            validate.setText("Valider");
+        }
+        validate.setDisable(disabled);
+    }
 
     public String getPseudoTextField() {
         return this.usernameTextField.getText();

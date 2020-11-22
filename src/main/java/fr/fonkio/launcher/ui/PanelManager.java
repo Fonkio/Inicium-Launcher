@@ -124,6 +124,7 @@ public class PanelManager {
                 initPanel = !loginInit;
                 loginInit = true;
                 panel = panelLogin;
+                panelLogin.showPanel();
                 break;
         }
         if(changementPanel) {

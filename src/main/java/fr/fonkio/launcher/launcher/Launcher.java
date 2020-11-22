@@ -179,8 +179,6 @@ public class Launcher {
     }
 
     public void install() {
-        saver.set("name", pseudo);
-        saver.save();
         MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
         this.panelManager.setDisableInstallButton(true);
         if (offline) {
@@ -251,8 +249,6 @@ public class Launcher {
         //Lancement
         MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
         this.panelManager.setStatus("Jeu lancé");
-        saver.set("name", pseudo);
-        saver.save();
         Process p = launcher.launch();
         this.panelManager.getStage().setIconified(true);
         Runnable target;
