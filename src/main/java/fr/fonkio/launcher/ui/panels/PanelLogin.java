@@ -44,6 +44,7 @@ public class PanelLogin extends Panel {
     private Saver saver;
     private GridPane loginPanel;
     private CheckBox saveName = new CheckBox();
+
     Label saveNameLabel = new Label("Se connecter automatiquement");
 
     public PanelLogin(Stage stage) throws IOException {
@@ -62,7 +63,7 @@ public class PanelLogin extends Panel {
         super.init(panelManager);
         String savePseudo = saver.get("name");
         if (savePseudo != null) { //pseudo save
-            connexionAnimation(panelManager);
+            connexionAnimation(panelManager, true);
             setDisableAll(true);
         } else {
             setDisableAll(false);
@@ -137,7 +138,7 @@ public class PanelLogin extends Panel {
 
             if(usernameTextField.getText().length() >= 3) {
                 if (e.getCode().equals(KeyCode.ENTER)) {
-                    connexionAnimation(panelManager);
+                    connexionAnimation(panelManager, false);
                 } else {
                     validate.setDisable(false);
                 }
@@ -199,7 +200,7 @@ public class PanelLogin extends Panel {
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         validate.setOnMouseClicked(e->{
-            connexionAnimation(panelManager);
+            connexionAnimation(panelManager, false);
         });
         if(usernameTextField.getText().length() < 3) {
             validate.setDisable(true);
@@ -209,7 +210,7 @@ public class PanelLogin extends Panel {
         this.layout.getChildren().add(loginPanel);
     }
 
-    private void connexionAnimation(PanelManager panelManager) {
+    private void connexionAnimation(PanelManager panelManager, boolean quickStart) {
         TimerTask task = new TimerTask() {
             public void run() {
                 Platform.runLater(new Runnable() {
@@ -220,11 +221,12 @@ public class PanelLogin extends Panel {
                 });
             }
         };
-        if (!saveName.isDisable()) {
+        if (!quickStart) {
             if (saveName.isSelected()) {
                 saver.set("name", usernameTextField.getText());
             } else {
                 saver.remove("name");
+                System.out.println(validate.getText());
             }
         }
         saver.save();
