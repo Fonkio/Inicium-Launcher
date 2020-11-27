@@ -15,7 +15,7 @@ import java.net.URISyntaxException;
 
 public class MvWildLauncher {
 
-    public static final String LAUNCHER_VERSION = "1.5";
+    public static final String LAUNCHER_VERSION = "1.5.1";
     public static final String SERVEUR_IP = "survie.mvwild.org";
     public static final String TWITTER_URL = "https://twitter.com/MvWild_Serveur";
     public static final String DISCORD_URL = "https://discord.gg/5JcvM2B";
