@@ -28,11 +28,11 @@ public enum OperatingSystem {
         return OperatingSystem.UNKNOWN;
     }
 
-    public String getName() {
+    /*public String getName() {
         return name;
     }
 
     public String[] getAliases() {
         return aliases;
-    }
+    }*/
 }

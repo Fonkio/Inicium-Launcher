@@ -1,13 +1,10 @@
 package fr.fonkio.launcher.ui.panels.includes;
 
-import de.jensd.fx.glyphs.GlyphIcon;
-//import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
 import javafx.geometry.HPos;
-import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -15,15 +12,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class TopPanel extends Panel {
-
-    private GridPane topBar;
 
     public TopPanel(Stage stage) {
         super(stage);
@@ -32,7 +26,6 @@ public class TopPanel extends Panel {
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-        this.topBar = this.layout;
         this.layout.setStyle("-fx-background-color: rgb(31,35,37);");
         GridPane topBarButton = new GridPane();
         this.layout.getChildren().add(topBarButton);

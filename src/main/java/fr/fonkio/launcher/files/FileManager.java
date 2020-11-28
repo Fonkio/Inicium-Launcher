@@ -7,7 +7,7 @@ import java.io.File;
 
 public class FileManager {
 
-    private String serverName;
+    private final String serverName;
 
     public FileManager(String serverName) {
         this.serverName = serverName;
@@ -17,7 +17,7 @@ public class FileManager {
         final String userHome = System.getProperty("user.home");
 
         final String fileSeparator = File.separator;
-        File f = null;
+        File f;
         switch (OperatingSystem.getCurrentPlatform()) {
             case WINDOWS:
                  f = new File(userHome + fileSeparator + "AppData" + fileSeparator + "Roaming" + fileSeparator + "." + this.serverName);
@@ -30,27 +30,31 @@ public class FileManager {
                 break;
         }
         if (!f.exists()) {
-            f.mkdirs();
+            boolean created = f.mkdirs();
+            if (!created) {
+                Main.logger.log("Le dossier n'a pas pu être créé");
+            }
         }
+
         return f;
     }
 
-    public File getAssetsFolder() {
+    /*public File getAssetsFolder() {
         return new File(createGameDir(), "assets");
-    }
+    }*/
     public File getLauncherLog() { return new File(createGameDir()+"/", "launcher.log"); }
     public File getLauncherProperties() { return new File(createGameDir()+"/", "launcher.properties"); }
-    public File getNativesFolder() {
+    /*public File getNativesFolder() {
         return new File(createGameDir(), "natives");
     }
     public File getLibsFolder() {
         return new File(createGameDir(), "libs");
-    }
+    }*/
     public File getGameFolder() {
         return createGameDir();
     }
-    public File getRuntimeFolder() {
+    /*public File getRuntimeFolder() {
         return new File(createGameDir(), "runtime");
-    }
+    }*/
 
 }

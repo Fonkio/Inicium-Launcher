@@ -2,19 +2,15 @@ package fr.fonkio.launcher.ui.panel;
 
 import fr.fonkio.launcher.ui.PanelManager;
 import javafx.animation.FadeTransition;
-import javafx.geometry.Insets;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.awt.*;
 
 public class Panel implements IPanel {
 
     protected GridPane layout = new GridPane();
     protected PanelManager panelManager;
-    private Stage stage;
+    private final Stage stage;
 
     public Panel(Stage stage) {
         this.stage = stage;

@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 
 import java.util.List;
 import java.util.Map;
@@ -18,8 +17,6 @@ import java.util.Map;
 public class PlayerListGridPane {
 
     private final PanelMain panelMain;
-    private GridPane gpConnect = new GridPane();
-    private Label playerListTitle;
     private FlowPane listeConnecte;
 
     public PlayerListGridPane(PanelMain panelMain) {
@@ -28,7 +25,7 @@ public class PlayerListGridPane {
 
     //Affichage onglet paramètres
     public void addTopPanel(GridPane topPanel) {
-        this.playerListTitle = new Label("Liste des joueurs");
+        Label playerListTitle = new Label("Liste des joueurs");
         GridPane.setVgrow(playerListTitle, Priority.ALWAYS);
         GridPane.setHgrow(playerListTitle, Priority.ALWAYS);
         GridPane.setValignment(playerListTitle, VPos.TOP);
@@ -70,7 +67,6 @@ public class PlayerListGridPane {
         listeConnecte.setVgap(50);
         listeConnecte.setTranslateY(80);
         Map<String, List<String>> map = HttpRecup.getList();
-        int indiceServer = 0;
 
         for(String serverName : map.keySet()) {
             GridPane gpServer = new GridPane();
@@ -80,7 +76,7 @@ public class PlayerListGridPane {
             GridPane.setHalignment(gpServer, HPos.LEFT);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < map.get(serverName).size(); i++) {
-                sb.append(map.get(serverName).get(i)+"\n");
+                sb.append(map.get(serverName).get(i)).append("\n");
             }
             Label titre = new Label (serverName+" ["+map.get(serverName).size()+"]");
             Label liste = new Label(sb.toString());
@@ -98,7 +94,6 @@ public class PlayerListGridPane {
             GridPane.setHalignment(titre, HPos.LEFT);
             gpServer.getChildren().addAll(titre, liste);
             listeConnecte.getChildren().add(gpServer);
-            indiceServer ++;
         }
     }
 

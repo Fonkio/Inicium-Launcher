@@ -2,51 +2,42 @@ package fr.fonkio.launcher.ui.panels;
 
 import com.sun.webkit.WebPage;
 import fr.arinonia.arilibfx.ui.component.AProgressBar;
-import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.HttpRecup;
-import javafx.animation.TranslateTransition;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
-import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
 
 public class HomeGridPane {
 
-    private PanelMain panelMain;
+    private final PanelMain panelMain;
     private Label status;
     private Button installButton;
     AProgressBar progressBar = new AProgressBar(400, 20);
-    private GridPane twitter;
 
     public HomeGridPane(PanelMain panelMain) {
         this.panelMain = panelMain;
@@ -92,7 +83,7 @@ public class HomeGridPane {
         Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
 
         //IFRAME Twitter
-        twitter = new GridPane();
+        GridPane twitter = new GridPane();
         GridPane.setVgrow(twitter, Priority.ALWAYS);
         GridPane.setHgrow(twitter, Priority.ALWAYS);
         GridPane.setValignment(twitter, VPos.CENTER);
@@ -115,10 +106,8 @@ public class HomeGridPane {
                 webEngine.loadContent(content_url);
                 try {
                     Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
-                } catch (IOException ioException) {
+                } catch (IOException | URISyntaxException ioException) {
                     ioException.printStackTrace();
-                } catch (URISyntaxException uriSyntaxException) {
-                    uriSyntaxException.printStackTrace();
                 }
             });
             webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) change ->{
@@ -187,10 +176,8 @@ public class HomeGridPane {
         buttonSite.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
         Image voteImage = new Image(Main.class.getResource("/vote.png").toExternalForm());
@@ -212,10 +199,8 @@ public class HomeGridPane {
         buttonVote.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.VOTE_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
         Image discordImage = new Image(Main.class.getResource("/discord.png").toExternalForm());
@@ -237,10 +222,8 @@ public class HomeGridPane {
         buttonDiscord.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.DISCORD_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
         ImageView twitterImageView = new ImageView(twitterImage);
@@ -261,10 +244,8 @@ public class HomeGridPane {
         buttonTwitter.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.TWITTER_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
         Image instagramImage = new Image(Main.class.getResource("/instagram.png").toExternalForm());
@@ -286,10 +267,8 @@ public class HomeGridPane {
         buttonInstagram.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.INSTAGRAM_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
         Image facebookImage = new Image(Main.class.getResource("/facebook.png").toExternalForm());
@@ -311,16 +290,12 @@ public class HomeGridPane {
         buttonFacebook.setOnMouseClicked(e-> {
             try {
                 Desktop.getDesktop().browse(new URI(MvWildLauncher.FACEBOOK_URL));
-            } catch (IOException ioException) {
+            } catch (IOException | URISyntaxException ioException) {
                 ioException.printStackTrace();
-            } catch (URISyntaxException uriSyntaxException) {
-                uriSyntaxException.printStackTrace();
             }
         });
 
-        installButton.setOnMouseClicked(e-> {
-            this.panelMain.install();
-        });
+        installButton.setOnMouseClicked(e-> this.panelMain.install());
         //Ajout des éléments
         pane.getChildren().addAll(mvwildTitle, survie, desc, installButton, buttonSite, buttonDiscord, buttonTwitter, buttonFacebook, buttonInstagram, buttonVote, progressBar, status);
         if (webEnabled) {

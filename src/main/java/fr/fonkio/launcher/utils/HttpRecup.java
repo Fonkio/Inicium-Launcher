@@ -38,12 +38,16 @@ public class HttpRecup {
             }
         }
 
-        return offline?"":nbCo.split(" joueur")[0].replaceAll(" ", "");
+        if (nbCo != null) {
+            return offline?"":nbCo.split(" joueur")[0].replaceAll(" ", "");
+        } else {
+            return "";
+        }
     }
 
 
     public static Map<String, List<String>> getList() {
-        StringBuilder stringBuilder = new StringBuilder("");
+        StringBuilder stringBuilder = new StringBuilder();
         try{
             URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/jsonPlayerList.php").openConnection());
             connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
@@ -61,10 +65,7 @@ public class HttpRecup {
             }
         }
         String res = stringBuilder.toString();
-        res.replace(" ", "");
-        res.replace("/n", "");
-        res.split("/");
-        String tabResServPlayerList[] = res.split("/");
+        String[] tabResServPlayerList = res.split("/");
         Map<String, List<String>> map = new HashMap<>();
         if (tabResServPlayerList.length >= 2) {
             for(int i = 1; i < tabResServPlayerList.length; i++) {
@@ -78,7 +79,7 @@ public class HttpRecup {
 
     //Récupération du texte sur un URL pour les versions
     public static String getVersion(String url) {
-        String inputline = null;
+        String inputline;
         try{
             URLConnection connection = (new URL(url).openConnection());
             connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);

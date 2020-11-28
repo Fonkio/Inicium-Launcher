@@ -28,19 +28,18 @@ import java.net.URISyntaxException;
 
 public class PanelMain extends Panel {
 
-    private HomeGridPane home = new HomeGridPane(this);
-    private SettingsGridPane settings = new SettingsGridPane(this);
-    private PlayerListGridPane playerList = new PlayerListGridPane(this);
+    private final HomeGridPane home = new HomeGridPane(this);
+    private final SettingsGridPane settings = new SettingsGridPane(this);
+    private final PlayerListGridPane playerList = new PlayerListGridPane(this);
 
-    private GridPane centerPane = new GridPane();
+    private final GridPane centerPane = new GridPane();
 
-    private Label pseudo = new Label("");
-    private Image teteJ;
+    private final Label pseudo = new Label("");
     private VBox vBoxMv;
     private VBox vBoxSettings;
     private VBox vBoxPlayerList;
-    private ScrollPane scrollPane = new ScrollPane();
-    private Rectangle rectangleSelect = new Rectangle();
+    private final ScrollPane scrollPane = new ScrollPane();
+    private final Rectangle rectangleSelect = new Rectangle();
 
     ImageView imageViewTete = new ImageView();
     private Label playerListLabel;
@@ -186,9 +185,7 @@ public class PanelMain extends Panel {
         this.imageViewTete.setTranslateY(570);
         this.imageViewTete.setFitHeight(60);
         this.imageViewTete.setFitWidth(60);
-        this.imageViewTete.setOnMouseEntered(e->{
-            this.layout.setCursor(Cursor.HAND);
-        });
+        this.imageViewTete.setOnMouseEntered(e-> this.layout.setCursor(Cursor.HAND));
         this.imageViewTete.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         this.pseudo.setTooltip(new Tooltip("Se déconnecter"));
         this.pseudo.setOnMouseEntered(e-> {
@@ -197,12 +194,8 @@ public class PanelMain extends Panel {
 
         });
         this.pseudo.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        this.imageViewTete.setOnMouseClicked(e-> {
-            this.panelManager.showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
-        });
-        this.pseudo.setOnMouseClicked(e-> {
-            this.panelManager.showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
-        });
+        this.imageViewTete.setOnMouseClicked(e-> this.panelManager.showPanel(MainPanel.LOGIN));
+        this.pseudo.setOnMouseClicked(e-> this.panelManager.showPanel(MainPanel.LOGIN));
         //Fin affichage pseudo + tete joueur
 
         //Selection de l'onglet
@@ -312,30 +305,14 @@ public class PanelMain extends Panel {
 
         //Control affichage
 
-        jouerLabel.setOnMouseClicked(e->{
-            afficher(MainPanel.HOME);
-        });
-        imageViewMvWild.setOnMouseClicked(e->{
-            afficher(MainPanel.HOME);
-        });
-        buttonSetting.setOnMouseClicked(e->{
-            afficher(MainPanel.PARAMETRES);
-        });
-        settingLabel.setOnMouseClicked(e->{
-            afficher(MainPanel.PARAMETRES);
-        });
-        buttonPlayer.setOnMouseClicked(e->{
-            afficher(MainPanel.PLAYER_LIST);
-        });
-        playerListLabel.setOnMouseClicked(e->{
-            afficher(MainPanel.PLAYER_LIST);
-        });
-        buttonUpdate.setOnMouseClicked(e->{
-            update();
-        });
-        updateLabel.setOnMouseClicked(e->{
-            update();
-        });
+        jouerLabel.setOnMouseClicked(e-> afficher(MainPanel.HOME));
+        imageViewMvWild.setOnMouseClicked(e-> afficher(MainPanel.HOME));
+        buttonSetting.setOnMouseClicked(e-> afficher(MainPanel.PARAMETRES));
+        settingLabel.setOnMouseClicked(e-> afficher(MainPanel.PARAMETRES));
+        buttonPlayer.setOnMouseClicked(e-> afficher(MainPanel.PLAYER_LIST));
+        playerListLabel.setOnMouseClicked(e-> afficher(MainPanel.PLAYER_LIST));
+        buttonUpdate.setOnMouseClicked(e-> update());
+        updateLabel.setOnMouseClicked(e-> update());
 
         //Fin selection onglet
 
@@ -351,17 +328,15 @@ public class PanelMain extends Panel {
     private void update () {
         try {
             Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL+"launcher/"));
-        } catch (IOException ioException) {
+        } catch (IOException | URISyntaxException ioException) {
             ioException.printStackTrace();
-        } catch (URISyntaxException uriSyntaxException) {
-            uriSyntaxException.printStackTrace();
         }
     }
 
     public void setPseudo(String pseudo) {
         this.pseudo.setText(pseudo);
         String path = "https://minotar.net/avatar/"+pseudo+"/100.png";
-        this.teteJ = new Image(path);
+        Image teteJ = new Image(path);
         this.imageViewTete.setImage(teteJ);
     }
 
@@ -409,9 +384,9 @@ public class PanelMain extends Panel {
         return this.panelManager.getVersion();
     }
 
-    public String getMCPVersion() {
+    /*public String getMCPVersion() {
         return this.panelManager.getMCPVersion();
-    }
+    }*/
 
     public String getForgeVersion() {
         return this.panelManager.getForgeVersion();
