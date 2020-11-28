@@ -1,6 +1,7 @@
 package fr.fonkio.launcher.ui.panels;
 
 import fr.fonkio.launcher.Main;
+import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
 import fr.fonkio.launcher.utils.HttpRecup;
@@ -9,6 +10,7 @@ import javafx.animation.TranslateTransition;
 import javafx.geometry.*;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -18,6 +20,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class PanelMain extends Panel {
 
@@ -237,7 +244,7 @@ public class PanelMain extends Panel {
         GridPane.setHgrow(buttonSetting, Priority.ALWAYS);
         GridPane.setValignment(buttonSetting, VPos.CENTER);
         buttonSetting.setTranslateX(34);
-        buttonSetting.setTranslateY(70);
+        buttonSetting.setTranslateY(140);
         buttonSetting.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         buttonSetting.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         Label settingLabel = new Label("Paramètres");
@@ -245,7 +252,7 @@ public class PanelMain extends Panel {
         GridPane.setHgrow(settingLabel, Priority.ALWAYS);
         GridPane.setValignment(settingLabel, VPos.CENTER);
         settingLabel.setTranslateX(110);
-        settingLabel.setTranslateY(70);
+        settingLabel.setTranslateY(140);
         settingLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-weight: bold");
         settingLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         settingLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
@@ -263,7 +270,7 @@ public class PanelMain extends Panel {
         GridPane.setHgrow(buttonPlayer, Priority.ALWAYS);
         GridPane.setValignment(buttonPlayer, VPos.CENTER);
         buttonPlayer.setTranslateX(34);
-        buttonPlayer.setTranslateY(140);
+        buttonPlayer.setTranslateY(70);
         buttonPlayer.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         buttonPlayer.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
         this.playerListLabel = new Label("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
@@ -271,10 +278,37 @@ public class PanelMain extends Panel {
         GridPane.setHgrow(playerListLabel, Priority.ALWAYS);
         GridPane.setValignment(playerListLabel, VPos.CENTER);
         playerListLabel.setTranslateX(110);
-        playerListLabel.setTranslateY(140);
+        playerListLabel.setTranslateY(70);
         playerListLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-weight: bold");
         playerListLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         playerListLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+
+        //Update
+
+        Image updateImage = new Image(Main.class.getResource("/download.png").toExternalForm());
+        ImageView imageUpdate = new ImageView(updateImage);
+        imageUpdate.setFitHeight(50);
+        imageUpdate.setFitWidth(50);
+        Button buttonUpdate = new Button();
+        buttonUpdate.setBackground(Background.EMPTY);
+        buttonUpdate.setGraphic(imageUpdate);
+        GridPane.setVgrow(buttonUpdate, Priority.ALWAYS);
+        GridPane.setHgrow(buttonUpdate, Priority.ALWAYS);
+        GridPane.setValignment(buttonUpdate, VPos.CENTER);
+        buttonUpdate.setTranslateX(34);
+        buttonUpdate.setTranslateY(210);
+        buttonUpdate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        buttonUpdate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        Label updateLabel = new Label("Mettre à jour ! (");
+        GridPane.setVgrow(updateLabel, Priority.ALWAYS);
+        GridPane.setHgrow(updateLabel, Priority.ALWAYS);
+        GridPane.setValignment(updateLabel, VPos.CENTER);
+        updateLabel.setTranslateX(110);
+        updateLabel.setTranslateY(210);
+        updateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-weight: bold");
+        updateLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+        updateLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+
 
         //Control affichage
 
@@ -296,12 +330,33 @@ public class PanelMain extends Panel {
         playerListLabel.setOnMouseClicked(e->{
             afficher(MainPanel.PLAYER_LIST);
         });
+        buttonUpdate.setOnMouseClicked(e->{
+            update();
+        });
+        updateLabel.setOnMouseClicked(e->{
+            update();
+        });
 
         //Fin selection onglet
 
         //Ajout des éléments
         pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, buttonSetting, settingLabel, pseudo, imageViewTete, buttonPlayer, playerListLabel);
+        String checkVersion = panelManager.checkVersion();
+        if (checkVersion != null) {
+            updateLabel.setText(updateLabel.getText()+"v"+checkVersion+")");
+            pane.getChildren().addAll(updateLabel, buttonUpdate);
+        }
     } //Fin showLeftBar
+
+    private void update () {
+        try {
+            Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL+"launcher/"));
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        } catch (URISyntaxException uriSyntaxException) {
+            uriSyntaxException.printStackTrace();
+        }
+    }
 
     public void setPseudo(String pseudo) {
         this.pseudo.setText(pseudo);
@@ -371,12 +426,12 @@ public class PanelMain extends Panel {
                 break;
             case PARAMETRES:
                 this.scrollPane.setContent(vBoxSettings);
-                tt.setToY(70);
+                tt.setToY(140);
                 break;
             case PLAYER_LIST:
                 this.scrollPane.setContent(vBoxPlayerList);
                 refreshList();
-                tt.setToY(140);
+                tt.setToY(70);
                 break;
         }
         tt.play();

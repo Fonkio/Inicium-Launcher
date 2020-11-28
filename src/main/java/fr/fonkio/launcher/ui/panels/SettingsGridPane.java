@@ -1,5 +1,6 @@
 package fr.fonkio.launcher.ui.panels;
 
+import fr.fonkio.launcher.MvWildLauncher;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
@@ -111,6 +112,15 @@ public class SettingsGridPane {
             save.setText("Sauvegarder");
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
-        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, checkBox, checkText);
+
+        Label credit = new Label("MvWildLauncher par Fonkio (v"+ MvWildLauncher.LAUNCHER_VERSION+")");
+        GridPane.setVgrow(credit, Priority.ALWAYS);
+        GridPane.setHgrow(credit, Priority.ALWAYS);
+        GridPane.setValignment(credit, VPos.TOP);
+        credit.setTranslateX(675);
+        credit.setTranslateY(25);
+        credit.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
+
+        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, checkBox, checkText, credit);
     }
 }

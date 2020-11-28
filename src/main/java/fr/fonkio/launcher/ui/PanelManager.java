@@ -10,28 +10,23 @@ import fr.fonkio.launcher.ui.panels.PanelMain;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
 import fr.fonkio.launcher.utils.HttpRecup;
-import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.net.*;
 
 public class PanelManager {
 
     private final Stage stage;
-    private GridPane layout;
-    private TopPanel topPanel;
-    private GridPane centerPanel = new GridPane();
+    private final TopPanel topPanel;
+    private final GridPane centerPanel = new GridPane();
     private Double xOffset;
     private Double yOffset;
     PanelLogin panelLogin;
@@ -64,35 +59,29 @@ public class PanelManager {
         this.stage.getIcons().add(new Image(Main.class.getResource("/logoNBG.png").toExternalForm()));
         this.stage.show();
 
-        this.layout = new GridPane();
-        this.layout.setStyle(AriLibFX.setResponsiveBackground(Main.class.getResource("/fondLauncher.png").toExternalForm()));
-        this.stage.setScene(new Scene(this.layout));
+        GridPane layout = new GridPane();
+        layout.setStyle(AriLibFX.setResponsiveBackground(Main.class.getResource("/fondLauncher.png").toExternalForm()));
+        this.stage.setScene(new Scene(layout));
         this.stage.setResizable(false);
 
         RowConstraints topPanelConstraints = new RowConstraints();
         topPanelConstraints.setValignment(VPos.TOP);
         topPanelConstraints.setMinHeight(25);
         topPanelConstraints.setMaxHeight(25);
-        this.layout.getRowConstraints().addAll(topPanelConstraints, new RowConstraints());
-        this.layout.add(this.topPanel.getLayout(), 0, 0);
+        layout.getRowConstraints().addAll(topPanelConstraints, new RowConstraints());
+        layout.add(this.topPanel.getLayout(), 0, 0);
         this.topPanel.init(this);
-        this.layout.add(this.centerPanel, 0, 1);
+        layout.add(this.centerPanel, 0, 1);
         GridPane.setVgrow(this.centerPanel, Priority.ALWAYS);
         GridPane.setHgrow(this.centerPanel, Priority.ALWAYS);
         //ResizeHelper.addResizeListener(this.stage);
-        this.layout.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                xOffset = stage.getX() - event.getScreenX();
-                yOffset = stage.getY() - event.getScreenY();
-            }
+        layout.setOnMousePressed(event -> {
+            xOffset = stage.getX() - event.getScreenX();
+            yOffset = stage.getY() - event.getScreenY();
         });
-        this.layout.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                stage.setX(event.getScreenX() + xOffset);
-                stage.setY(event.getScreenY() + yOffset);
-            }
+        layout.setOnMouseDragged(event -> {
+            stage.setX(event.getScreenX() + xOffset);
+            stage.setY(event.getScreenY() + yOffset);
         });
         checkVersion();
         showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
@@ -127,14 +116,17 @@ public class PanelManager {
                 panelLogin.showPanel();
                 break;
         }
-        if(changementPanel) {
-            this.centerPanel.getChildren().clear();
-            this.centerPanel.getChildren().add(panel.getLayout());
+        if (panel != null){
+            if(changementPanel) {
+                this.centerPanel.getChildren().clear();
+                this.centerPanel.getChildren().add(panel.getLayout());
+            }
+            if(initPanel) {
+                panel.init(this);
+            }
+            panel.onShow();
         }
-        if(initPanel) {
-            panel.init(this);
-        }
-        panel.onShow();
+
     }
 
     public Stage getStage() {
@@ -192,31 +184,12 @@ public class PanelManager {
         this.launcher.connexion();
     }
 
-    private void checkVersion() {
+    public String checkVersion() {
         String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
-        if ((!HttpRecup.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
-            Thread t = new Thread() {
-                @Override
-                public void run() {
-                    switch (JOptionPane.showConfirmDialog(null, "Une nouvelle version est disponible !\nVersion actuelle : " + MvWildLauncher.LAUNCHER_VERSION + "\nNouvelle version : " + version)) {
-                        case JOptionPane.OK_OPTION:
-                            try {
-                                Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL + "launcher/"));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (URISyntaxException e) {
-                                e.printStackTrace();
-                            }
-                            MvWildLauncher.stopRP();
-                            System.exit(0);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            };
-            t.start();
+        if (version != null && (!HttpRecup.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+            return version;
         }
+        return null;
     }
 
     public void install() {
