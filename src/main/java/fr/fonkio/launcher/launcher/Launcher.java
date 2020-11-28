@@ -38,23 +38,26 @@ import java.util.TimerTask;
 public class Launcher {
 
     private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-    private Saver saver = new Saver(fileManager.getLauncherProperties());
-    private PanelManager panelManager;
+    private final Saver saver = new Saver(fileManager.getLauncherProperties());
+    private final PanelManager panelManager;
     String pseudo;
-    String strVersion = null;
+    String strVersion;
     String strForgeVersion = null;
     String strMCPVersion = null;
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
     private Timer timerUpdateBar;
-    private File dir = fileManager.getGameFolder();
+    private final File dir = fileManager.getGameFolder();
 
     public Launcher(PanelManager panelManager) throws MalformedURLException, BuilderException, URISyntaxException {
         this.panelManager = panelManager;
 
         if (!fileManager.createGameDir().exists()) {
-            fileManager.createGameDir().mkdir();
+            boolean created = fileManager.createGameDir().mkdir();
+            if (!created) {
+                Main.logger.log("Le dossier n'a pas pu être créé");
+            }
         }
 
         dlCallback = new MvCallback(this.panelManager);
@@ -149,14 +152,13 @@ public class Launcher {
                 .withMods(mods)
                 .withNoGui(true)
                 .build();
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().
+        return new FlowUpdater.FlowUpdaterBuilder().
                 withVersion(version).
                 withForgeVersion(forgeVersion).
                 withUpdaterOptions(new UpdaterOptions(false, false, false))
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles.json").toURL()))
                 .withProgressCallback(callback)
                 .build();
-        return updater;
     }
 
     public void setPseudo(String pseudo) {
@@ -197,41 +199,38 @@ public class Launcher {
             timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
         }
 
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                if (!offline) {
-                    try {
-                        updater.update(dir, false);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                        panelManager.setInstallButtonText("Erreur");
-                        panelManager.setDisableInstallButton(true);
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                    } finally {
-                        timerUpdateBar.cancel();
-                    }
+        Thread t = new Thread(() -> {
+            if (!offline) {
+                try {
+                    updater.update(dir, false);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                    panelManager.setInstallButtonText("Erreur");
+                    panelManager.setDisableInstallButton(true);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                } finally {
+                    timerUpdateBar.cancel();
                 }
-                Platform.runLater(() -> {
-                    panelManager.setStatus("Lancement ...");
-                    try {
-                        launch(strVersion, strForgeVersion, strMCPVersion);
-                    } catch (Exception e) {
-                        panelManager.getStage().setIconified(false);
-                        MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-                        panelManager.setInstallButtonText("Relancer");
-                        panelManager.setDisableInstallButton(false);
-                        if(offline) {
-                            JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu ! L'installation n'est pas complète, il est nécessaire d'être en ligne pour lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                        }
-                        panelManager.setStatus("");
-                    }
-                });
             }
-        };
+            Platform.runLater(() -> {
+                panelManager.setStatus("Lancement ...");
+                try {
+                    launch(strVersion, strForgeVersion, strMCPVersion);
+                } catch (Exception e) {
+                    panelManager.getStage().setIconified(false);
+                    MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
+                    panelManager.setInstallButtonText("Relancer");
+                    panelManager.setDisableInstallButton(false);
+                    if(offline) {
+                        JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu ! L'installation n'est pas complète, il est nécessaire d'être en ligne pour lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                    panelManager.setStatus("");
+                }
+            });
+        });
         t.start();
     }
     public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
@@ -251,25 +250,21 @@ public class Launcher {
         this.panelManager.setStatus("Jeu lancé");
         Process p = launcher.launch();
         this.panelManager.getStage().setIconified(true);
-        Runnable target;
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    p.waitFor(); //Attente fermeture du jeu
-                    Platform.runLater(()->{
-                        panelManager.getStage().setIconified(false);
-                        panelManager.setDisableInstallButton(false);
-                        panelManager.setInstallButtonText("Relancer");
-                        panelManager.setStatus("");
-                    });
+        Thread t = new Thread(() -> {
+            try {
+                p.waitFor(); //Attente fermeture du jeu
+                Platform.runLater(()->{
+                    panelManager.getStage().setIconified(false);
+                    panelManager.setDisableInstallButton(false);
+                    panelManager.setInstallButtonText("Relancer");
+                    panelManager.setStatus("");
+                });
 
-                    MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
+                MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
 
-                } catch (InterruptedException e) {
-                }
+            } catch (InterruptedException ignored) {
             }
-        };
+        });
         t.start();
     }
 

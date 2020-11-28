@@ -9,7 +9,7 @@ import javafx.application.Platform;
 
 public class MvCallback implements IProgressCallback {
     private String status = "";
-    private PanelManager panelManager;
+    private final PanelManager panelManager;
 
     public MvCallback(PanelManager panelManager) {
         this.panelManager = panelManager;
@@ -55,14 +55,10 @@ public class MvCallback implements IProgressCallback {
                 Main.logger.warn(step.toString());
                 break;
         }
-        Platform.runLater(()-> {
-            this.panelManager.setStatus(this.status+"...");
-        });
+        Platform.runLater(()-> this.panelManager.setStatus(this.status+"..."));
     }
     @Override
     public void update(int downloaded, int max) {
-        Platform.runLater(()-> {
-            this.panelManager.setStatus(this.status + downloaded+"/"+max +"...");
-        });
+        Platform.runLater(()-> this.panelManager.setStatus(this.status + downloaded+"/"+max +"..."));
     }
 }

@@ -6,7 +6,6 @@ import club.minnced.discord.rpc.DiscordRichPresence;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
-import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.stage.Stage;
 
@@ -22,14 +21,13 @@ public class MvWildLauncher {
     public static final String FACEBOOK_URL = "https://www.facebook.com/MvwildServeur/";
     public static final String VOTE_URL = "https://www.mvwild.org/voter/";
     public static final String INSTAGRAM_URL = "https://www.instagram.com/mvwild/";
-    private PanelManager panelManager;
     public static final String SERVEUR_NAME = "MvWild";
     public static final String SITE_URL = "https://www.mvwild.org/";
     public static final String CONFIG_WEB = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11";
-    private static DiscordRPC library = DiscordRPC.INSTANCE;
+    private static final DiscordRPC library = DiscordRPC.INSTANCE;
     private static Thread threadRP;
     private static final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-    private static Saver saver = new Saver(fileManager.getLauncherProperties());
+    private static final Saver saver = new Saver(fileManager.getLauncherProperties());
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
         String appName = "752142344240889867";
@@ -48,8 +46,8 @@ public class MvWildLauncher {
         }, "RPC-Callback-Handler");
         threadRP.start();
 
-        this.panelManager = new PanelManager(stage);
-        this.panelManager.init();
+        PanelManager panelManager = new PanelManager(stage);
+        panelManager.init();
     }
     public static void stopRP() {
         Main.logger.log("Arret - RP");

@@ -1,18 +1,17 @@
 package fr.fonkio.launcher.ui.panels;
 
+
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
-import fr.fonkio.launcher.utils.MainPanel;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -23,37 +22,35 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import javax.swing.*;
-import java.awt.*;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 public class PanelLogin extends Panel {
-    private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-    private File dir = fileManager.createGameDir();
-    private Button validate = new Button("Valider");
-    private TextField usernameTextField = new TextField();
-    private Saver saver;
+    private final Button validate = new Button("Valider");
+    private final TextField usernameTextField = new TextField();
+    private final Saver saver;
     private GridPane loginPanel;
-    private CheckBox saveName = new CheckBox();
+    private final CheckBox saveName = new CheckBox();
 
     Label saveNameLabel = new Label("Se connecter automatiquement");
 
     public PanelLogin(Stage stage) throws IOException {
         super(stage);
+        FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
+        File dir = fileManager.createGameDir();
         if(!dir.exists()) {
-            dir.mkdir();
+            boolean created = dir.mkdir();
+            if (!created) {
+                Main.logger.log("Le dossier n'a pas pu être créé");
+            }
         }
         if(!fileManager.getLauncherProperties().exists()){
-            fileManager.getLauncherProperties().createNewFile();
+            boolean created = fileManager.getLauncherProperties().createNewFile();
+            if (!created) {
+                Main.logger.log("Le dossier n'a pas pu être créé");
+            }
         }
         saver = new Saver(fileManager.getLauncherProperties());
     }
@@ -199,9 +196,7 @@ public class PanelLogin extends Panel {
         validate.setStyle("-fx-background-color: #52872F; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font: 14px; -fx-text-fill: white");
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        validate.setOnMouseClicked(e->{
-            connexionAnimation(panelManager, false);
-        });
+        validate.setOnMouseClicked(e-> connexionAnimation(panelManager, false));
         if(usernameTextField.getText().length() < 3) {
             validate.setDisable(true);
         }
@@ -213,12 +208,7 @@ public class PanelLogin extends Panel {
     private void connexionAnimation(PanelManager panelManager, boolean quickStart) {
         TimerTask task = new TimerTask() {
             public void run() {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        panelManager.connexion();
-                    }
-                });
+                Platform.runLater(panelManager::connexion);
             }
         };
         if (!quickStart) {
