@@ -215,4 +215,11 @@ public class PanelManager {
     public Boolean getDRP() {
         return this.launcher.getDRP();
     }
+
+    public void resetMods() {
+        launcher.resetMod();
+    }
+    public boolean containsModsFolder() {
+        return launcher.containsModsFolder();
+    }
 }

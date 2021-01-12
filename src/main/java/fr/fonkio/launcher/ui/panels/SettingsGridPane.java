@@ -91,6 +91,21 @@ public class SettingsGridPane {
             save.setText("Sauvegardé !");
             save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
+        Button resetMod = new Button("Réinstaller les mods");
+        GridPane.setVgrow(resetMod, Priority.ALWAYS);
+        GridPane.setHgrow(resetMod, Priority.ALWAYS);
+        GridPane.setValignment(resetMod, VPos.BOTTOM);
+        GridPane.setHalignment(resetMod, HPos.LEFT);
+        resetMod.setMinWidth(140);
+        resetMod.setMaxHeight(40);
+        resetMod.setStyle("-fx-background-color: #FF0000; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+        resetMod.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
+        resetMod.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+        resetMod.setOnMouseClicked(e-> {
+            this.panelMain.resetMods();
+            resetMod.setVisible(false);
+        });
+        resetMod.setVisible(this.panelMain.containsModsFolder());
         slider.setOnDragDetected(e-> {
             save.setText("Sauvegarder");
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
@@ -113,6 +128,6 @@ public class SettingsGridPane {
         credit.setTranslateY(25);
         credit.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
 
-        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, checkBox, checkText, credit);
+        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, resetMod, checkBox, checkText, credit);
     }
 }

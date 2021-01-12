@@ -193,6 +193,14 @@ public class Launcher {
         Thread t = new Thread(() -> {
             if (!offline) {
                 try {
+                    File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
+                    for (File mod : modFolder.listFiles()) {
+                        if (mod.getName().startsWith("AI-")) {
+                            if(!mod.getName().contains(strVersion)) {
+                                mod.delete();
+                            }
+                        }
+                    }
                     updater.update(dir);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -287,5 +295,26 @@ public class Launcher {
 
     public String getForgeVersion() {
         return strForgeVersion;
+    }
+
+    public boolean containsModsFolder() {
+        File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
+        return modFolder.exists();
+    }
+
+    public void resetMod() {
+        File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
+        System.out.println(modFolder.getPath());
+        deleteDirectory(modFolder);
+    }
+
+    private boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
     }
 }

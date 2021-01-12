@@ -412,6 +412,7 @@ public class PanelMain extends Panel {
         tt.play();
     }
 
+
     public void refreshList() {
         this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
         GridPane topPanelPlayerList = new GridPane();
@@ -427,5 +428,13 @@ public class PanelMain extends Panel {
             this.vBoxPlayerList.getChildren().remove(0);
         }
         this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
+    }
+
+    public void resetMods() {
+        this.panelManager.resetMods();
+    }
+
+    public boolean containsModsFolder() {
+        return this.panelManager.containsModsFolder();
     }
 }
