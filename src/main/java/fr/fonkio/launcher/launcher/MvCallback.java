@@ -23,6 +23,9 @@ public class MvCallback implements IProgressCallback {
     @Override
     public void step(Step step) {
         switch (step.toString()) {
+            case "PREREQUISITES":
+                this.status = "Chargement des prérequis... ";
+                break;
             case "READ":
                 this.status = "Verification des fichiers ";
                 break;
@@ -39,19 +42,19 @@ public class MvCallback implements IProgressCallback {
                 this.status = "Récupération des mods ";
                 break;
             case "FORGE":
-                this.status = "Installation de forge ";
+                this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ') ";
                 break;
             case "INTERNAL_FORGE_HACKS":
-                this.status = "Forge installé, lancement ";
+                this.status = "Forge installé, lancement... ";
                 break;
             case "END":
-                this.status = "Le jeu a été lancé !";
+                this.status = "Terminé ";
                 break;
             case "EXTERNAL_FILES":
-                this.status = "Téléchargement de la configuration...";
+                this.status = "Téléchargement de la configuration... ";
                 break;
             default:
-                this.status = "Chargement ";
+                this.status = "Chargement... ";
                 Main.logger.warn(step.toString());
                 break;
         }
@@ -59,6 +62,10 @@ public class MvCallback implements IProgressCallback {
     }
     @Override
     public void update(int downloaded, int max) {
-        Platform.runLater(()-> this.panelManager.setStatus(this.status + downloaded+"/"+max +"..."));
+        Platform.runLater(()-> {
+            this.panelManager.setStatus(this.status + downloaded+"/"+max +"...");
+            this.panelManager.setProgress(downloaded, max);
+        }
+        );
     }
 }

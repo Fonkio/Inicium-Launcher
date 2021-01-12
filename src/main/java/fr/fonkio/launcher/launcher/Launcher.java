@@ -32,8 +32,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Launcher {
 
@@ -47,7 +45,6 @@ public class Launcher {
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
-    private Timer timerUpdateBar;
     private final File dir = fileManager.getGameFolder();
 
     public Launcher(PanelManager panelManager) throws MalformedURLException, BuilderException, URISyntaxException {
@@ -113,6 +110,11 @@ public class Launcher {
         }
         saver.set("mcpVersion", strMCPVersion);
         saver.save();
+
+        //strVersion = "1.16.4";
+        //strForgeVersion = "35.1.4";
+        //strMCPVersion = "20201102.104115";
+
         //Recuperation updater
         //Version vanilla
         //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
@@ -152,10 +154,12 @@ public class Launcher {
                 .withMods(mods)
                 .withNoGui(true)
                 .build();
+        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder().withSilentRead(false).withReExtractNatives(false).withEnableModsFromCurseForge(false).withInstallOptifineAsMod(false)
+                .build();
         return new FlowUpdater.FlowUpdaterBuilder().
                 withVersion(version).
                 withForgeVersion(forgeVersion).
-                withUpdaterOptions(new UpdaterOptions(false, false, false))
+                withUpdaterOptions(options)
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles.json").toURL()))
                 .withProgressCallback(callback)
                 .build();
@@ -185,32 +189,17 @@ public class Launcher {
         this.panelManager.setDisableInstallButton(true);
         if (offline) {
             this.panelManager.setProgress(100, 100);
-        } else {
-            TimerTask updateBar = new TimerTask() {
-                public void run() {
-                    float dl = updater.getDownloadInfos().getDownloaded()*1.0f;
-                    float dlTot = updater.getDownloadInfos().getTotalToDownload()*1.0f;
-                    panelManager.setProgress(dl, dlTot);
-                }
-            };
-            this.timerUpdateBar = new Timer("timerUpdateBar");
-            long delay  = 50L;
-            long period = 50L;
-            timerUpdateBar.scheduleAtFixedRate(updateBar, delay, period);
         }
-
         Thread t = new Thread(() -> {
             if (!offline) {
                 try {
-                    updater.update(dir, false);
+                    updater.update(dir);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                     panelManager.setInstallButtonText("Erreur");
                     panelManager.setDisableInstallButton(true);
                 } catch (Exception exception) {
                     exception.printStackTrace();
-                } finally {
-                    timerUpdateBar.cancel();
                 }
             }
             Platform.runLater(() -> {
@@ -273,7 +262,11 @@ public class Launcher {
     }
 
     public void setRAM(double ramD) {
-        saver.set("RAM", (Math.round(ramD)+""));
+        if (ramD == 0) {
+            saver.remove("RAM");
+        } else {
+            saver.set("RAM", (Math.round(ramD)+""));
+        }
         saver.save();
     }
 
@@ -294,9 +287,5 @@ public class Launcher {
 
     public String getForgeVersion() {
         return strForgeVersion;
-    }
-
-    public String getMCPVersion() {
-        return strMCPVersion;
     }
 }
