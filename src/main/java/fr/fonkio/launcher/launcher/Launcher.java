@@ -209,6 +209,7 @@ public class Launcher {
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
+                System.out.println("Fin update");
             }
             Platform.runLater(() -> {
                 panelManager.setStatus("Lancement ...");
@@ -246,6 +247,7 @@ public class Launcher {
         MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
         this.panelManager.setStatus("Jeu lancé");
         Process p = launcher.launch();
+
         this.panelManager.getStage().setIconified(true);
         Thread t = new Thread(() -> {
             try {
@@ -259,8 +261,7 @@ public class Launcher {
 
                 MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
 
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
         });
         t.start();
     }

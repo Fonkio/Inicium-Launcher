@@ -119,6 +119,7 @@ public class PanelMain extends Panel {
         topPanel.setMinHeight(340);
         topPanel.setMaxHeight(340);
 
+
         //SETTINGS
         this.vBoxSettings = new VBox();
         GridPane.setVgrow(this.vBoxSettings, Priority.ALWAYS);
@@ -437,4 +438,5 @@ public class PanelMain extends Panel {
     public boolean containsModsFolder() {
         return this.panelManager.containsModsFolder();
     }
+
 }

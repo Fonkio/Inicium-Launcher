@@ -64,7 +64,9 @@ public class MvCallback implements IProgressCallback {
     public void update(int downloaded, int max) {
         Platform.runLater(()-> {
             this.panelManager.setStatus(this.status + downloaded+"/"+max +"...");
-            this.panelManager.setProgress(downloaded, max);
+            if (max != 0) {
+                this.panelManager.setProgress(downloaded, max);
+            }
         }
         );
     }

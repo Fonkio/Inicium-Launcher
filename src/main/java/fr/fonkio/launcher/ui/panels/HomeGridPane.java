@@ -7,6 +7,7 @@ import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -15,9 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.*;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
@@ -77,7 +76,7 @@ public class HomeGridPane {
         GridPane.setVgrow(desc, Priority.ALWAYS);
         GridPane.setHgrow(desc, Priority.ALWAYS);
         GridPane.setValignment(desc, VPos.TOP);
-        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #bcc6e7; -fx-opacity: 70%;");
+        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #bcc6e7; -fx-opacity: 70%; ");
         desc.setTranslateY(130);
 
         Image twitterImage = new Image(Main.class.getResource("/twitter.png").toExternalForm());
