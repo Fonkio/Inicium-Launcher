@@ -431,8 +431,8 @@ public class PanelMain extends Panel {
         this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
     }
 
-    public void resetMods() {
-        this.panelManager.resetMods();
+    public void resetLauncher() {
+        this.panelManager.resetLauncher();
     }
 
     public boolean containsModsFolder() {

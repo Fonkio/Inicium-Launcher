@@ -216,8 +216,8 @@ public class PanelManager {
         return this.launcher.getDRP();
     }
 
-    public void resetMods() {
-        launcher.resetMod();
+    public void resetLauncher() {
+        launcher.resetLauncher();
     }
     public boolean containsModsFolder() {
         return launcher.containsModsFolder();

@@ -91,7 +91,7 @@ public class SettingsGridPane {
             save.setText("Sauvegardé !");
             save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
-        Button resetMod = new Button("Réinstaller les mods");
+        Button resetMod = new Button("Réinstaller le launcher");
         GridPane.setVgrow(resetMod, Priority.ALWAYS);
         GridPane.setHgrow(resetMod, Priority.ALWAYS);
         GridPane.setValignment(resetMod, VPos.BOTTOM);
@@ -102,7 +102,7 @@ public class SettingsGridPane {
         resetMod.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
         resetMod.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
         resetMod.setOnMouseClicked(e-> {
-            this.panelMain.resetMods();
+            this.panelMain.resetLauncher();
             resetMod.setVisible(false);
         });
         resetMod.setVisible(this.panelMain.containsModsFolder());

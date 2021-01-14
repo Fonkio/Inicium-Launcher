@@ -53,6 +53,9 @@ public class FileManager {
     public File getGameFolder() {
         return createGameDir();
     }
+    public File getGameFolder(String version) {
+        return new File (createGameDir(), version+"/");
+    }
     /*public File getRuntimeFolder() {
         return new File(createGameDir(), "runtime");
     }*/

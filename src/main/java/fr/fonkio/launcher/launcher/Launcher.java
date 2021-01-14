@@ -45,7 +45,7 @@ public class Launcher {
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
-    private final File dir = fileManager.getGameFolder();
+    private final File dir;
 
     public Launcher(PanelManager panelManager) throws MalformedURLException, BuilderException, URISyntaxException {
         this.panelManager = panelManager;
@@ -74,6 +74,7 @@ public class Launcher {
             }
         }
         saver.set("mcVersion", strVersion);
+        dir = fileManager.getGameFolder(strVersion);
 
         if (!HttpRecup.offline) {
             strForgeVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
@@ -194,13 +195,16 @@ public class Launcher {
             if (!offline) {
                 try {
                     File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
-                    for (File mod : modFolder.listFiles()) {
-                        if (mod.getName().startsWith("AI-")) {
-                            if(!mod.getName().contains(strVersion)) {
-                                mod.delete();
+                    if (modFolder != null && modFolder.isDirectory()) {
+                        for (File mod : modFolder.listFiles()) {
+                            if (mod.getName().startsWith("AI-")) {
+                                if(!mod.getName().contains(strVersion)) {
+                                    mod.delete();
+                                }
                             }
                         }
                     }
+
                     updater.update(dir);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -216,6 +220,7 @@ public class Launcher {
                 try {
                     launch(strVersion, strForgeVersion, strMCPVersion);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     panelManager.getStage().setIconified(false);
                     MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
                     panelManager.setInstallButtonText("Relancer");
@@ -226,6 +231,7 @@ public class Launcher {
                         JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
                     panelManager.setStatus("");
+
                 }
             });
         });
@@ -233,7 +239,7 @@ public class Launcher {
     }
     public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
         GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
-        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
+        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME+"/"+version, gameVersion, new GameTweak[0]);
         GameFolder gameFolder = new GameFolder("/assets/", "/libraries/", "/natives/", "/client.jar");
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
@@ -299,21 +305,23 @@ public class Launcher {
     }
 
     public boolean containsModsFolder() {
-        File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
+        File modFolder = new File(dir+"/mods");
         return modFolder.exists();
     }
 
-    public void resetMod() {
-        File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
-        System.out.println(modFolder.getPath());
-        deleteDirectory(modFolder);
+    public void resetLauncher() {
+        File launcherFolder = fileManager.getGameFolder();
+        System.out.println(launcherFolder.getPath());
+        deleteDirectory(launcherFolder);
     }
 
     private boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
-                deleteDirectory(file);
+                if (!file.getName().startsWith("launcher.")) {
+                    deleteDirectory(file);
+                }
             }
         }
         return directoryToBeDeleted.delete();
