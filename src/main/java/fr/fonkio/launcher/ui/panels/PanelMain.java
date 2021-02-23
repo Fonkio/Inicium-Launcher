@@ -385,10 +385,6 @@ public class PanelMain extends Panel {
         return this.panelManager.getVersion();
     }
 
-    /*public String getMCPVersion() {
-        return this.panelManager.getMCPVersion();
-    }*/
-
     public String getForgeVersion() {
         return this.panelManager.getForgeVersion();
     }

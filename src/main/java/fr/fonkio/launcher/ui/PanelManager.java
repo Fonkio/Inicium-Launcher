@@ -200,10 +200,6 @@ public class PanelManager {
         return this.launcher.getVersion();
     }
 
-    /*public String getMCPVersion() {
-        return this.launcher.getMCPVersion();
-    }*/
-
     public String getForgeVersion() {
         return this.launcher.getForgeVersion();
     }

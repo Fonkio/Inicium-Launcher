@@ -140,7 +140,7 @@ public class Launcher {
         }
         //Pas de mod pour l'instant
         //List<Mod> mods = new ArrayList<>();
-        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.json");
+        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
         Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
 
         final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
@@ -161,7 +161,7 @@ public class Launcher {
                 withVersion(version).
                 withForgeVersion(forgeVersion).
                 withUpdaterOptions(options)
-                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles.json").toURL()))
+                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
                 .withProgressCallback(callback)
                 .build();
     }
@@ -169,6 +169,7 @@ public class Launcher {
     public void setPseudo(String pseudo) {
         this.pseudo = pseudo;
     }
+
     public String getPseudo() {
         return this.pseudo;
     }
@@ -194,7 +195,7 @@ public class Launcher {
         Thread t = new Thread(() -> {
             if (!offline) {
                 try {
-                    File modFolder = new File(this.fileManager.createGameDir().getPath()+"/mods");
+                    File modFolder = new File(this.fileManager.getGameFolder(strVersion).getPath()+"/mods");
                     if (modFolder != null && modFolder.isDirectory()) {
                         for (File mod : modFolder.listFiles()) {
                             if (mod.getName().startsWith("AI-")) {
