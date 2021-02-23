@@ -336,7 +336,7 @@ public class PanelMain extends Panel {
 
     public void setPseudo(String pseudo) {
         this.pseudo.setText(pseudo);
-        String path = "https://minotar.net/avatar/"+pseudo+"/100.png";
+        String path = "https://cravatar.eu/head/"+pseudo+"/100.png";
         Image teteJ = new Image(path);
         this.imageViewTete.setImage(teteJ);
     }
