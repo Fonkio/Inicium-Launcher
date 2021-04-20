@@ -42,7 +42,7 @@ public class MvCallback implements IProgressCallback {
                 this.status = "Récupération des mods ";
                 break;
             case "FORGE":
-                this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ') ";
+                this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ) ";
                 break;
             case "INTERNAL_FORGE_HACKS":
                 this.status = "Forge installé, lancement... ";
