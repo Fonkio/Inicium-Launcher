@@ -16,12 +16,12 @@ import java.net.URISyntaxException;
 
 public class MvWildLauncher {
 
-    public static final String LAUNCHER_VERSION = "1.7";
+    public static final String LAUNCHER_VERSION = "1.7.1";
     public static final String SERVEUR_IP = "survie.mvwild.org";
     public static final String TWITTER_URL = "https://twitter.com/MvWild_Serveur";
     public static final String DISCORD_URL = "https://discord.gg/5JcvM2B";
     public static final String FACEBOOK_URL = "https://www.facebook.com/MvwildServeur/";
-    public static final String VOTE_URL = "https://www.mvwild.org/voter/";
+    public static final String VOTE_URL = "https://www.mvwild.org/vote";
     public static final String INSTAGRAM_URL = "https://www.instagram.com/mvwild/";
     public static final String SERVEUR_NAME = "MvWild";
     public static final String SITE_URL = "https://www.mvwild.org/";

@@ -328,7 +328,7 @@ public class PanelMain extends Panel {
 
     private void update () {
         try {
-            Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL+"launcher/"));
+            Desktop.getDesktop().browse(new URI(MvWildLauncher.SITE_URL+"mvlauncher"));
         } catch (IOException | URISyntaxException ioException) {
             ioException.printStackTrace();
         }
