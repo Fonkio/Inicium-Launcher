@@ -1,9 +1,11 @@
 package fr.fonkio.launcher.files;
 
-import fr.fonkio.launcher.Main;
+import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.OperatingSystem;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FileManager {
 
@@ -32,7 +34,7 @@ public class FileManager {
         if (!f.exists()) {
             boolean created = f.mkdirs();
             if (!created) {
-                Main.logger.log("Le dossier n'a pas pu être créé");
+                MvWildLauncher.logger.info("Le dossier n'a pas pu être créé");
             }
         }
 
@@ -42,7 +44,7 @@ public class FileManager {
     /*public File getAssetsFolder() {
         return new File(createGameDir(), "assets");
     }*/
-    public File getLauncherLog() { return new File(createGameDir()+"/", "launcher.log"); }
+    public Path getLauncherLogPath() { return Paths.get(createGameDir()+"/launcher.log");  }
     public File getLauncherProperties() { return new File(createGameDir()+"/", "launcher.properties"); }
     /*public File getNativesFolder() {
         return new File(createGameDir(), "natives");
@@ -53,8 +55,8 @@ public class FileManager {
     public File getGameFolder() {
         return createGameDir();
     }
-    public File getGameFolder(String version) {
-        return new File (createGameDir(), version+"/");
+    public Path getGameFolder(String version) {
+        return Paths.get(createGameDir().getPath()+ "/" + version+"/");
     }
     /*public File getRuntimeFolder() {
         return new File(createGameDir(), "runtime");

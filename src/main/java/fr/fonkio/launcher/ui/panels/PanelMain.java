@@ -345,8 +345,8 @@ public class PanelMain extends Panel {
         return this.panelManager.getRAM();
     }
 
-    public Boolean getDRP() {
-        return this.panelManager.getDRP();
+    public Boolean isDRPDisabled() {
+        return this.panelManager.isDRPDisabled();
     }
 
     public GridPane getLayout() {
@@ -357,8 +357,8 @@ public class PanelMain extends Panel {
         this.panelManager.setRAM(ramD);
     }
 
-    public void setDRP(boolean selected) {
-        this.panelManager.setDRP(selected);
+    public void setDisableDRP(boolean selected) {
+        this.panelManager.setDisableDRP(selected);
     }
 
     public void install() {
@@ -371,6 +371,10 @@ public class PanelMain extends Panel {
 
     public void setProgress(float avancee, float fin) {
         this.home.setProgress(avancee, fin);
+    }
+
+    public void setLoading() {
+        this.home.setLoading();
     }
 
     public void setDisableInstall(boolean b) {
@@ -434,5 +438,6 @@ public class PanelMain extends Panel {
     public boolean containsModsFolder() {
         return this.panelManager.containsModsFolder();
     }
+
 
 }

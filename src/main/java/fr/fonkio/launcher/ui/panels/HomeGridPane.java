@@ -1,19 +1,19 @@
 package fr.fonkio.launcher.ui.panels;
 
 import com.sun.webkit.WebPage;
-import fr.arinonia.arilibfx.ui.component.AProgressBar;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -36,7 +36,7 @@ public class HomeGridPane {
     private final PanelMain panelMain;
     private Label status;
     private Button installButton;
-    AProgressBar progressBar = new AProgressBar(400, 20);
+    ProgressBar progressBar = new ProgressBar();
 
     public HomeGridPane(PanelMain panelMain) {
         this.panelMain = panelMain;
@@ -92,8 +92,8 @@ public class HomeGridPane {
         twitter.setMinHeight(1500);
         twitter.setTranslateY(20);
         twitter.setTranslateX(30);
-
-        String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
+        String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"\">Chargement des tweets de MvWild_Serveur</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
+        //String content_url = "<a class=\"twitter-timeline\" data-lang=\"fr\" data-theme=\"dark\" href=\""+MvWildLauncher.TWITTER_URL+"?ref_src=twsrc%5Etfw\">Chargement des tweets ...</a> <script async src=\"https://platform.twitter.com/widgets.js\" charset=\"utf-8\"></script>";
         boolean webEnabled = true;
         try {
             WebView webView = new WebView();
@@ -133,15 +133,17 @@ public class HomeGridPane {
         GridPane.setValignment(installButton, VPos.TOP);
         GridPane.setHalignment(installButton, HPos.LEFT);
 
-        progressBar.setBackgroundColor(javafx.scene.paint.Color.rgb(92, 92, 92));
+        //progressBar.setBackgroundColor(javafx.scene.paint.Color.rgb(92, 92, 92));
         Stop[] stops = new Stop[]{new Stop(0, javafx.scene.paint.Color.rgb(48, 85, 22)), new Stop(1, javafx.scene.paint.Color.rgb(82, 135, 47))};
         LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
-        progressBar.setForegroundColor(lg);
+        //progressBar.setForegroundColor(lg);
         GridPane.setVgrow(progressBar, Priority.ALWAYS);
         GridPane.setHgrow(progressBar, Priority.ALWAYS);
         GridPane.setValignment(progressBar, VPos.TOP);
         GridPane.setHalignment(progressBar, HPos.LEFT);
         progressBar.setTranslateY(280);
+        progressBar.setMinWidth(500);
+        progressBar.setStyle("-fx-accent: #52872F");
 
         GridPane.setVgrow(this.status, Priority.ALWAYS);
         GridPane.setHgrow(this.status, Priority.ALWAYS);
@@ -316,7 +318,10 @@ public class HomeGridPane {
     }
 
     public void setProgress(float avancee, float fin) {
-        progressBar.setProgress(avancee, fin);
+        progressBar.setProgress(avancee/fin);
     }
 
+    public void setLoading() {
+        progressBar.setProgress(0);
+    }
 }

@@ -3,6 +3,8 @@ package fr.fonkio.launcher;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import fr.flowarg.flowlogger.ILogger;
+import fr.flowarg.flowlogger.Logger;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
@@ -14,7 +16,7 @@ import java.net.URISyntaxException;
 
 public class MvWildLauncher {
 
-    public static final String LAUNCHER_VERSION = "1.6.2";
+    public static final String LAUNCHER_VERSION = "1.7";
     public static final String SERVEUR_IP = "survie.mvwild.org";
     public static final String TWITTER_URL = "https://twitter.com/MvWild_Serveur";
     public static final String DISCORD_URL = "https://discord.gg/5JcvM2B";
@@ -27,6 +29,7 @@ public class MvWildLauncher {
     private static final DiscordRPC library = DiscordRPC.INSTANCE;
     private static Thread threadRP;
     private static final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
+    public static final ILogger logger = new Logger("MvWild", fileManager.getLauncherLogPath(), true);
     private static final Saver saver = new Saver(fileManager.getLauncherProperties());
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
@@ -50,12 +53,12 @@ public class MvWildLauncher {
         panelManager.init();
     }
     public static void stopRP() {
-        Main.logger.log("Arret - RP");
+        logger.info("Arret - RP");
         threadRP.interrupt();
         library.Discord_Shutdown();
     }
     public static void updatePresence(String version, String state, String largeImageKey, String pseudo) {
-        if(saver.get("DRP") != null || (!Boolean.parseBoolean(saver.get("DRP")))) {
+        if(saver.get("disableDRP") != null || (!Boolean.parseBoolean(saver.get("DRP")))) {
             DiscordRichPresence presence = new DiscordRichPresence();
             presence.startTimestamp = System.currentTimeMillis() / 1000;
             if (version == null) {

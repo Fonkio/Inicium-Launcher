@@ -43,13 +43,13 @@ public class PanelLogin extends Panel {
         if(!dir.exists()) {
             boolean created = dir.mkdir();
             if (!created) {
-                Main.logger.log("Le dossier n'a pas pu être créé");
+                MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
             }
         }
         if(!fileManager.getLauncherProperties().exists()){
             boolean created = fileManager.getLauncherProperties().createNewFile();
             if (!created) {
-                Main.logger.log("Le dossier n'a pas pu être créé");
+                MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
             }
         }
         saver = new Saver(fileManager.getLauncherProperties());

@@ -1,6 +1,5 @@
 package fr.fonkio.launcher.launcher;
 
-import fr.flowarg.flowlogger.Logger;
 import fr.flowarg.flowupdater.FlowUpdater;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.json.ExternalFile;
@@ -12,7 +11,6 @@ import fr.flowarg.flowupdater.versions.ForgeVersionBuilder;
 import fr.flowarg.flowupdater.versions.VanillaVersion;
 import fr.flowarg.flowupdater.versions.VersionType;
 import fr.flowarg.openlauncherlib.NewForgeVersionDiscriminator;
-import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
@@ -31,6 +29,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Launcher {
@@ -45,7 +44,7 @@ public class Launcher {
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
-    private final File dir;
+    private final Path dir;
 
     public Launcher(PanelManager panelManager) throws MalformedURLException, BuilderException, URISyntaxException {
         this.panelManager = panelManager;
@@ -53,15 +52,15 @@ public class Launcher {
         if (!fileManager.createGameDir().exists()) {
             boolean created = fileManager.createGameDir().mkdir();
             if (!created) {
-                Main.logger.log("Le dossier n'a pas pu être créé");
+                MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
             }
         }
 
         dlCallback = new MvCallback(this.panelManager);
 
         //Recuperation des versions
-        strVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"version.php");
-        Main.logger.log("Version MC : "+ strVersion);
+        strVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/versionMc.php");
+        MvWildLauncher.logger.info("Version MC : "+ strVersion);
         if (HttpRecup.offline || strVersion == null) {
             if (saver.get("mcVersion") == null) {
                 MvWildLauncher.stopRP();
@@ -70,7 +69,7 @@ public class Launcher {
 
                 HttpRecup.offline = true;
                 strVersion = saver.get("mcVersion");
-                Main.logger.log("Mode hors ligne ... Version mc recuperee : "+strVersion);
+                MvWildLauncher.logger.warn("Mode hors ligne ... Version mc recuperee : "+strVersion);
             }
         }
         saver.set("mcVersion", strVersion);
@@ -78,7 +77,7 @@ public class Launcher {
 
         if (!HttpRecup.offline) {
             strForgeVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
-            Main.logger.log("Version Forge : "+ strForgeVersion);
+            MvWildLauncher.logger.info("Version Forge : "+ strForgeVersion);
         }
         if (strForgeVersion == null) {
             if (saver.get("forgeVersion") == null) {
@@ -88,7 +87,7 @@ public class Launcher {
                 this.panelManager.setInstallButtonText("Jouer hors ligne");
                 HttpRecup.offline = true;
                 strForgeVersion = saver.get("forgeVersion");
-                Main.logger.log("Mode hors ligne ... Version Forge recuperee : "+strForgeVersion);
+                MvWildLauncher.logger.info("Mode hors ligne ... Version Forge recuperee : "+strForgeVersion);
             }
 
         }
@@ -96,7 +95,7 @@ public class Launcher {
 
         if (!HttpRecup.offline) {
             strMCPVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
-            Main.logger.log("Version MCP : "+ strMCPVersion);
+            MvWildLauncher.logger.info("Version MCP : "+ strMCPVersion);
         }
         if (strMCPVersion == null) {
             if (saver.get("mcpVersion") == null) {
@@ -106,7 +105,7 @@ public class Launcher {
                 this.panelManager.setInstallButtonText("Jouer hors ligne");
                 HttpRecup.offline = true;
                 strMCPVersion = saver.get("mcpVersion");
-                Main.logger.log("Mode hors ligne ... Version MCP recuperee : "+strMCPVersion);
+                MvWildLauncher.logger.info("Mode hors ligne ... Version MCP recuperee : "+strMCPVersion);
             }
         }
         saver.set("mcpVersion", strMCPVersion);
@@ -141,7 +140,6 @@ public class Launcher {
         //Pas de mod pour l'instant
         //List<Mod> mods = new ArrayList<>();
         List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
-        Logger logger = new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog());
 
         final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
                 .withName(versionMc)
@@ -149,17 +147,16 @@ public class Launcher {
                 .withVersionType(VersionType.FORGE).build();
         AbstractForgeVersion forgeVersion = new ForgeVersionBuilder(ForgeVersionBuilder.ForgeVersionType.NEW)
                 .withForgeVersion(versionForge)
-                .withVanillaVersion(version)
-                .withLogger(logger)
-                .withProgressCallback(callback)
                 .withMods(mods)
-                .withNoGui(true)
                 .build();
-        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder().withSilentRead(false).withReExtractNatives(false).withEnableModsFromCurseForge(false).withInstallOptifineAsMod(false)
+        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
+                .withSilentRead(false)
+                .withReExtractNatives(false)
                 .build();
         return new FlowUpdater.FlowUpdaterBuilder().
                 withVersion(version).
                 withForgeVersion(forgeVersion).
+                withLogger(MvWildLauncher.logger).
                 withUpdaterOptions(options)
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
                 .withProgressCallback(callback)
@@ -180,7 +177,7 @@ public class Launcher {
             JOptionPane.showMessageDialog(null, "Le pseudo est trop court !", "Erreur pseudo", JOptionPane.ERROR_MESSAGE);
         } else {
             MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-            Main.logger.log("Connexion avec le pseudo : "+pseudo);
+            MvWildLauncher.logger.info("Connexion avec le pseudo : "+pseudo);
             this.panelManager.setPseudo(pseudo);
             this.panelManager.showPanel(MainPanel.HOME);
         }
@@ -195,7 +192,7 @@ public class Launcher {
         Thread t = new Thread(() -> {
             if (!offline) {
                 try {
-                    File modFolder = new File(this.fileManager.getGameFolder(strVersion).getPath()+"/mods");
+                    File modFolder = new File(this.fileManager.getGameFolder(strVersion)+"/mods");
                     if (modFolder != null && modFolder.isDirectory()) {
                         for (File mod : modFolder.listFiles()) {
                             if (mod.getName().startsWith("AI-")) {
@@ -239,7 +236,7 @@ public class Launcher {
         t.start();
     }
     public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
-        GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
+        GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGHER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
         GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME+"/"+version, gameVersion, new GameTweak[0]);
         GameFolder gameFolder = new GameFolder("/assets/", "/libraries/", "/natives/", "/client.jar");
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
@@ -286,15 +283,16 @@ public class Launcher {
         saver.save();
     }
 
-    public void setDRP(boolean selected) {
+    public void setDisableDRP(boolean selected) {
         if(selected) {
             MvWildLauncher.stopRP();
         }
-        saver.set("DRP", selected+"");
+        saver.set("disableDRP", selected+"");
+        saver.save();
     }
 
-    public Boolean getDRP() {
-        return Boolean.parseBoolean(saver.get("DRP"));
+    public Boolean isDRPDisabled() {
+        return Boolean.parseBoolean(saver.get("disableDRP"));
     }
 
     public String getVersion() {

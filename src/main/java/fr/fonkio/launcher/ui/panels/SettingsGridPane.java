@@ -60,8 +60,8 @@ public class SettingsGridPane {
         slider.setSnapToTicks(true);
 
         CheckBox checkBox = new CheckBox();
-        if(this.panelMain.getDRP() != null) {
-            checkBox.setSelected(this.panelMain.getDRP());
+        if(this.panelMain.isDRPDisabled() != null) {
+            checkBox.setSelected(this.panelMain.isDRPDisabled());
         }
         checkBox.setTranslateY(25);
         Label checkText = new Label("Désactiver le Discord Rich Presence");
@@ -87,7 +87,7 @@ public class SettingsGridPane {
         save.setOnMouseClicked(e-> {
             double ramD = slider.getValue()*1024;
             this.panelMain.setRAM(ramD);
-            this.panelMain.setDRP(checkBox.isSelected());
+            this.panelMain.setDisableDRP(checkBox.isSelected());
             save.setText("Sauvegardé !");
             save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });

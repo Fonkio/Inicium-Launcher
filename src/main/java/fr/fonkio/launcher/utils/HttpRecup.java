@@ -17,7 +17,8 @@ public class HttpRecup {
     public static boolean offline = false;
 
     public static String getNbCo() {
-        String nbCo = null;
+        return "?";
+        /*String nbCo = null;
         try{
             URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/status.php").openConnection());
             connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
@@ -42,12 +43,12 @@ public class HttpRecup {
             return offline?"":nbCo.split(" joueur")[0].replaceAll(" ", "");
         } else {
             return "";
-        }
+        }*/
     }
 
 
     public static Map<String, List<String>> getList() {
-        StringBuilder stringBuilder = new StringBuilder();
+        /*StringBuilder stringBuilder = new StringBuilder();
         try{
             URLConnection connection = (new URL(MvWildLauncher.SITE_URL+"launcher/jsonPlayerList.php").openConnection());
             connection.setRequestProperty("User-Agent", MvWildLauncher.CONFIG_WEB);
@@ -73,7 +74,11 @@ public class HttpRecup {
                     map.put(tabResServPlayerList[i-1], Arrays.asList(tabResServPlayerList[i].split(",")));
                 }
             }
-        }
+        }*/
+        Map<String, List<String>> map = new HashMap<>();
+        List<String> temp = new ArrayList<>();
+        temp.add("La liste des joueurs est en maintenance");
+        map.put("Maintenance", temp);
         return map;
     }
 
@@ -97,7 +102,7 @@ public class HttpRecup {
         if (inputline == null) {
             return null;
         }
-        Main.logger.log("Version recupérée : "+inputline);
+        MvWildLauncher.logger.info("Version recupérée : "+inputline);
         return inputline;
     }
 }

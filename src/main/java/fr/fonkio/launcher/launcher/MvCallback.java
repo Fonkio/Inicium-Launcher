@@ -4,12 +4,14 @@ import fr.flowarg.flowlogger.ILogger;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
 import fr.fonkio.launcher.Main;
+import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.ui.PanelManager;
 import javafx.application.Platform;
 
 public class MvCallback implements IProgressCallback {
     private String status = "";
     private final PanelManager panelManager;
+    private boolean forge;
 
     public MvCallback(PanelManager panelManager) {
         this.panelManager = panelManager;
@@ -17,11 +19,12 @@ public class MvCallback implements IProgressCallback {
 
     @Override
     public void init(ILogger logger) {
-        Main.logger.log("Création callback "+this.getClass().getName());
+        MvWildLauncher.logger.info("Création callback "+this.getClass().getName());
     }
 
     @Override
     public void step(Step step) {
+        this.forge = false;
         switch (step.toString()) {
             case "PREREQUISITES":
                 this.status = "Chargement des prérequis... ";
@@ -43,6 +46,7 @@ public class MvCallback implements IProgressCallback {
                 break;
             case "FORGE":
                 this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ) ";
+                this.forge = true;
                 break;
             case "INTERNAL_FORGE_HACKS":
                 this.status = "Forge installé, lancement... ";
@@ -55,17 +59,21 @@ public class MvCallback implements IProgressCallback {
                 break;
             default:
                 this.status = "Chargement... ";
-                Main.logger.warn(step.toString());
+                MvWildLauncher.logger.err("Nouvelle étape de téléchargement non renseigné : " + step);
                 break;
         }
         Platform.runLater(()-> this.panelManager.setStatus(this.status+"..."));
     }
     @Override
-    public void update(int downloaded, int max) {
+    public void update(long downloaded, long max) {
         Platform.runLater(()-> {
-            this.panelManager.setStatus(this.status + downloaded+"/"+max +"...");
+            this.panelManager.setStatus(this.status + "...");
             if (max != 0) {
-                this.panelManager.setProgress(downloaded, max);
+                if(this.forge) {
+                    this.panelManager.setLoading();
+                } else {
+                    this.panelManager.setProgress(downloaded, max);
+                }
             }
         }
         );

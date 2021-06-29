@@ -1,6 +1,5 @@
 package fr.fonkio.launcher.ui;
 
-import fr.arinonia.arilibfx.AriLibFX;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
@@ -60,7 +59,10 @@ public class PanelManager {
         this.stage.show();
 
         GridPane layout = new GridPane();
-        layout.setStyle(AriLibFX.setResponsiveBackground(Main.class.getResource("/fondLauncher.png").toExternalForm()));
+        layout.setStyle(
+                "-fx-background-image: url('"+Main.class.getResource("/fondLauncher.png").toExternalForm()+"');"
+                +"-fx-backgound-repeat: skretch;"+"-fx-backgound-position: center center;"
+                +"-fx-background-size: cover;");
         this.stage.setScene(new Scene(layout));
         this.stage.setResizable(false);
 
@@ -148,6 +150,11 @@ public class PanelManager {
             panelMain.setProgress(avancee, fin);
         }
     }
+    public void setLoading() {
+        if (homeInit) {
+            panelMain.setLoading();
+        }
+    }
     public void setPseudo(String pseudo) {
         this.launcher.setPseudo(pseudo);
         if(homeInit) {
@@ -204,12 +211,12 @@ public class PanelManager {
         return this.launcher.getForgeVersion();
     }
 
-    public void setDRP(boolean selected) {
-        this.launcher.setDRP(selected);
+    public void setDisableDRP(boolean selected) {
+        this.launcher.setDisableDRP(selected);
     }
 
-    public Boolean getDRP() {
-        return this.launcher.getDRP();
+    public Boolean isDRPDisabled() {
+        return this.launcher.isDRPDisabled();
     }
 
     public void resetLauncher() {
@@ -218,4 +225,6 @@ public class PanelManager {
     public boolean containsModsFolder() {
         return launcher.containsModsFolder();
     }
+
+
 }
