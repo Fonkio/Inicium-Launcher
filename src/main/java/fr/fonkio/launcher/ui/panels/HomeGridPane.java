@@ -119,7 +119,7 @@ public class HomeGridPane {
                 Field field = webEngine.getClass().getDeclaredField("page");
                 field.setAccessible(true);
                 WebPage page = (WebPage)field.get(webEngine);
-                SwingUtilities.invokeLater(()->page.setBackgroundColor(new java.awt.Color(255, 255, 255, 0).getRGB()));
+                SwingUtilities.invokeLater(()->page.setBackgroundColor(Color.TRANSLUCENT));
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
             }
