@@ -56,7 +56,7 @@ public class FileManager {
         return createGameDir();
     }
     public Path getGameFolder(String version) {
-        return Paths.get(createGameDir().getPath()+ "/" + version+"/");
+        return Paths.get(createGameDir().getPath() +"/");
     }
     /*public File getRuntimeFolder() {
         return new File(createGameDir(), "runtime");

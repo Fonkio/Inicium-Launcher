@@ -393,6 +393,10 @@ public class PanelMain extends Panel {
         return this.panelManager.getForgeVersion();
     }
 
+    public String getFabricVersion() {
+        return this.panelManager.getFabricVersion();
+    }
+
     public void afficher(MainPanel mainPanel) {
         TranslateTransition tt = new TranslateTransition(Duration.millis(100), this.rectangleSelect);
         switch (mainPanel) {

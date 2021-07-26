@@ -6,10 +6,7 @@ import fr.flowarg.flowupdater.download.json.ExternalFile;
 import fr.flowarg.flowupdater.download.json.Mod;
 import fr.flowarg.flowupdater.utils.UpdaterOptions;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
-import fr.flowarg.flowupdater.versions.AbstractForgeVersion;
-import fr.flowarg.flowupdater.versions.ForgeVersionBuilder;
-import fr.flowarg.flowupdater.versions.VanillaVersion;
-import fr.flowarg.flowupdater.versions.VersionType;
+import fr.flowarg.flowupdater.versions.*;
 import fr.flowarg.openlauncherlib.NewForgeVersionDiscriminator;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
@@ -30,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Launcher {
@@ -40,13 +38,14 @@ public class Launcher {
     String pseudo;
     String strVersion;
     String strForgeVersion = null;
+    String strFabricVersion = null;
     String strMCPVersion = null;
     boolean offline = false;
     IProgressCallback dlCallback;
     FlowUpdater updater;
     private final Path dir;
 
-    public Launcher(PanelManager panelManager) throws MalformedURLException, BuilderException, URISyntaxException {
+    public Launcher(PanelManager panelManager) throws BuilderException, URISyntaxException, MalformedURLException {
         this.panelManager = panelManager;
 
         if (!fileManager.createGameDir().exists()) {
@@ -94,6 +93,24 @@ public class Launcher {
         saver.set("forgeVersion", strForgeVersion);
 
         if (!HttpRecup.offline) {
+            strFabricVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/fabricVersion.php");
+            MvWildLauncher.logger.info("Version Fabric : "+ strFabricVersion);
+        }
+        if (strFabricVersion == null) {
+            if (saver.get("fabricVersion") == null) {
+                MvWildLauncher.stopRP();
+                System.exit(0);
+            } else {
+                this.panelManager.setInstallButtonText("Jouer hors ligne");
+                HttpRecup.offline = true;
+                strFabricVersion = saver.get("fabricVersion");
+                MvWildLauncher.logger.info("Mode hors ligne ... Version Fabric recuperee : "+strFabricVersion);
+            }
+
+        }
+        saver.set("fabricVersion", strFabricVersion);
+
+        if (!HttpRecup.offline) {
             strMCPVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
             MvWildLauncher.logger.info("Version MCP : "+ strMCPVersion);
         }
@@ -119,7 +136,7 @@ public class Launcher {
         //Version vanilla
         //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
         //Version forge
-        updater = updateForge(dlCallback, strVersion, strForgeVersion);
+        updater = updateFabric(dlCallback, strVersion, strFabricVersion);
 
         if (updater == null && !HttpRecup.offline) {
             JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
@@ -163,6 +180,37 @@ public class Launcher {
                 .build();
     }
 
+    private FlowUpdater updateFabric(IProgressCallback callback, String versionMc, String versionFabric) throws BuilderException, URISyntaxException, MalformedURLException {
+        if (HttpRecup.offline) {
+            return null;
+        }
+
+        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
+                .withName(versionMc)
+                .withSnapshot(false)
+                .withVersionType(VersionType.FABRIC).build();
+        FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
+                .withFabricVersion(versionFabric)
+                .withMods(getMods())
+                .build();
+        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
+                .withSilentRead(false)
+                .withReExtractNatives(false)
+                .build();
+        return new FlowUpdater.FlowUpdaterBuilder().
+                withVersion(version).
+                withFabricVersion(fabricVersion).
+                withLogger(MvWildLauncher.logger).
+                withUpdaterOptions(options)
+                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
+                .withProgressCallback(callback)
+                .build();
+    }
+
+    private List<Mod> getMods() {
+        return Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
+    }
+
     public void setPseudo(String pseudo) {
         this.pseudo = pseudo;
     }
@@ -193,10 +241,14 @@ public class Launcher {
             if (!offline) {
                 try {
                     File modFolder = new File(this.fileManager.getGameFolder(strVersion)+"/mods");
-                    if (modFolder != null && modFolder.isDirectory()) {
+                    if (modFolder.isDirectory()) {
+                        List<String> name = new ArrayList<>();
+                        for (Mod mod : getMods()) {
+                            name.add(mod.getName());
+                        }
                         for (File mod : modFolder.listFiles()) {
-                            if (mod.getName().startsWith("AI-")) {
-                                if(!mod.getName().contains(strVersion)) {
+                            if (mod.getName().startsWith("AI_")) {
+                                if(!name.contains(mod.getName())) {
                                     mod.delete();
                                 }
                             }
@@ -216,7 +268,7 @@ public class Launcher {
             Platform.runLater(() -> {
                 panelManager.setStatus("Lancement ...");
                 try {
-                    launch(strVersion, strForgeVersion, strMCPVersion);
+                    launch(strVersion);
                 } catch (Exception e) {
                     e.printStackTrace();
                     panelManager.getStage().setIconified(false);
@@ -235,27 +287,33 @@ public class Launcher {
         });
         t.start();
     }
-    public void launch(String version, String versionForge, String versionMCP) throws LaunchException {
-        GameVersion gameVersion = new GameVersion(version, GameType.V1_13_HIGHER_FORGE.setNewForgeVersionDiscriminator(new NewForgeVersionDiscriminator(versionForge, version, "net.minecraftforge", versionMCP)));
-        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME+"/"+version, gameVersion, new GameTweak[0]);
-        GameFolder gameFolder = new GameFolder("/assets/", "/libraries/", "/natives/", "/client.jar");
+
+    public void launch(String version) throws LaunchException {
+
+        GameVersion gameVersion = new GameVersion(version, GameType.FABRIC);
+        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
+        GameFolder gameFolder = GameFolder.FLOW_UPDATER;
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
-        if(saver.get("RAM")!=null) {
-            profile.getVmArgs().add("-Xmx"+saver.get("RAM")+"M");
+
+        //Gestion param RAM
+        if(saver.get("RAM") != null) {
+            profile.getVmArgs().add("-Xmx" + saver.get("RAM") + "M");
         }
 
         ExternalLauncher launcher = new ExternalLauncher(profile);
+
         //Lancement
         MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
         this.panelManager.setStatus("Jeu lancé");
         Process p = launcher.launch();
-
         this.panelManager.getStage().setIconified(true);
+
+        //Thread attente fermeture du jeu
         Thread t = new Thread(() -> {
             try {
-                p.waitFor(); //Attente fermeture du jeu
+                p.waitFor();
                 Platform.runLater(()->{
                     panelManager.getStage().setIconified(false);
                     panelManager.setDisableInstallButton(false);
@@ -301,6 +359,10 @@ public class Launcher {
 
     public String getForgeVersion() {
         return strForgeVersion;
+    }
+
+    public String getFabricVersion() {
+        return strFabricVersion;
     }
 
     public boolean containsModsFolder() {

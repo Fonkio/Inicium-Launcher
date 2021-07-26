@@ -2,10 +2,11 @@ plugins {
     id 'idea'
     id 'java-library'
     id 'application'
+    id("org.openjfx.javafxplugin") version "0.0.10"
 }
 
 group 'fr.fonkio'
-version '1.7.2'
+version '1.8'
 
 repositories {
     mavenCentral()
@@ -13,27 +14,32 @@ repositories {
         url = "https://jitpack.io/"
         name = 'JitPack'
     }
-    jcenter()
+}
+
+javafx {
+    version = '12'
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web' ]
 }
 
 dependencies {
-    compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
-    compile 'club.minnced:java-discord-rpc:2.0.1'
-    compile 'fr.flowarg:flowupdater:1.4.+'
-    compile 'fr.flowarg:openlauncherlib:3.1.+'
+    implementation 'de.jensd:fontawesomefx-fontawesome:4+'
+    implementation 'club.minnced:java-discord-rpc:2.0.1'
+    implementation 'fr.flowarg:flowupdater:1.4.+'
+    implementation 'fr.flowarg:openlauncherlib:3.2.+'
 }
 
 compileJava {
     options.encoding = "UTF-8"
 }
 
-jar{
-    manifest{
+application {
+    getMainClass().set('fr.fonkio.launcher.Main')
+}
+
+jar {
+    duplicatesStrategy = 'include'
+    manifest {
         attributes 'Main-Class': 'fr.fonkio.launcher.Main'
     }
-    from{
-        configurations.compile.collect{
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
+    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 }

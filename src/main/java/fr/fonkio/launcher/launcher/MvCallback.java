@@ -27,53 +27,52 @@ public class MvCallback implements IProgressCallback {
         this.forge = false;
         switch (step.toString()) {
             case "PREREQUISITES":
-                this.status = "Chargement des prérequis... ";
+                this.status = "Chargement des prérequis...";
                 break;
             case "READ":
-                this.status = "Verification des fichiers ";
+                this.status = "Verification des fichiers...";
                 break;
             case "DL_LIBS":
-                this.status = "Téléchargement des librairies ";
+                this.status = "Téléchargement des librairies...";
                 break;
             case "DL_ASSETS":
-                this.status = "Téléchargement des assets ";
+                this.status = "Téléchargement des assets...";
                 break;
             case "EXTRACT_NATIVES":
-                this.status = "Extraction en cours, veuillez patienter ";
+                this.status = "Extraction en cours, veuillez patienter...";
                 break;
             case "MODS":
-                this.status = "Récupération des mods ";
+                this.status = "Récupération des mods...";
                 break;
             case "FORGE":
-                this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ) ";
+                this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ)";
+                this.forge = true;
+                break;
+            case "FABRIC":
+                this.status = "Install. de fabric ...";
                 this.forge = true;
                 break;
             case "INTERNAL_FORGE_HACKS":
                 this.status = "Forge installé, lancement... ";
                 break;
             case "END":
-                this.status = "Terminé ";
+                this.status = "Terminé !";
                 break;
             case "EXTERNAL_FILES":
-                this.status = "Téléchargement de la configuration... ";
+                this.status = "Téléchargement de la configuration...";
                 break;
             default:
-                this.status = "Chargement... ";
+                this.status = "Chargement...";
                 MvWildLauncher.logger.err("Nouvelle étape de téléchargement non renseigné : " + step);
                 break;
         }
-        Platform.runLater(()-> this.panelManager.setStatus(this.status+"..."));
+        Platform.runLater(()-> this.panelManager.setStatus(this.status));
     }
     @Override
     public void update(long downloaded, long max) {
         Platform.runLater(()-> {
-            this.panelManager.setStatus(this.status + "...");
             if (max != 0) {
-                if(this.forge) {
-                    this.panelManager.setLoading();
-                } else {
-                    this.panelManager.setProgress(downloaded, max);
-                }
+                this.panelManager.setProgress(downloaded, max);
             }
         }
         );

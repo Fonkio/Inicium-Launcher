@@ -211,6 +211,10 @@ public class PanelManager {
         return this.launcher.getForgeVersion();
     }
 
+    public String getFabricVersion() {
+        return this.launcher.getFabricVersion();
+    }
+
     public void setDisableDRP(boolean selected) {
         this.launcher.setDisableDRP(selected);
     }

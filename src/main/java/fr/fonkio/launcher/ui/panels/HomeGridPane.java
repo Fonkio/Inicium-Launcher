@@ -49,7 +49,7 @@ public class HomeGridPane {
         } else {
             installButton = new Button("Jouer");
         }
-        status = new Label("Version "+this.panelMain.getVersion() + "/ Forge : "+this.panelMain.getForgeVersion());
+        status = new Label("Version "+this.panelMain.getVersion() + "/ Fabric : "+this.panelMain.getFabricVersion());
 
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);
