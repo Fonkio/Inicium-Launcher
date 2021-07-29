@@ -191,7 +191,7 @@ public class Launcher {
                 .withVersionType(VersionType.FABRIC).build();
         FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
                 .withFabricVersion(versionFabric)
-                .withMods(getMods())
+                .withMods(MvWildLauncher.getMods())
                 .build();
         UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
                 .withSilentRead(false)
@@ -205,10 +205,6 @@ public class Launcher {
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
                 .withProgressCallback(callback)
                 .build();
-    }
-
-    private List<Mod> getMods() {
-        return Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
     }
 
     public void setPseudo(String pseudo) {
@@ -243,7 +239,7 @@ public class Launcher {
                     File modFolder = new File(this.fileManager.getGameFolder(strVersion)+"/mods");
                     if (modFolder.isDirectory()) {
                         List<String> name = new ArrayList<>();
-                        for (Mod mod : getMods()) {
+                        for (Mod mod : MvWildLauncher.getMods()) {
                             name.add(mod.getName());
                         }
                         for (File mod : modFolder.listFiles()) {

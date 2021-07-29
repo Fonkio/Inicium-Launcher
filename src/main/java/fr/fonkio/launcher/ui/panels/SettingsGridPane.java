@@ -1,7 +1,7 @@
 package fr.fonkio.launcher.ui.panels;
 
+import fr.flowarg.flowupdater.download.json.Mod;
 import fr.fonkio.launcher.MvWildLauncher;
-import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -59,26 +59,25 @@ public class SettingsGridPane {
         slider.setMinorTickCount(1);
         slider.setSnapToTicks(true);
 
-        CheckBox checkBox = new CheckBox();
+        CheckBox checkBoxDrp = new CheckBox();
         if(this.panelMain.isDRPDisabled() != null) {
-            checkBox.setSelected(this.panelMain.isDRPDisabled());
+            checkBoxDrp.setSelected(this.panelMain.isDRPDisabled());
         }
-        checkBox.setTranslateY(25);
+        checkBoxDrp.setTranslateY(25);
         Label checkText = new Label("Désactiver le Discord Rich Presence");
         checkText.setTranslateY(25);
         checkText.setTranslateX(25);
         checkText.setOnMouseEntered(e-> this.panelMain.getLayout().setCursor(Cursor.HAND));
         checkText.setOnMouseExited(e-> this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
-        checkBox.setOnMouseEntered(e-> this.panelMain.getLayout().setCursor(Cursor.HAND));
-        checkBox.setOnMouseExited(e-> this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+        checkBoxDrp.setOnMouseEntered(e-> this.panelMain.getLayout().setCursor(Cursor.HAND));
+        checkBoxDrp.setOnMouseExited(e-> this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
 
         checkText.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
 
         Button save = new Button("Sauvegarder");
-        GridPane.setVgrow(save, Priority.ALWAYS);
-        GridPane.setHgrow(save, Priority.ALWAYS);
-        GridPane.setValignment(save, VPos.BOTTOM);
-        GridPane.setHalignment(save, HPos.RIGHT);
+
+        save.setTranslateY(400);
+        save.setTranslateX(0);
         save.setMinWidth(140);
         save.setMaxHeight(40);
         save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
@@ -87,15 +86,14 @@ public class SettingsGridPane {
         save.setOnMouseClicked(e-> {
             double ramD = slider.getValue()*1024;
             this.panelMain.setRAM(ramD);
-            this.panelMain.setDisableDRP(checkBox.isSelected());
+            this.panelMain.setDisableDRP(checkBoxDrp.isSelected());
             save.setText("Sauvegardé !");
             save.setStyle("-fx-background-color: #52872F; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
         Button resetMod = new Button("Réinstaller le launcher");
-        GridPane.setVgrow(resetMod, Priority.ALWAYS);
-        GridPane.setHgrow(resetMod, Priority.ALWAYS);
-        GridPane.setValignment(resetMod, VPos.BOTTOM);
-        GridPane.setHalignment(resetMod, HPos.LEFT);
+
+        resetMod.setTranslateY(400);
+        resetMod.setTranslateX(150);
         resetMod.setMinWidth(140);
         resetMod.setMaxHeight(40);
         resetMod.setStyle("-fx-background-color: #FF0000; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
@@ -111,14 +109,21 @@ public class SettingsGridPane {
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
         checkText.setOnMouseClicked(e->{
-            checkBox.setSelected(!checkBox.isSelected());
+            checkBoxDrp.setSelected(!checkBoxDrp.isSelected());
             save.setText("Sauvegarder");
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
-        checkBox.setOnMouseClicked(e -> {
+        checkBoxDrp.setOnMouseClicked(e -> {
             save.setText("Sauvegarder");
             save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
         });
+
+        Label modTitle = new Label("Désactiver le téléchargement automatique des mods");
+        GridPane.setVgrow(modTitle, Priority.ALWAYS);
+        GridPane.setHgrow(modTitle, Priority.ALWAYS);
+        GridPane.setValignment(modTitle, VPos.TOP);
+        modTitle.setStyle("-fx-font-size: 20px; -fx-text-fill: white;  -fx-font-weight: bold");
+        modTitle.setTranslateY(230);
 
         Label credit = new Label("MvWildLauncher par Fonkio (v"+ MvWildLauncher.LAUNCHER_VERSION+")");
         GridPane.setVgrow(credit, Priority.ALWAYS);
@@ -128,6 +133,34 @@ public class SettingsGridPane {
         credit.setTranslateY(25);
         credit.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
 
-        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, resetMod, checkBox, checkText, credit);
+        int translate = 110;
+        for (Mod mod : MvWildLauncher.getMods()) {
+            CheckBox checkBoxMod = new CheckBox();
+            checkBoxMod.setTranslateY(translate);
+            Label mobLabel = new Label(mod.getName().split("_")[1]);
+            mobLabel.setTranslateY(translate);
+            mobLabel.setTranslateX(25);
+            mobLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
+            mobLabel.setOnMouseEntered(e-> this.panelMain.getLayout().setCursor(Cursor.HAND));
+            mobLabel.setOnMouseExited(e-> this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+            checkBoxMod.setOnMouseEntered(e-> this.panelMain.getLayout().setCursor(Cursor.HAND));
+            checkBoxMod.setOnMouseExited(e-> this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
+
+            mobLabel.setOnMouseClicked(e->{
+                checkBoxMod.setSelected(!checkBoxMod.isSelected());
+                save.setText("Sauvegarder");
+                save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+            });
+            checkBoxMod.setOnMouseClicked(e -> {
+                save.setText("Sauvegarder");
+                save.setStyle("-fx-background-color: #2a4c13; -fx-background-insets: 0; -fx-font-size: 14px; -fx-text-fill: white;");
+            });
+
+            translate += 25;
+            topPanelSettings.getChildren().addAll(checkBoxMod, mobLabel);
+        }
+
+
+        topPanelSettings.getChildren().addAll(settingsTitle, ramTitle, ram0, slider, save, resetMod, checkBoxDrp, checkText, credit, modTitle);
     }
 }

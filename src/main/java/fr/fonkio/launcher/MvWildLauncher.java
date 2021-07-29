@@ -5,6 +5,7 @@ import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
 import fr.flowarg.flowlogger.ILogger;
 import fr.flowarg.flowlogger.Logger;
+import fr.flowarg.flowupdater.download.json.Mod;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.ui.PanelManager;
@@ -13,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 public class MvWildLauncher {
 
@@ -31,6 +33,11 @@ public class MvWildLauncher {
     private static final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
     public static final ILogger logger = new Logger("MvWild", fileManager.getLauncherLogPath(), true);
     private static final Saver saver = new Saver(fileManager.getLauncherProperties());
+
+    public static List<Mod> getMods() {
+        return Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
+    }
+
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
         String appName = "752142344240889867";
