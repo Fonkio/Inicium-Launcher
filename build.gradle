@@ -14,18 +14,23 @@ repositories {
         url = "https://jitpack.io/"
         name = 'JitPack'
     }
+    maven {
+        url 'https://litarvan.github.io/maven'
+    }
 }
 
 javafx {
     version = '12'
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web' ]
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing' ]
 }
 
 dependencies {
+    implementation 'fr.litarvan:openauth:1+'
     implementation 'de.jensd:fontawesomefx-fontawesome:4+'
     implementation 'club.minnced:java-discord-rpc:2.0.1'
     implementation 'fr.flowarg:flowupdater:1.4.+'
     implementation 'fr.flowarg:openlauncherlib:3.2.+'
+    implementation 'com.github.oshi:oshi-core:5+'
 }
 
 compileJava {
