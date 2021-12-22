@@ -128,14 +128,6 @@ public class Launcher {
         saver.set("mcpVersion", strMCPVersion);
         saver.save();
 
-        //strVersion = "1.16.4";
-        //strForgeVersion = "35.1.4";
-        //strMCPVersion = "20201102.104115";
-
-        //Recuperation updater
-        //Version vanilla
-        //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
-        //Version forge
         updater = updateFabric(dlCallback, strVersion, strFabricVersion);
 
         if (updater == null && !HttpRecup.offline) {
@@ -143,65 +135,25 @@ public class Launcher {
         }
 
     }
-    /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
-        final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
-        final IVanillaVersion version = versionBuilder.build(false, VersionType.VANILLA);
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog())).withProgressCallback(callback).build();
-        return updater;
-    }*/
-
-    private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
-        if (HttpRecup.offline) {
-            return null;
-        }
-        //Pas de mod pour l'instant
-        //List<Mod> mods = new ArrayList<>();
-        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
-
-        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
-                .withName(versionMc)
-                .withSnapshot(false)
-                .withVersionType(VersionType.FORGE).build();
-        AbstractForgeVersion forgeVersion = new ForgeVersionBuilder(ForgeVersionBuilder.ForgeVersionType.NEW)
-                .withForgeVersion(versionForge)
-                .withMods(mods)
-                .build();
-        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
-                .withSilentRead(false)
-                .withReExtractNatives(false)
-                .build();
-        return new FlowUpdater.FlowUpdaterBuilder().
-                withVersion(version).
-                withForgeVersion(forgeVersion).
-                withLogger(MvWildLauncher.logger).
-                withUpdaterOptions(options)
-                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
-                .withProgressCallback(callback)
-                .build();
-    }
 
     private FlowUpdater updateFabric(IProgressCallback callback, String versionMc, String versionFabric) throws BuilderException, URISyntaxException, MalformedURLException {
+
         if (HttpRecup.offline) {
             return null;
         }
 
         final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
                 .withName(versionMc)
-                .withSnapshot(false)
-                .withVersionType(VersionType.FABRIC).build();
-        FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
+                .withVersionType(VersionType.FABRIC)
+                .build();
+        final FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
                 .withFabricVersion(versionFabric)
                 .withMods(getMods())
                 .build();
-        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
-                .withSilentRead(false)
-                .withReExtractNatives(false)
-                .build();
-        return new FlowUpdater.FlowUpdaterBuilder().
-                withVersion(version).
-                withFabricVersion(fabricVersion).
-                withLogger(MvWildLauncher.logger).
-                withUpdaterOptions(options)
+        return new FlowUpdater.FlowUpdaterBuilder()
+                .withVanillaVersion(version)
+                .withFabricVersion(fabricVersion)
+                .withLogger(MvWildLauncher.logger)
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
                 .withProgressCallback(callback)
                 .build();
