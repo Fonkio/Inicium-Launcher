@@ -8,13 +8,10 @@ import fr.fonkio.launcher.ui.panel.Panel;
 import fr.fonkio.launcher.ui.panels.PanelMain;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
-import fr.fonkio.launcher.utils.HttpRecup;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -26,8 +23,6 @@ public class PanelManager {
     private final Stage stage;
     private final TopPanel topPanel;
     private final GridPane centerPanel = new GridPane();
-    private Double xOffset;
-    private Double yOffset;
     PanelLogin panelLogin;
     boolean loginInit = false;
     PanelMain panelMain;
@@ -53,10 +48,12 @@ public class PanelManager {
         this.stage.setWidth(1280);
         this.stage.setMinHeight(720);
         this.stage.setHeight(720);
-        this.stage.initStyle(StageStyle.UNDECORATED);
+        this.stage.initStyle(StageStyle.DECORATED);
         this.stage.centerOnScreen();
         this.stage.getIcons().add(new Image(Main.class.getResource("/logoNBG.png").toExternalForm()));
         this.stage.show();
+        stage.setOnCloseRequest(we ->
+                System.exit(0));
 
         GridPane layout = new GridPane();
         layout.setStyle(
@@ -66,26 +63,12 @@ public class PanelManager {
         this.stage.setScene(new Scene(layout));
         this.stage.setResizable(false);
 
-        RowConstraints topPanelConstraints = new RowConstraints();
-        topPanelConstraints.setValignment(VPos.TOP);
-        topPanelConstraints.setMinHeight(25);
-        topPanelConstraints.setMaxHeight(25);
-        layout.getRowConstraints().addAll(topPanelConstraints, new RowConstraints());
-        layout.add(this.topPanel.getLayout(), 0, 0);
-        this.topPanel.init(this);
-        layout.add(this.centerPanel, 0, 1);
+
+        layout.add(this.centerPanel, 0, 0);
         GridPane.setVgrow(this.centerPanel, Priority.ALWAYS);
         GridPane.setHgrow(this.centerPanel, Priority.ALWAYS);
-        //ResizeHelper.addResizeListener(this.stage);
-        layout.setOnMousePressed(event -> {
-            xOffset = stage.getX() - event.getScreenX();
-            yOffset = stage.getY() - event.getScreenY();
-        });
-        layout.setOnMouseDragged(event -> {
-            stage.setX(event.getScreenX() + xOffset);
-            stage.setY(event.getScreenY() + yOffset);
-        });
-        checkVersion();
+
+        checkLauncherVersion();
         showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
 
         MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
@@ -96,27 +79,27 @@ public class PanelManager {
         boolean changementPanel = true;
         boolean initPanel = true;
         switch (name) {
-            case HOME:
+            case HOME -> {
                 panel = panelMain;
                 changementPanel = currentPanel.equals(fr.fonkio.launcher.utils.MainPanel.LOGIN);
                 initPanel = !homeInit;
                 homeInit = true;
                 currentPanel = fr.fonkio.launcher.utils.MainPanel.HOME;
-                break;
-            case PARAMETRES:
+            }
+            case PARAMETRES -> {
                 panel = panelMain;
                 changementPanel = currentPanel.equals(fr.fonkio.launcher.utils.MainPanel.LOGIN);
                 initPanel = !homeInit;
                 homeInit = true;
                 currentPanel = fr.fonkio.launcher.utils.MainPanel.PARAMETRES;
-                break;
-            case LOGIN:
+            }
+            case LOGIN -> {
                 currentPanel = fr.fonkio.launcher.utils.MainPanel.LOGIN;
                 initPanel = !loginInit;
                 loginInit = true;
                 panel = panelLogin;
                 panelLogin.showPanel();
-                break;
+            }
         }
         if (panel != null){
             if(changementPanel) {
@@ -191,12 +174,8 @@ public class PanelManager {
         this.launcher.connexion();
     }
 
-    public String checkVersion() {
-        String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
-        if (version != null && (!HttpRecup.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
-            return version;
-        }
-        return null;
+    public String checkLauncherVersion() {
+        return this.launcher.checkVersion();
     }
 
     public void install() {

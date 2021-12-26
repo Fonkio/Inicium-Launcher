@@ -1,9 +1,8 @@
 package fr.fonkio.launcher.ui.panels;
 
-
-import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
+import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
 import fr.theshark34.openlauncherlib.util.Saver;
@@ -30,7 +29,7 @@ import java.util.TimerTask;
 public class PanelLogin extends Panel {
     private final Button validate = new Button("Valider");
     private final TextField usernameTextField = new TextField();
-    private final Saver saver;
+    private final MvSaver saver = new MvSaver();
     private GridPane loginPanel;
     private final CheckBox saveName = new CheckBox();
 
@@ -38,21 +37,14 @@ public class PanelLogin extends Panel {
 
     public PanelLogin(Stage stage) throws IOException {
         super(stage);
-        FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-        File dir = fileManager.createGameDir();
+        File dir = FileManager.createGameDir();
         if(!dir.exists()) {
             boolean created = dir.mkdir();
             if (!created) {
                 MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
             }
         }
-        if(!fileManager.getLauncherProperties().exists()){
-            boolean created = fileManager.getLauncherProperties().createNewFile();
-            if (!created) {
-                MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
-            }
-        }
-        saver = new Saver(fileManager.getLauncherProperties());
+
     }
 
     @Override
