@@ -2,6 +2,7 @@ package fr.fonkio.launcher.utils;
 
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
+import fr.fonkio.launcher.launcher.Launcher;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -13,8 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class HttpRecup {
-
-    public static boolean offline = false;
 
     public static String getNbCo() {
         return "?";
@@ -93,8 +92,8 @@ public class HttpRecup {
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             inputline = in.readLine();
         } catch (Exception e) {
-            if (!offline) {
-                offline = true;
+            if (!Launcher.offline) {
+                Launcher.offline = true;
                 JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nPassage en mode hors-ligne", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
             }
             return null;

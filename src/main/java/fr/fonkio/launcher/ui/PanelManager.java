@@ -8,17 +8,12 @@ import fr.fonkio.launcher.ui.panel.Panel;
 import fr.fonkio.launcher.ui.panels.PanelMain;
 import fr.fonkio.launcher.ui.panels.PanelLogin;
 import fr.fonkio.launcher.ui.panels.includes.TopPanel;
-import fr.fonkio.launcher.utils.HttpRecup;
-import javafx.event.EventHandler;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.*;
@@ -28,8 +23,6 @@ public class PanelManager {
     private final Stage stage;
     private final TopPanel topPanel;
     private final GridPane centerPanel = new GridPane();
-    private Double xOffset;
-    private Double yOffset;
     PanelLogin panelLogin;
     boolean loginInit = false;
     PanelMain panelMain;
@@ -75,7 +68,7 @@ public class PanelManager {
         GridPane.setVgrow(this.centerPanel, Priority.ALWAYS);
         GridPane.setHgrow(this.centerPanel, Priority.ALWAYS);
 
-        checkVersion();
+        checkLauncherVersion();
         showPanel(fr.fonkio.launcher.utils.MainPanel.LOGIN);
 
         MvWildLauncher.updatePresence(null, "Connexion au launcher ...", "mvwildlogo", null);
@@ -181,12 +174,8 @@ public class PanelManager {
         this.launcher.connexion();
     }
 
-    public String checkVersion() {
-        String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
-        if (version != null && (!HttpRecup.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
-            return version;
-        }
-        return null;
+    public String checkLauncherVersion() {
+        return this.launcher.checkVersion();
     }
 
     public void install() {

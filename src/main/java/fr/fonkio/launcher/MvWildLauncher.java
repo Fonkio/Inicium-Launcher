@@ -7,6 +7,7 @@ import fr.flowarg.flowlogger.ILogger;
 import fr.flowarg.flowlogger.Logger;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.files.FileManager;
+import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.stage.Stage;
@@ -28,9 +29,10 @@ public class MvWildLauncher {
     public static final String CONFIG_WEB = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23/0/1271.95 Safari/53.7.11";
     private static final DiscordRPC library = DiscordRPC.INSTANCE;
     private static Thread threadRP;
-    private static final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-    public static final ILogger logger = new Logger("MvWild", fileManager.getLauncherLogPath(), true);
-    private static final Saver saver = new Saver(fileManager.getLauncherProperties());
+    public static final ILogger logger = new Logger("MvWild", FileManager.getLauncherLogPath(), true);
+    private static final MvSaver saver = new MvSaver();
+
+
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
         String appName = "752142344240889867";

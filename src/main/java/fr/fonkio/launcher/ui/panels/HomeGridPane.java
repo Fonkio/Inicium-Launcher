@@ -3,6 +3,7 @@ package fr.fonkio.launcher.ui.panels;
 import com.sun.webkit.WebPage;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
+import fr.fonkio.launcher.launcher.Launcher;
 import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
@@ -44,7 +45,7 @@ public class HomeGridPane {
 
     //Affichage onglet jouer par defaut
     public void addTopPanel(GridPane pane) {
-        if (HttpRecup.offline) {
+        if (Launcher.offline) {
             installButton = new Button("Mode Hors-Ligne");
         } else {
             installButton = new Button("Jouer");
