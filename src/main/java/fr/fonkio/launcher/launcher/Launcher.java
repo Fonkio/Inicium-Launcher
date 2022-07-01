@@ -1,15 +1,11 @@
 package fr.fonkio.launcher.launcher;
 
-import fr.flowarg.flowupdater.FlowUpdater;
 import fr.flowarg.flowupdater.download.IProgressCallback;
-import fr.flowarg.flowupdater.download.json.ExternalFile;
 import fr.flowarg.flowupdater.download.json.Mod;
-import fr.flowarg.flowupdater.utils.UpdaterOptions;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
-import fr.flowarg.flowupdater.versions.*;
-import fr.flowarg.openlauncherlib.NewForgeVersionDiscriminator;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
+import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.utils.HttpRecup;
 import fr.fonkio.launcher.utils.MainPanel;
@@ -19,196 +15,65 @@ import fr.theshark34.openlauncherlib.external.ExternalLauncher;
 import fr.theshark34.openlauncherlib.minecraft.*;
 import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Launcher {
 
-    private final FileManager fileManager = new FileManager(MvWildLauncher.SERVEUR_NAME.toLowerCase());
-    private final Saver saver = new Saver(fileManager.getLauncherProperties());
+    private final MvSaver saver = new MvSaver();
     private final PanelManager panelManager;
     String pseudo;
     String strVersion;
     String strForgeVersion = null;
-    String strFabricVersion = null;
-    String strMCPVersion = null;
-    boolean offline = false;
-    IProgressCallback dlCallback;
-    FlowUpdater updater;
-    private final Path dir;
+    String strFabricVersion;
+    IProgressCallback mvCallback;
+    Updater updater;
+
+    public static boolean offline = false;
+    
+
 
     public Launcher(PanelManager panelManager) throws BuilderException, URISyntaxException, MalformedURLException {
         this.panelManager = panelManager;
 
-        if (!fileManager.createGameDir().exists()) {
-            boolean created = fileManager.createGameDir().mkdir();
+        if (!FileManager.createGameDir().exists()) {
+            boolean created = FileManager.createGameDir().mkdir();
             if (!created) {
                 MvWildLauncher.logger.err("Le dossier n'a pas pu être créé");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Le dossier n'a pas pu être créé");
+                alert.show();
             }
         }
 
-        dlCallback = new MvCallback(this.panelManager);
+        mvCallback = new MvCallback(this.panelManager);
 
-        //Recuperation des versions
-        strVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/versionMc.php");
-        MvWildLauncher.logger.info("Version MC : "+ strVersion);
-        if (HttpRecup.offline || strVersion == null) {
-            if (saver.get("mcVersion") == null) {
-                MvWildLauncher.stopRP();
-                System.exit(0);
-            } else {
+        strVersion = getVersion("launcher/versionMc.php", "mcVersion");
+        strFabricVersion = getVersion("launcher/fabricVersion.php", "fabricVersion");
 
-                HttpRecup.offline = true;
-                strVersion = saver.get("mcVersion");
-                MvWildLauncher.logger.warn("Mode hors ligne ... Version mc recuperee : "+strVersion);
+        try {
+            updater = new Updater(strVersion, strFabricVersion, mvCallback);
+        } catch (Exception e) {
+            if (!offline) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Erreur création de la mise à jour");
+                alert.setContentText(e.getMessage());
+                alert.setOnCloseRequest(event -> stop());
+                alert.show();
             }
         }
-        saver.set("mcVersion", strVersion);
-        dir = fileManager.getGameFolder(strVersion);
-
-        if (!HttpRecup.offline) {
-            strForgeVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/forgeVersion.php");
-            MvWildLauncher.logger.info("Version Forge : "+ strForgeVersion);
-        }
-        if (strForgeVersion == null) {
-            if (saver.get("forgeVersion") == null) {
-                MvWildLauncher.stopRP();
-                System.exit(0);
-            } else {
-                this.panelManager.setInstallButtonText("Jouer hors ligne");
-                HttpRecup.offline = true;
-                strForgeVersion = saver.get("forgeVersion");
-                MvWildLauncher.logger.info("Mode hors ligne ... Version Forge recuperee : "+strForgeVersion);
-            }
-
-        }
-        saver.set("forgeVersion", strForgeVersion);
-
-        if (!HttpRecup.offline) {
-            strFabricVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/fabricVersion.php");
-            MvWildLauncher.logger.info("Version Fabric : "+ strFabricVersion);
-        }
-        if (strFabricVersion == null) {
-            if (saver.get("fabricVersion") == null) {
-                MvWildLauncher.stopRP();
-                System.exit(0);
-            } else {
-                this.panelManager.setInstallButtonText("Jouer hors ligne");
-                HttpRecup.offline = true;
-                strFabricVersion = saver.get("fabricVersion");
-                MvWildLauncher.logger.info("Mode hors ligne ... Version Fabric recuperee : "+strFabricVersion);
-            }
-
-        }
-        saver.set("fabricVersion", strFabricVersion);
-
-        if (!HttpRecup.offline) {
-            strMCPVersion = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/mcpVersion.php");
-            MvWildLauncher.logger.info("Version MCP : "+ strMCPVersion);
-        }
-        if (strMCPVersion == null) {
-            if (saver.get("mcpVersion") == null) {
-                MvWildLauncher.stopRP();
-                System.exit(0);
-            } else {
-                this.panelManager.setInstallButtonText("Jouer hors ligne");
-                HttpRecup.offline = true;
-                strMCPVersion = saver.get("mcpVersion");
-                MvWildLauncher.logger.info("Mode hors ligne ... Version MCP recuperee : "+strMCPVersion);
-            }
-        }
-        saver.set("mcpVersion", strMCPVersion);
-        saver.save();
-
-        //strVersion = "1.16.4";
-        //strForgeVersion = "35.1.4";
-        //strMCPVersion = "20201102.104115";
-
-        //Recuperation updater
-        //Version vanilla
-        //final FlowUpdater updater = updateVanilla(dir, dlCallback, strVersion);
-        //Version forge
-        updater = updateFabric(dlCallback, strVersion, strFabricVersion);
-
-        if (updater == null && !HttpRecup.offline) {
-            JOptionPane.showMessageDialog(null, "Erreur de mise à jour de la version minecraft (null)", "Erreur updater", JOptionPane.ERROR_MESSAGE);
-        }
-
-    }
-    /*private FlowUpdater updateVanilla(File dir, IProgressCallback callback, String strVersion) throws IOException, BuilderArgumentException {
-        final IVanillaVersion.Builder versionBuilder = new IVanillaVersion.Builder(strVersion);
-        final IVanillaVersion version = versionBuilder.build(false, VersionType.VANILLA);
-        final FlowUpdater updater = new FlowUpdater.FlowUpdaterBuilder().withVersion(version).withLogger(new Logger("["+MvWildLauncher.SERVEUR_NAME+"]", fileManager.getLauncherLog())).withProgressCallback(callback).build();
-        return updater;
-    }*/
-
-    private FlowUpdater updateForge(IProgressCallback callback, String versionMc, String versionForge) throws BuilderException, URISyntaxException, MalformedURLException {
-        if (HttpRecup.offline) {
-            return null;
-        }
-        //Pas de mod pour l'instant
-        //List<Mod> mods = new ArrayList<>();
-        List<Mod> mods = Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
-
-        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
-                .withName(versionMc)
-                .withSnapshot(false)
-                .withVersionType(VersionType.FORGE).build();
-        AbstractForgeVersion forgeVersion = new ForgeVersionBuilder(ForgeVersionBuilder.ForgeVersionType.NEW)
-                .withForgeVersion(versionForge)
-                .withMods(mods)
-                .build();
-        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
-                .withSilentRead(false)
-                .withReExtractNatives(false)
-                .build();
-        return new FlowUpdater.FlowUpdaterBuilder().
-                withVersion(version).
-                withForgeVersion(forgeVersion).
-                withLogger(MvWildLauncher.logger).
-                withUpdaterOptions(options)
-                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
-                .withProgressCallback(callback)
-                .build();
     }
 
-    private FlowUpdater updateFabric(IProgressCallback callback, String versionMc, String versionFabric) throws BuilderException, URISyntaxException, MalformedURLException {
-        if (HttpRecup.offline) {
-            return null;
-        }
-
-        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
-                .withName(versionMc)
-                .withSnapshot(false)
-                .withVersionType(VersionType.FABRIC).build();
-        FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
-                .withFabricVersion(versionFabric)
-                .withMods(getMods())
-                .build();
-        UpdaterOptions options = new UpdaterOptions.UpdaterOptionsBuilder()
-                .withSilentRead(false)
-                .withReExtractNatives(false)
-                .build();
-        return new FlowUpdater.FlowUpdaterBuilder().
-                withVersion(version).
-                withFabricVersion(fabricVersion).
-                withLogger(MvWildLauncher.logger).
-                withUpdaterOptions(options)
-                .withExternalFiles(ExternalFile.getExternalFilesFromJson(new URI(MvWildLauncher.SITE_URL+"launcher/externalfiles/externalfiles.php").toURL()))
-                .withProgressCallback(callback)
-                .build();
-    }
-
-    private List<Mod> getMods() {
-        return Mod.getModsFromJson(MvWildLauncher.SITE_URL+"launcher/mods.php");
+    private void stop() {
+        MvWildLauncher.stopRP();
+        System.exit(0);
     }
 
     public void setPseudo(String pseudo) {
@@ -217,6 +82,39 @@ public class Launcher {
 
     public String getPseudo() {
         return this.pseudo;
+    }
+
+    private String getVersion(String path, String versionName) {
+        String version = null;
+        if (!offline) {
+            version = HttpRecup.getVersion(MvWildLauncher.SITE_URL + path);
+        }
+        if (version == null) {
+            if (saver.get(versionName) == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Impossible de lancer le jeu");
+                alert.setContentText("Le mode hors ligne du launcher est disponible uniquement quand le jeu a été lancé au moins une fois.");
+                alert.setOnCloseRequest(event -> stop());
+                alert.show();
+            } else {
+                goOffiline();
+                version = saver.get(versionName);
+                MvWildLauncher.logger.info("Mode hors ligne ... Version "+ versionName +" recuperee : "+ version);
+            }
+        }
+        saver.set(versionName, version);
+        saver.save();
+        return version;
+    }
+
+    private void goOffiline() {
+        this.panelManager.setInstallButtonText("Jouer hors ligne");
+        offline = true;
+        MvWildLauncher.logger.info("Mode hors ligne ...");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Passage en mode hors ligne");
+        alert.setContentText("Impossible d'établir la connexion avec le serveur, passage en mode hors ligne");
+        alert.show();
     }
 
     public void connexion() {
@@ -240,10 +138,10 @@ public class Launcher {
         Thread t = new Thread(() -> {
             if (!offline) {
                 try {
-                    File modFolder = new File(this.fileManager.getGameFolder(strVersion)+"/mods");
+                    File modFolder = new File(String.valueOf(FileManager.getModFolderPath()));
                     if (modFolder.isDirectory()) {
                         List<String> name = new ArrayList<>();
-                        for (Mod mod : getMods()) {
+                        for (Mod mod : Updater.getMods()) {
                             name.add(mod.getName());
                         }
                         for (File mod : modFolder.listFiles()) {
@@ -254,8 +152,7 @@ public class Launcher {
                             }
                         }
                     }
-
-                    updater.update(dir);
+                    updater.update();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                     panelManager.setInstallButtonText("Erreur");
@@ -292,7 +189,7 @@ public class Launcher {
 
         GameVersion gameVersion = new GameVersion(version, GameType.FABRIC);
         GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
-        GameFolder gameFolder = GameFolder.FLOW_UPDATER;
+        GameFolder gameFolder = GameFolder.FLOW_UPDATER_1_19_SUP;
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
@@ -366,17 +263,17 @@ public class Launcher {
     }
 
     public boolean containsModsFolder() {
-        File modFolder = new File(dir+"/mods");
+        File modFolder = FileManager.getModFolderPath().toFile();
         return modFolder.exists();
     }
 
     public void resetLauncher() {
-        File launcherFolder = fileManager.getGameFolder();
+        File launcherFolder = FileManager.getGameFolder();
         System.out.println(launcherFolder.getPath());
         deleteDirectory(launcherFolder);
     }
 
-    private boolean deleteDirectory(File directoryToBeDeleted) {
+    private void deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
@@ -385,6 +282,15 @@ public class Launcher {
                 }
             }
         }
-        return directoryToBeDeleted.delete();
+        directoryToBeDeleted.delete();
     }
+
+    public String checkVersion() {
+        String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
+        if (version != null && (!Launcher.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+            return version;
+        }
+        return null;
+    }
+
 }

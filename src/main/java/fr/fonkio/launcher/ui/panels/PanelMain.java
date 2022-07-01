@@ -319,7 +319,7 @@ public class PanelMain extends Panel {
 
         //Ajout des éléments
         pane.getChildren().addAll(rectangleSelect, imageViewMvWild, jouerLabel, buttonSetting, settingLabel, pseudo, imageViewTete, buttonPlayer, playerListLabel);
-        String checkVersion = panelManager.checkVersion();
+        String checkVersion = panelManager.checkLauncherVersion();
         if (checkVersion != null) {
             updateLabel.setText(updateLabel.getText()+"v"+checkVersion+")");
             pane.getChildren().addAll(updateLabel, buttonUpdate);

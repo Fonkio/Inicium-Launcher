@@ -2,64 +2,61 @@ package fr.fonkio.launcher.files;
 
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.utils.OperatingSystem;
+import fr.theshark34.openlauncherlib.util.Saver;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class FileManager {
 
-    private final String serverName;
+    private static final String SERVER_NAME = MvWildLauncher.SERVEUR_NAME.toLowerCase();
 
-    public FileManager(String serverName) {
-        this.serverName = serverName;
-    }
+    public static File createGameDir() {
 
-    public File createGameDir() {
         final String userHome = System.getProperty("user.home");
 
         final String fileSeparator = File.separator;
-        File f;
-        switch (OperatingSystem.getCurrentPlatform()) {
-            case WINDOWS:
-                 f = new File(userHome + fileSeparator + "AppData" + fileSeparator + "Roaming" + fileSeparator + "." + this.serverName);
-                 break;
-            case MACOS:
-                f = new File(userHome + fileSeparator + "Library" + fileSeparator + "Application Support" + fileSeparator + this.serverName);
-                break;
-            default:
-                f = new File(userHome + fileSeparator + "." + this.serverName);
-                break;
-        }
-        if (!f.exists()) {
-            boolean created = f.mkdirs();
+        File gameDir = switch (OperatingSystem.getCurrentPlatform()) {
+            case WINDOWS -> new File(userHome + fileSeparator + "AppData" + fileSeparator + "Roaming" + fileSeparator + "." + SERVER_NAME);
+            case MACOS -> new File(userHome + fileSeparator + "Library" + fileSeparator + "Application Support" + fileSeparator + SERVER_NAME);
+            default -> new File(userHome + fileSeparator + "." + SERVER_NAME);
+        };
+        if (!gameDir.exists()) {
+            boolean created = gameDir.mkdirs();
             if (!created) {
                 MvWildLauncher.logger.info("Le dossier n'a pas pu être créé");
             }
         }
 
-        return f;
+        return gameDir;
     }
 
-    /*public File getAssetsFolder() {
-        return new File(createGameDir(), "assets");
-    }*/
-    public Path getLauncherLogPath() { return Paths.get(createGameDir()+"/launcher.log");  }
-    public File getLauncherProperties() { return new File(createGameDir()+"/", "launcher.properties"); }
-    /*public File getNativesFolder() {
-        return new File(createGameDir(), "natives");
+    public static Path getLauncherLogPath() { return Paths.get(createGameDir()+"/launcher.log");  }
+
+    public static Saver getSaver() {
+        File fileProp = new File(createGameDir()+"/", "launcher.properties");
+        if (!fileProp.exists()) {
+            try {
+                fileProp.createNewFile();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+        return new Saver(Paths.get(fileProp.getPath()));
     }
-    public File getLibsFolder() {
-        return new File(createGameDir(), "libs");
-    }*/
-    public File getGameFolder() {
+
+    public static File getGameFolder() {
         return createGameDir();
     }
-    public Path getGameFolder(String version) {
+    public static Path getGameFolderPath() {
         return Paths.get(createGameDir().getPath() +"/");
     }
-    /*public File getRuntimeFolder() {
-        return new File(createGameDir(), "runtime");
-    }*/
+
+    public static Path getModFolderPath() {
+        return Paths.get(createGameDir().getPath() +"/mods");
+    }
+
 
 }
