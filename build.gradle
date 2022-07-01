@@ -24,8 +24,8 @@ javafx {
 dependencies {
     api 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
     api 'club.minnced:java-discord-rpc:2.0.1'
-    api 'fr.flowarg:flowupdater:1.5.1'
-    api 'fr.flowarg:openlauncherlib:3.2.3'
+    api 'fr.flowarg:flowupdater:1.7.1'
+    api 'fr.flowarg:openlauncherlib:3.2.5'
 }
 
 compileJava {

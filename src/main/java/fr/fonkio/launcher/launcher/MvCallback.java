@@ -1,6 +1,7 @@
 package fr.fonkio.launcher.launcher;
 
 import fr.flowarg.flowlogger.ILogger;
+import fr.flowarg.flowupdater.download.DownloadList;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.Step;
 import fr.fonkio.launcher.Main;
@@ -31,8 +32,7 @@ public class MvCallback implements IProgressCallback {
             case "DL_ASSETS" -> this.status = "Téléchargement des assets...";
             case "EXTRACT_NATIVES" -> this.status = "Extraction en cours, veuillez patienter...";
             case "MODS" -> this.status = "Récupération des mods...";
-            case "FORGE" -> this.status = "Install. de forge (Cette étape peu prendre du temps lors d'une MAJ)";
-            case "FABRIC" -> this.status = "Install. de fabric ...";
+            case "MOD_LOADER" -> this.status = "Install. de fabric ...";
             case "INTERNAL_FORGE_HACKS" -> this.status = "Forge installé, lancement... ";
             case "END" -> this.status = "Terminé !";
             case "EXTERNAL_FILES" -> this.status = "Téléchargement de la configuration...";
@@ -44,10 +44,10 @@ public class MvCallback implements IProgressCallback {
         Platform.runLater(()-> this.panelManager.setStatus(this.status));
     }
     @Override
-    public void update(long downloaded, long max) {
+    public void update(DownloadList.DownloadInfo dlInfo) {
         Platform.runLater(()-> {
-            if (max != 0) {
-                this.panelManager.setProgress(downloaded, max);
+            if (dlInfo.getTotalToDownloadBytes() != 0) {
+                this.panelManager.setProgress(dlInfo.getDownloadedBytes(), dlInfo.getTotalToDownloadBytes());
             }
         }
         );

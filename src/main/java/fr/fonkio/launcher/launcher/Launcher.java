@@ -189,7 +189,7 @@ public class Launcher {
 
         GameVersion gameVersion = new GameVersion(version, GameType.FABRIC);
         GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
-        GameFolder gameFolder = GameFolder.FLOW_UPDATER;
+        GameFolder gameFolder = GameFolder.FLOW_UPDATER_1_19_SUP;
         AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
