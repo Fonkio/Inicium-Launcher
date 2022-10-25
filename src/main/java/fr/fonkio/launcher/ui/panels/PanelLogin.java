@@ -2,10 +2,9 @@ package fr.fonkio.launcher.ui.panels;
 
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
-import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.ui.panel.Panel;
-import fr.theshark34.openlauncherlib.util.Saver;
+import fr.fonkio.launcher.utils.MainPanel;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
@@ -14,8 +13,8 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
@@ -27,13 +26,8 @@ import java.util.TimerTask;
 
 
 public class PanelLogin extends Panel {
-    private final Button validate = new Button("Valider");
-    private final TextField usernameTextField = new TextField();
-    private final MvSaver saver = new MvSaver();
+    private final Button validate = new Button();
     private GridPane loginPanel;
-    private final CheckBox saveName = new CheckBox();
-
-    Label saveNameLabel = new Label("Se connecter automatiquement");
 
     public PanelLogin(Stage stage) throws IOException {
         super(stage);
@@ -50,14 +44,6 @@ public class PanelLogin extends Panel {
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-        String savePseudo = saver.get("name");
-        if (savePseudo != null) { //pseudo save
-            connexionAnimation(panelManager, true);
-            setDisableAll(true);
-        } else {
-            setDisableAll(false);
-        }
-
 
         this.loginPanel = new GridPane();
         GridPane mainPanel = new GridPane();
@@ -83,137 +69,85 @@ public class PanelLogin extends Panel {
 
         mainPanel.setStyle("-fx-background-color: #181818;");
 
-        Label bienvenue = new Label("SE CONNECTER !");
+        Label bienvenue = new Label("MvWild Launcher");
         GridPane.setVgrow(bienvenue, Priority.ALWAYS);
         GridPane.setHgrow(bienvenue, Priority.ALWAYS);
         GridPane.setValignment(bienvenue, VPos.TOP);
         GridPane.setHalignment(bienvenue, HPos.CENTER);
-        bienvenue.setTranslateY(27);
+        bienvenue.setTranslateY(280);
 
-        bienvenue.setStyle("-fx-text-fill: white; -fx-font-size: 20px;");
+        bienvenue.setStyle("-fx-text-fill: white; -fx-font-size: 35px; -fx-font-style: bold");
 
         Separator connectSeparator = new Separator();
         GridPane.setVgrow(connectSeparator, Priority.ALWAYS);
         GridPane.setHgrow(connectSeparator, Priority.ALWAYS);
         GridPane.setValignment(connectSeparator, VPos.TOP);
         GridPane.setHalignment(connectSeparator, HPos.CENTER);
-        connectSeparator.setTranslateY(60);
+        connectSeparator.setTranslateY(345);
         connectSeparator.setMinWidth(325);
         connectSeparator.setMaxWidth(325);
         connectSeparator.setStyle("-fx-background-color: white; -fx-opacity: 50%;");
 
-        Label usernameLabel = new Label("Pseudo");
-        GridPane.setVgrow(usernameLabel, Priority.ALWAYS);
-        GridPane.setHgrow(usernameLabel, Priority.ALWAYS);
-        GridPane.setValignment(usernameLabel, VPos.TOP);
-        GridPane.setHalignment(usernameLabel, HPos.CENTER);
-        usernameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
-        usernameLabel.setTranslateY(270);
-        usernameLabel.setTranslateX(-135);
-
-
-        if (savePseudo != null) {
-            usernameTextField.setText(savePseudo);
-        }
-        GridPane.setVgrow(usernameTextField, Priority.ALWAYS);
-        GridPane.setHgrow(usernameTextField, Priority.ALWAYS);
-        GridPane.setValignment(usernameTextField, VPos.TOP);
-        GridPane.setHalignment(usernameTextField, HPos.CENTER);
-        usernameTextField.setStyle("-fx-background-color: #1e1e1e; -fx-font-size: 16px; -fx-text-fill: #e5e5e5");
-        usernameTextField.setMaxWidth(325);
-        usernameTextField.setMaxHeight(40);
-        usernameTextField.setTranslateY(300);
-        usernameTextField.setOnKeyReleased(e->{
-
-            if(usernameTextField.getText().length() >= 3) {
-                if (e.getCode().equals(KeyCode.ENTER)) {
-                    connexionAnimation(panelManager, false);
-                } else {
-                    validate.setDisable(false);
-                }
-            } else {
-                validate.setDisable(true);
-            }
-
-        });
-
-        Separator usernameSeparator = new Separator();
-        GridPane.setVgrow(usernameSeparator, Priority.ALWAYS);
-        GridPane.setHgrow(usernameSeparator, Priority.ALWAYS);
-        GridPane.setValignment(usernameSeparator, VPos.CENTER);
-        GridPane.setHalignment(usernameSeparator, HPos.CENTER);
-        usernameSeparator.setTranslateY(-20);
-        usernameSeparator.setMinWidth(325);
-        usernameSeparator.setMaxWidth(325);
-        usernameSeparator.setMaxHeight(1);
-        usernameSeparator.setStyle("-fx-background-color: white; -fx-opacity: 50%;");
-
-
-        Separator validateSeparator = new Separator();
-        GridPane.setVgrow(validateSeparator, Priority.ALWAYS);
-        GridPane.setHgrow(validateSeparator, Priority.ALWAYS);
-        GridPane.setValignment(validateSeparator, VPos.TOP);
-        GridPane.setHalignment(validateSeparator, HPos.CENTER);
-        validateSeparator.setTranslateY(60);
-        validateSeparator.setMinWidth(325);
-        validateSeparator.setMaxWidth(325);
-        validateSeparator.setStyle("-fx-background-color: white; -fx-opacity: 50%;");
-
-
-        saveName.setSelected(savePseudo != null);
-        GridPane.setVgrow(saveName, Priority.ALWAYS);
-        GridPane.setHgrow(saveName, Priority.ALWAYS);
-        GridPane.setValignment(saveName, VPos.TOP);
-        GridPane.setHalignment(saveName, HPos.CENTER);
-        saveName.setTranslateY(400);
-        saveName.setTranslateX(-150);
-
-        GridPane.setVgrow(saveNameLabel, Priority.ALWAYS);
-        GridPane.setHgrow(saveNameLabel, Priority.ALWAYS);
-        GridPane.setValignment(saveNameLabel, VPos.TOP);
-        GridPane.setHalignment(saveNameLabel, HPos.CENTER);
-        saveNameLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
-        saveNameLabel.setTranslateY(400);
-        saveNameLabel.setTranslateX(-40);
-        saveNameLabel.setOnMouseClicked(e -> saveName.setSelected(!saveName.isSelected()));
-
-
+        ImageView view = new ImageView(new Image("microsoft.png"));
+        view.setPreserveRatio(true);
+        view.setFitHeight(30d);
         GridPane.setVgrow(validate, Priority.ALWAYS);
         GridPane.setHgrow(validate, Priority.ALWAYS);
-        GridPane.setValignment(validate, VPos.CENTER);
+        GridPane.setValignment(validate, VPos.TOP);
         GridPane.setHalignment(validate, HPos.CENTER);
-        validate.setTranslateY(20);
+        validate.setGraphic(view);
+        validate.setTranslateY(380);
         validate.setMinWidth(325);
         validate.setMaxHeight(50);
-        validate.setStyle("-fx-background-color: #52872F; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font: 14px; -fx-text-fill: white");
+        validate.setStyle("-fx-background-color: #52872F; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font-size: 20px; -fx-font-style: bold; -fx-text-fill: white");
         validate.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
         validate.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        validate.setOnMouseClicked(e-> connexionAnimation(panelManager, false));
-        if(usernameTextField.getText().length() < 3) {
-            validate.setDisable(true);
+        validate.setOnMouseClicked(e-> {
+            connexionEnCours();
+            panelManager.connexion();
+        });
+        if (panelManager.isConnected()) {
+            connexionEnCours();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    connexionAnimation(panelManager);
+                }
+            };
+            Timer timer = new Timer("Timer");
+            long delay = 1000L;
+            timer.schedule(task, delay);
+        } else {
+            seConnecter();
         }
 
-        mainPanel.getChildren().addAll(bienvenue, connectSeparator, usernameLabel, usernameTextField, usernameSeparator, saveName, saveNameLabel, validate);
+        mainPanel.getChildren().addAll(bienvenue, connectSeparator, validate);
         this.layout.getChildren().add(loginPanel);
     }
 
-    private void connexionAnimation(PanelManager panelManager, boolean quickStart) {
+    private void connexionEnCours() {
+        validate.setDisable(true);
+        validate.setText(" Connexion...");
+    }
+
+    private void seConnecter() {
+        validate.setDisable(false);
+        validate.setText(" Connexion à Micosoft");
+    }
+
+    public void connected(PanelManager panelManager) {
+        connexionAnimation(panelManager);
+    }
+
+    private void connexionAnimation(PanelManager panelManager) {
         TimerTask task = new TimerTask() {
             public void run() {
-                Platform.runLater(panelManager::connexion);
+                Platform.runLater(() -> panelManager.showPanel(MainPanel.HOME)
+                );
             }
         };
-        if (!quickStart) {
-            if (saveName.isSelected()) {
-                saver.set("name", usernameTextField.getText());
-            } else {
-                saver.remove("name");
-                System.out.println(validate.getText());
-            }
-        }
-        saver.save();
-        Timer timer = new Timer("Timer");
 
+        Timer timer = new Timer("Timer");
         long delay = 1000L;
         TranslateTransition tt = new TranslateTransition(Duration.millis(500), loginPanel);
         tt.setToX(1280);
@@ -223,25 +157,10 @@ public class PanelLogin extends Panel {
     }
 
     public void showPanel() {
+        seConnecter();
         TranslateTransition tt = new TranslateTransition(Duration.millis(500), loginPanel);
         tt.setToX(0);
         tt.play();
-        setDisableAll(false);
     }
 
-    private void setDisableAll(boolean disabled) {
-        saveName.setDisable(disabled);
-        usernameTextField.setDisable(disabled);
-        saveNameLabel.setDisable(disabled);
-        if (disabled) {
-            validate.setText("Connexion en cours ...");
-        } else {
-            validate.setText("Valider");
-        }
-        validate.setDisable(disabled);
-    }
-
-    public String getPseudoTextField() {
-        return this.usernameTextField.getText();
-    }
 }

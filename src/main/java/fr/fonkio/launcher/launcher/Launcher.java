@@ -7,13 +7,12 @@ import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
+import fr.fonkio.launcher.utils.EnumSaver;
 import fr.fonkio.launcher.utils.HttpRecup;
-import fr.fonkio.launcher.utils.MainPanel;
 import fr.theshark34.openlauncherlib.LaunchException;
 import fr.theshark34.openlauncherlib.external.ExternalLaunchProfile;
 import fr.theshark34.openlauncherlib.external.ExternalLauncher;
 import fr.theshark34.openlauncherlib.minecraft.*;
-import fr.theshark34.openlauncherlib.util.Saver;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -40,7 +39,7 @@ public class Launcher {
     
 
 
-    public Launcher(PanelManager panelManager) throws BuilderException, URISyntaxException, MalformedURLException {
+    public Launcher(PanelManager panelManager) throws BuilderException {
         this.panelManager = panelManager;
 
         if (!FileManager.createGameDir().exists()) {
@@ -55,8 +54,8 @@ public class Launcher {
 
         mvCallback = new MvCallback(this.panelManager);
 
-        strVersion = getVersion("launcher/versionMc.php", "mcVersion");
-        strFabricVersion = getVersion("launcher/fabricVersion.php", "fabricVersion");
+        strVersion = getVersion("launcher/versionMc.php", EnumSaver.VERSION_MC);
+        strFabricVersion = getVersion("launcher/fabricVersion.php", EnumSaver.VERSION_FABRIC);
 
         try {
             updater = new Updater(strVersion, strFabricVersion, mvCallback);
@@ -76,21 +75,13 @@ public class Launcher {
         System.exit(0);
     }
 
-    public void setPseudo(String pseudo) {
-        this.pseudo = pseudo;
-    }
-
-    public String getPseudo() {
-        return this.pseudo;
-    }
-
-    private String getVersion(String path, String versionName) {
+    private String getVersion(String path, EnumSaver versionProp) {
         String version = null;
         if (!offline) {
             version = HttpRecup.getVersion(MvWildLauncher.SITE_URL + path);
         }
         if (version == null) {
-            if (saver.get(versionName) == null) {
+            if (saver.get(versionProp) == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Impossible de lancer le jeu");
                 alert.setContentText("Le mode hors ligne du launcher est disponible uniquement quand le jeu a été lancé au moins une fois.");
@@ -98,11 +89,11 @@ public class Launcher {
                 alert.show();
             } else {
                 goOffiline();
-                version = saver.get(versionName);
-                MvWildLauncher.logger.info("Mode hors ligne ... Version "+ versionName +" recuperee : "+ version);
+                version = saver.get(versionProp);
+                MvWildLauncher.logger.info("Mode hors ligne ... Version "+ versionProp.getKey() +" recuperee : "+ version);
             }
         }
-        saver.set(versionName, version);
+        saver.set(versionProp, version);
         saver.save();
         return version;
     }
@@ -115,18 +106,6 @@ public class Launcher {
         alert.setTitle("Passage en mode hors ligne");
         alert.setContentText("Impossible d'établir la connexion avec le serveur, passage en mode hors ligne");
         alert.show();
-    }
-
-    public void connexion() {
-        String pseudo = this.panelManager.getPseudoTextField();
-        if (pseudo.length()<3) {
-            JOptionPane.showMessageDialog(null, "Le pseudo est trop court !", "Erreur pseudo", JOptionPane.ERROR_MESSAGE);
-        } else {
-            MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
-            MvWildLauncher.logger.info("Connexion avec le pseudo : "+pseudo);
-            this.panelManager.setPseudo(pseudo);
-            this.panelManager.showPanel(MainPanel.HOME);
-        }
     }
 
     public void install() {
@@ -144,10 +123,12 @@ public class Launcher {
                         for (Mod mod : Updater.getMods()) {
                             name.add(mod.getName());
                         }
-                        for (File mod : modFolder.listFiles()) {
-                            if (mod.getName().startsWith("AI_")) {
-                                if(!name.contains(mod.getName())) {
-                                    mod.delete();
+                        if (modFolder.listFiles() != null) {
+                            for (File mod : modFolder.listFiles()) {
+                                if (mod.getName().startsWith("AI_")) {
+                                    if(!name.contains(mod.getName())) {
+                                        mod.delete();
+                                    }
                                 }
                             }
                         }
@@ -190,13 +171,13 @@ public class Launcher {
         GameVersion gameVersion = new GameVersion(version, GameType.FABRIC);
         GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
         GameFolder gameFolder = GameFolder.FLOW_UPDATER_1_19_SUP;
-        AuthInfos authInfos = new AuthInfos(pseudo, "compte", "crack");
+        AuthInfos authInfos = panelManager.getMvAuth().getAuthInfos();
 
         ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
 
         //Gestion param RAM
-        if(saver.get("RAM") != null) {
-            profile.getVmArgs().add("-Xmx" + saver.get("RAM") + "M");
+        if(saver.get(EnumSaver.RAM) != null) {
+            profile.getVmArgs().add("-Xmx" + saver.get(EnumSaver.RAM) + "M");
         }
 
         ExternalLauncher launcher = new ExternalLauncher(profile);
@@ -226,14 +207,14 @@ public class Launcher {
     }
 
     public String getRAM() {
-        return saver.get("RAM");
+        return saver.get(EnumSaver.RAM);
     }
 
     public void setRAM(double ramD) {
         if (ramD == 0) {
-            saver.remove("RAM");
+            saver.remove(EnumSaver.RAM);
         } else {
-            saver.set("RAM", (Math.round(ramD)+""));
+            saver.set(EnumSaver.RAM, (Math.round(ramD)+""));
         }
         saver.save();
     }
@@ -242,12 +223,12 @@ public class Launcher {
         if(selected) {
             MvWildLauncher.stopRP();
         }
-        saver.set("disableDRP", selected+"");
+        saver.set(EnumSaver.DISABLE_DRP, selected+"");
         saver.save();
     }
 
     public Boolean isDRPDisabled() {
-        return Boolean.parseBoolean(saver.get("disableDRP"));
+        return Boolean.parseBoolean(saver.get(EnumSaver.DISABLE_DRP));
     }
 
     public String getVersion() {
