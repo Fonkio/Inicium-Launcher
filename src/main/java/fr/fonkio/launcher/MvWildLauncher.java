@@ -35,6 +35,15 @@ public class MvWildLauncher {
 
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
 
+        if(!Boolean.parseBoolean(saver.get(EnumSaver.DISABLE_DRP))) {
+            startRP();
+        }
+
+        PanelManager panelManager = new PanelManager(stage);
+        panelManager.init();
+    }
+
+    public static void startRP() {
         String appName = "752142344240889867";
         String steam = "";
         DiscordEventHandlers handlers = new DiscordEventHandlers();
@@ -50,10 +59,8 @@ public class MvWildLauncher {
             }
         }, "RPC-Callback-Handler");
         threadRP.start();
-
-        PanelManager panelManager = new PanelManager(stage);
-        panelManager.init();
     }
+
     public static void stopRP() {
         logger.info("Arret - RP");
         threadRP.interrupt();

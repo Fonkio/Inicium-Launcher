@@ -222,8 +222,10 @@ public class Launcher {
     public void setDisableDRP(boolean selected) {
         if(selected) {
             MvWildLauncher.stopRP();
+        } else {
+            MvWildLauncher.startRP();
         }
-        saver.set(EnumSaver.DISABLE_DRP, selected+"");
+        saver.set(EnumSaver.DISABLE_DRP, Boolean.toString(selected));
         saver.save();
     }
 
