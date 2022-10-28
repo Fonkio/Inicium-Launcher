@@ -1,27 +1,28 @@
 package fr.fonkio.launcher.files;
 
+import fr.fonkio.launcher.utils.EnumSaver;
 import fr.theshark34.openlauncherlib.util.Saver;
 
 public class MvSaver {
     Saver saver = FileManager.getSaver();
 
-    public String get(String prop) {
+    public String get(EnumSaver prop) {
         if (saver != null) {
-            return saver.get(prop);
+            return saver.get(prop.getKey());
         } else {
             return null;
         }
     }
 
-    public void set(String prop, String value) {
+    public void set(EnumSaver prop, String value) {
         if (saver != null) {
-            saver.set(prop, value);
+            saver.set(prop.getKey(), value);
         }
     }
 
-    public void remove(String prop) {
+    public void remove(EnumSaver prop) {
         if (saver != null) {
-            saver.remove(prop);
+            saver.remove(prop.getKey());
         }
     }
 

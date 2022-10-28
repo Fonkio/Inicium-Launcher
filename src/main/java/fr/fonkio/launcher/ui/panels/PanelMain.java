@@ -53,7 +53,7 @@ public class PanelMain extends Panel {
     @Override
     public void init(PanelManager panelManager) {
         super.init(panelManager);
-        setPseudo(panelManager.getPseudo());
+        setPseudo(panelManager.getMvAuth().getAuthInfos().getUsername());
         //Affichage principal
         ColumnConstraints mainPainConstraint = new ColumnConstraints();
         mainPainConstraint.setHalignment(HPos.LEFT);
@@ -195,8 +195,8 @@ public class PanelMain extends Panel {
 
         });
         this.pseudo.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        this.imageViewTete.setOnMouseClicked(e-> this.panelManager.showPanel(MainPanel.LOGIN));
-        this.pseudo.setOnMouseClicked(e-> this.panelManager.showPanel(MainPanel.LOGIN));
+        this.imageViewTete.setOnMouseClicked(e-> this.panelManager.deconnexion());
+        this.pseudo.setOnMouseClicked(e-> this.panelManager.deconnexion());
         //Fin affichage pseudo + tete joueur
 
         //Selection de l'onglet
@@ -373,10 +373,6 @@ public class PanelMain extends Panel {
         this.home.setProgress(avancee, fin);
     }
 
-    public void setLoading() {
-        this.home.setLoading();
-    }
-
     public void setDisableInstall(boolean b) {
         this.home.setDisableInstall(b);
     }
@@ -389,10 +385,6 @@ public class PanelMain extends Panel {
         return this.panelManager.getVersion();
     }
 
-    public String getForgeVersion() {
-        return this.panelManager.getForgeVersion();
-    }
-
     public String getFabricVersion() {
         return this.panelManager.getFabricVersion();
     }
@@ -400,19 +392,19 @@ public class PanelMain extends Panel {
     public void afficher(MainPanel mainPanel) {
         TranslateTransition tt = new TranslateTransition(Duration.millis(100), this.rectangleSelect);
         switch (mainPanel) {
-            case HOME:
+            case HOME -> {
                 this.scrollPane.setContent(vBoxMv);
                 tt.setToY(0);
-                break;
-            case PARAMETRES:
+            }
+            case PARAMETRES -> {
                 this.scrollPane.setContent(vBoxSettings);
                 tt.setToY(140);
-                break;
-            case PLAYER_LIST:
+            }
+            case PLAYER_LIST -> {
                 this.scrollPane.setContent(vBoxPlayerList);
                 refreshList();
                 tt.setToY(70);
-                break;
+            }
         }
         tt.play();
     }

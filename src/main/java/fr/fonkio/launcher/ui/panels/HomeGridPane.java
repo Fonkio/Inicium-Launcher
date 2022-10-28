@@ -4,7 +4,6 @@ import com.sun.webkit.WebPage;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.launcher.Launcher;
-import fr.fonkio.launcher.utils.HttpRecup;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -14,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -136,7 +134,7 @@ public class HomeGridPane {
 
         //progressBar.setBackgroundColor(javafx.scene.paint.Color.rgb(92, 92, 92));
         Stop[] stops = new Stop[]{new Stop(0, javafx.scene.paint.Color.rgb(48, 85, 22)), new Stop(1, javafx.scene.paint.Color.rgb(82, 135, 47))};
-        LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
+        //LinearGradient lg = new LinearGradient(0,0,1,0,true, CycleMethod.NO_CYCLE, stops);
         //progressBar.setForegroundColor(lg);
         GridPane.setVgrow(progressBar, Priority.ALWAYS);
         GridPane.setHgrow(progressBar, Priority.ALWAYS);
@@ -320,9 +318,5 @@ public class HomeGridPane {
 
     public void setProgress(float avancee, float fin) {
         progressBar.setProgress(avancee/fin);
-    }
-
-    public void setLoading() {
-        progressBar.setProgress(0);
     }
 }

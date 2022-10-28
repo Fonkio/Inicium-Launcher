@@ -9,7 +9,7 @@ import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
-import fr.theshark34.openlauncherlib.util.Saver;
+import fr.fonkio.launcher.utils.EnumSaver;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class MvWildLauncher {
         library.Discord_Shutdown();
     }
     public static void updatePresence(String version, String state, String largeImageKey, String pseudo) {
-        if(saver.get("disableDRP") != null || (!Boolean.parseBoolean(saver.get("DRP")))) {
+        if(saver.get(EnumSaver.DISABLE_DRP) != null || (!Boolean.parseBoolean(saver.get(EnumSaver.DISABLE_DRP)))) {
             DiscordRichPresence presence = new DiscordRichPresence();
             presence.startTimestamp = System.currentTimeMillis() / 1000;
             if (version == null) {
