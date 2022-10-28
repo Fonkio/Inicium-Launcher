@@ -16,20 +16,12 @@ public class Panel implements IPanel {
         this.stage = stage;
     }
 
-    public Stage getStage() {
-        return stage;
-    }
-
     @Override
     public void init(PanelManager panelManager) {
         this.panelManager = panelManager;
         GridPane.setHgrow(layout, Priority.ALWAYS);
         GridPane.setVgrow(layout, Priority.ALWAYS);
-
-
     }
-
-
 
     @Override
     public GridPane getLayout() {

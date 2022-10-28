@@ -74,7 +74,7 @@ public class PanelLogin extends Panel {
         GridPane.setHgrow(bienvenue, Priority.ALWAYS);
         GridPane.setValignment(bienvenue, VPos.TOP);
         GridPane.setHalignment(bienvenue, HPos.CENTER);
-        bienvenue.setTranslateY(280);
+        bienvenue.setTranslateY(270);
 
         bienvenue.setStyle("-fx-text-fill: white; -fx-font-size: 35px; -fx-font-style: bold");
 
@@ -83,7 +83,7 @@ public class PanelLogin extends Panel {
         GridPane.setHgrow(connectSeparator, Priority.ALWAYS);
         GridPane.setValignment(connectSeparator, VPos.TOP);
         GridPane.setHalignment(connectSeparator, HPos.CENTER);
-        connectSeparator.setTranslateY(345);
+        connectSeparator.setTranslateY(335);
         connectSeparator.setMinWidth(325);
         connectSeparator.setMaxWidth(325);
         connectSeparator.setStyle("-fx-background-color: white; -fx-opacity: 50%;");
@@ -96,7 +96,7 @@ public class PanelLogin extends Panel {
         GridPane.setValignment(validate, VPos.TOP);
         GridPane.setHalignment(validate, HPos.CENTER);
         validate.setGraphic(view);
-        validate.setTranslateY(380);
+        validate.setTranslateY(370);
         validate.setMinWidth(325);
         validate.setMaxHeight(50);
         validate.setStyle("-fx-background-color: #52872F; -fx-border-radius: 0px; -fx-background-insets: 0; -fx-font-size: 20px; -fx-font-style: bold; -fx-text-fill: white");
@@ -127,16 +127,20 @@ public class PanelLogin extends Panel {
 
     private void connexionEnCours() {
         validate.setDisable(true);
-        validate.setText(" Connexion...");
+        Platform.runLater(() -> validate.setText(" Connexion..."));
     }
 
     private void seConnecter() {
         validate.setDisable(false);
-        validate.setText(" Connexion à Micosoft");
+        Platform.runLater(() -> validate.setText(" Connexion à Microsoft"));
     }
 
     public void connected(PanelManager panelManager) {
         connexionAnimation(panelManager);
+    }
+
+    public void disconnected() {
+        seConnecter();
     }
 
     private void connexionAnimation(PanelManager panelManager) {

@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 
 import java.util.function.BiConsumer;
 
+
 public class MvAuth implements BiConsumer<MicrosoftAuthResult, Throwable> {
 
     MicrosoftAuthenticator authenticator = new MicrosoftAuthenticator();
@@ -67,15 +68,12 @@ public class MvAuth implements BiConsumer<MicrosoftAuthResult, Throwable> {
     @Override
     public void accept(MicrosoftAuthResult microsoftAuthResult, Throwable error) {
         if (error != null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Echec connexion");
-            alert.setContentText("Impossible de se connecter avec Microsoft :\n" + error.getMessage());
-            alert.show();
-            return;
+            panelManager.deconnexion();
+        } else {
+            updateTokens(microsoftAuthResult);
+            updateAuthInfos(microsoftAuthResult);
+            panelManager.connected();
         }
-        updateTokens(microsoftAuthResult);
-        updateAuthInfos(microsoftAuthResult);
-        panelManager.connected();
     }
 
     public void deconnexion() {
@@ -83,5 +81,6 @@ public class MvAuth implements BiConsumer<MicrosoftAuthResult, Throwable> {
         authenticator = new MicrosoftAuthenticator();
         saver.remove(EnumSaver.ACCESS_TOKEN);
         saver.remove(EnumSaver.REFRESH_TOKEN);
+        saver.save();
     }
 }

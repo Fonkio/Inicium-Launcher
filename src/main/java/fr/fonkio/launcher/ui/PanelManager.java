@@ -195,6 +195,7 @@ public class PanelManager {
 
     public void deconnexion() {
         mvAuth.deconnexion();
+        panelLogin.disconnected();
         showPanel(MainPanel.LOGIN);
     }
 
