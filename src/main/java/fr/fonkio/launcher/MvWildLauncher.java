@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
 
 public class MvWildLauncher {
 
-    public static final String LAUNCHER_VERSION = "1.11";
+    public static final String LAUNCHER_VERSION = "1.12";
     public static final String SERVEUR_IP = "survie.mvwild.org";
     public static final String TWITTER_URL = "https://twitter.com/MvWild_Serveur";
     public static final String DISCORD_URL = "https://discord.gg/5JcvM2B";
@@ -77,7 +77,7 @@ public class MvWildLauncher {
             }
             presence.state = state;
             presence.largeImageKey = largeImageKey;
-            presence.largeImageText = "Serveur Minecraft 100% Survie [Crack OK]";
+            presence.largeImageText = "Serveur Minecraft 100% Survie [Premium]";
             presence.smallImageKey = "minecraft";
             if (pseudo != null) {
                 presence.smallImageText = "Pseudo : "+pseudo;
