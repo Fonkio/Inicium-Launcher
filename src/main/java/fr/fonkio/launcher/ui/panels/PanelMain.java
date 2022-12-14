@@ -164,7 +164,6 @@ public class PanelMain extends Panel {
         this.vBoxMv.getChildren().add(0, topPanel);
         this.vBoxSettings.getChildren().add(0, topPanelSettings);
         VBox.setVgrow(vBoxPlayerList, Priority.ALWAYS);
-        vBoxPlayerList.setMinHeight(5000);
         this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
     }
 

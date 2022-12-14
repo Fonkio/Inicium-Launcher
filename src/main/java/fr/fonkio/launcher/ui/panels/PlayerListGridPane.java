@@ -2,22 +2,27 @@ package fr.fonkio.launcher.ui.panels;
 
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.utils.HttpRecup;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import java.util.List;
-import java.util.Map;
 
 public class PlayerListGridPane {
 
     private final PanelMain panelMain;
-    private FlowPane listeConnecte;
+    private ListView<Player> listeConnecte;
+
 
     public PlayerListGridPane(PanelMain panelMain) {
         this.panelMain = panelMain;
@@ -55,46 +60,78 @@ public class PlayerListGridPane {
 
     private void createGridConnect() {
         //ListeConnectés
-        this.listeConnecte = new FlowPane();
-        this.listeConnecte.setMaxHeight(20000);
-        listeConnecte.setVgap(500);
-        listeConnecte.setHgap(100);
+        this.listeConnecte = new ListView<>();
+        this.listeConnecte.setMaxHeight(550);
+        this.listeConnecte.setMinHeight(550);
+
 
         GridPane.setVgrow(listeConnecte, Priority.ALWAYS);
         GridPane.setHgrow(listeConnecte, Priority.ALWAYS);
         GridPane.setValignment(listeConnecte, VPos.TOP);
         GridPane.setHalignment(listeConnecte, HPos.LEFT);
-        listeConnecte.setVgap(50);
         listeConnecte.setTranslateY(80);
-        Map<String, List<String>> map = HttpRecup.getList();
+        listeConnecte.setStyle("-fx-background-color: transparent;");
+        List<String> playersNames = HttpRecup.getList();
 
-        for(String serverName : map.keySet()) {
-            GridPane gpServer = new GridPane();
-            GridPane.setVgrow(gpServer, Priority.ALWAYS);
-            GridPane.setHgrow(gpServer, Priority.ALWAYS);
-            GridPane.setValignment(gpServer, VPos.TOP);
-            GridPane.setHalignment(gpServer, HPos.LEFT);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < map.get(serverName).size(); i++) {
-                sb.append(map.get(serverName).get(i)).append("\n");
-            }
-            Label titre = new Label (serverName+" ["+map.get(serverName).size()+"]");
-            Label liste = new Label(sb.toString());
-            liste.setTranslateY(40);
-            liste.setStyle("-fx-font-size: 14px; -fx-text-fill: white;");
-            titre.setTranslateY(0);
-            titre.setStyle("-fx-font-size: 20px; -fx-text-fill: white;  -fx-font-weight: bold");
-            GridPane.setVgrow(liste, Priority.ALWAYS);
-            GridPane.setHgrow(liste, Priority.ALWAYS);
-            GridPane.setValignment(liste, VPos.TOP);
-            GridPane.setHalignment(liste, HPos.LEFT);
-            GridPane.setVgrow(titre, Priority.ALWAYS);
-            GridPane.setHgrow(titre, Priority.ALWAYS);
-            GridPane.setValignment(titre, VPos.TOP);
-            GridPane.setHalignment(titre, HPos.LEFT);
-            gpServer.getChildren().addAll(titre, liste);
-            listeConnecte.getChildren().add(gpServer);
+        ObservableList<Player> playerList = FXCollections.observableArrayList();
+
+        for (String str : playersNames) {
+            playerList.add(new Player(str,new ImageView("https://mc-heads.net/avatar/"+str+"/50")));
         }
+
+        listeConnecte.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Player player, boolean empty) {
+                super.updateItem(player, empty);
+                this.setStyle("-fx-background-color: transparent;");
+                if (empty) {
+                    setGraphic(null);
+                } else {
+
+                    // Create a HBox to hold our displayed value
+                    HBox hBox = new HBox(15);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+
+                    Label label = new Label(player.getName());
+                    label.setStyle("-fx-font-size: 26px; -fx-text-fill: white;");
+                    // Add the values from our piece to the HBox
+                    hBox.getChildren().addAll(
+                            player.getHead(),
+                            label
+                    );
+
+                    // Set the HBox as the display
+                    setGraphic(hBox);
+                }
+            }
+        });
+
+        listeConnecte.setItems(playerList);
     }
 
+    private class Player {
+        private String name;
+        private ImageView head;
+
+        public Player(String name, ImageView head) {
+            this.name = name;
+            this.head = head;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public ImageView getHead() {
+            return head;
+        }
+
+        public void setHead(ImageView head) {
+            this.head = head;
+        }
+    }
 }

@@ -3,15 +3,13 @@ package fr.fonkio.launcher.launcher;
 import fr.flowarg.flowupdater.download.IProgressCallback;
 import fr.flowarg.flowupdater.download.json.Mod;
 import fr.flowarg.flowupdater.utils.builderapi.BuilderException;
+import fr.flowarg.openlauncherlib.NoFramework;
 import fr.fonkio.launcher.MvWildLauncher;
 import fr.fonkio.launcher.files.FileManager;
 import fr.fonkio.launcher.files.MvSaver;
 import fr.fonkio.launcher.ui.PanelManager;
 import fr.fonkio.launcher.utils.EnumSaver;
 import fr.fonkio.launcher.utils.HttpRecup;
-import fr.theshark34.openlauncherlib.LaunchException;
-import fr.theshark34.openlauncherlib.external.ExternalLaunchProfile;
-import fr.theshark34.openlauncherlib.external.ExternalLauncher;
 import fr.theshark34.openlauncherlib.minecraft.*;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -19,8 +17,6 @@ import javafx.scene.control.Alert;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +25,9 @@ public class Launcher {
     private final MvSaver saver = new MvSaver();
     private final PanelManager panelManager;
     String pseudo;
-    String strVersion;
+    String minecraftVersion;
     String strForgeVersion = null;
-    String strFabricVersion;
+    String fabricVersion;
     IProgressCallback mvCallback;
     Updater updater;
 
@@ -54,11 +50,11 @@ public class Launcher {
 
         mvCallback = new MvCallback(this.panelManager);
 
-        strVersion = getVersion("launcher/versionMc.php", EnumSaver.VERSION_MC);
-        strFabricVersion = getVersion("launcher/fabricVersion.php", EnumSaver.VERSION_FABRIC);
+        minecraftVersion = getVersion("launcher/versionMc.php", EnumSaver.VERSION_MC);
+        fabricVersion = getVersion("launcher/fabricVersion.php", EnumSaver.VERSION_FABRIC);
 
         try {
-            updater = new Updater(strVersion, strFabricVersion, mvCallback);
+            updater = new Updater(minecraftVersion, fabricVersion, mvCallback);
         } catch (Exception e) {
             if (!offline) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -109,7 +105,7 @@ public class Launcher {
     }
 
     public void install() {
-        MvWildLauncher.updatePresence(strVersion, "Lancement du jeu", "mvwildlogo", pseudo);
+        MvWildLauncher.updatePresence(minecraftVersion, "Lancement du jeu", "mvwildlogo", pseudo);
         this.panelManager.setDisableInstallButton(true);
         if (offline) {
             this.panelManager.setProgress(100, 100);
@@ -146,7 +142,7 @@ public class Launcher {
             Platform.runLater(() -> {
                 panelManager.setStatus("Lancement ...");
                 try {
-                    launch(strVersion);
+                    launch();
                 } catch (Exception e) {
                     e.printStackTrace();
                     panelManager.getStage().setIconified(false);
@@ -166,26 +162,25 @@ public class Launcher {
         t.start();
     }
 
-    public void launch(String version) throws LaunchException {
+    public void launch() throws Exception {
 
-        GameVersion gameVersion = new GameVersion(version, GameType.FABRIC);
-        GameInfos gameInfos = new GameInfos(MvWildLauncher.SERVEUR_NAME, gameVersion, new GameTweak[0]);
         GameFolder gameFolder = GameFolder.FLOW_UPDATER_1_19_SUP;
         AuthInfos authInfos = panelManager.getMvAuth().getAuthInfos();
 
-        ExternalLaunchProfile profile = MinecraftLauncher.createExternalProfile(gameInfos, gameFolder, authInfos);
+
 
         //Gestion param RAM
+        List<String> args = new ArrayList<>();
         if(saver.get(EnumSaver.RAM) != null) {
-            profile.getVmArgs().add("-Xmx" + saver.get(EnumSaver.RAM) + "M");
+            args.add("-Xmx" + saver.get(EnumSaver.RAM) + "M");
         }
 
-        ExternalLauncher launcher = new ExternalLauncher(profile);
+        NoFramework noFramework = new NoFramework(FileManager.getGameFolderPath(), authInfos, gameFolder, args, NoFramework.Type.VM);
 
         //Lancement
-        MvWildLauncher.updatePresence(version, "En jeu", "mvwildlogo", pseudo);
+        MvWildLauncher.updatePresence(minecraftVersion, "En jeu", "mvwildlogo", pseudo);
         this.panelManager.setStatus("Jeu lancé");
-        Process p = launcher.launch();
+        Process p = noFramework.launch(minecraftVersion, fabricVersion, NoFramework.ModLoader.FABRIC);
         this.panelManager.getStage().setIconified(true);
 
         //Thread attente fermeture du jeu
@@ -199,7 +194,7 @@ public class Launcher {
                     panelManager.setStatus("");
                 });
 
-                MvWildLauncher.updatePresence(version, "Retour sur le launcher", "mvwildlogo", pseudo);
+                MvWildLauncher.updatePresence(minecraftVersion, "Retour sur le launcher", "mvwildlogo", pseudo);
 
             } catch (InterruptedException ignored) {}
         });
@@ -234,7 +229,7 @@ public class Launcher {
     }
 
     public String getVersion() {
-        return strVersion;
+        return minecraftVersion;
     }
 
     public String getForgeVersion() {
@@ -242,7 +237,7 @@ public class Launcher {
     }
 
     public String getFabricVersion() {
-        return strFabricVersion;
+        return fabricVersion;
     }
 
     public boolean containsModsFolder() {

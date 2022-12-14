@@ -21,18 +21,18 @@ public class Updater {
     private static final String PATH_TO_MODS = "launcher/mods.php";
     private final FlowUpdater updater;
 
-    public Updater(final String strVersionMc, String strVersionFabric, IProgressCallback mvCallback) throws BuilderException, URISyntaxException, MalformedURLException {
+    public Updater(final String versionMc, String versionFabric, IProgressCallback mvCallback) throws BuilderException, URISyntaxException, MalformedURLException {
 
-        final VanillaVersion version = new VanillaVersion.VanillaVersionBuilder()
-                .withName(strVersionMc)
+        final VanillaVersion vanillaVersion = new VanillaVersion.VanillaVersionBuilder()
+                .withName(versionMc)
                 .build();
         final FabricVersion fabricVersion = new FabricVersion.FabricVersionBuilder()
-                .withFabricVersion(strVersionFabric)
+                .withFabricVersion(versionFabric)
                 .withMods(getMods())
                 .build();
         this.updater = new FlowUpdater.FlowUpdaterBuilder()
                 .withModLoaderVersion(fabricVersion)
-                .withVanillaVersion(version)
+                .withVanillaVersion(vanillaVersion)
                 .withLogger(MvWildLauncher.logger)
                 .withExternalFiles(ExternalFile.getExternalFilesFromJson(MvWildLauncher.SITE_URL + PATH_TO_EXT_FILE))
                 .withProgressCallback(mvCallback)
