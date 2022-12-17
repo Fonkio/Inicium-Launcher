@@ -28,8 +28,11 @@ public class PlayerListGridPane {
         this.panelMain = panelMain;
     }
 
-    //Affichage onglet paramètres
+    //Affichage onglet liste des joueurs
     public void addTopPanel(GridPane topPanel) {
+        addTopPanel(topPanel, false);
+    }
+    public void addTopPanel(GridPane topPanel, boolean refresh) {
         Label playerListTitle = new Label("Liste des joueurs");
         GridPane.setVgrow(playerListTitle, Priority.ALWAYS);
         GridPane.setHgrow(playerListTitle, Priority.ALWAYS);
@@ -52,13 +55,13 @@ public class PlayerListGridPane {
         buttonRefresh.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
         buttonRefresh.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
         buttonRefresh.setOnMouseClicked(e->this.panelMain.refreshList());
-        createGridConnect();
+        createGridConnect(refresh);
         topPanel.getChildren().addAll(playerListTitle, buttonRefresh, this.listeConnecte);
 
     }
 
 
-    private void createGridConnect() {
+    private void createGridConnect(boolean refresh) {
         //ListeConnectés
         this.listeConnecte = new ListView<>();
         this.listeConnecte.setMaxHeight(550);
@@ -71,7 +74,7 @@ public class PlayerListGridPane {
         GridPane.setHalignment(listeConnecte, HPos.LEFT);
         listeConnecte.setTranslateY(80);
         listeConnecte.setStyle("-fx-background-color: transparent;");
-        List<String> playersNames = HttpRecup.getList();
+        List<String> playersNames = HttpRecup.getList(refresh);
 
         ObservableList<Player> playerList = FXCollections.observableArrayList();
 

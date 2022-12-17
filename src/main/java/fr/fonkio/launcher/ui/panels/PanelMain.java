@@ -410,7 +410,7 @@ public class PanelMain extends Panel {
 
 
     public void refreshList() {
-        this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
+        this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo(true) +")");
         GridPane topPanelPlayerList = new GridPane();
         GridPane.setVgrow(topPanelPlayerList, Priority.ALWAYS);
         GridPane.setHgrow(topPanelPlayerList, Priority.ALWAYS);
@@ -419,7 +419,7 @@ public class PanelMain extends Panel {
         topPanelPlayerList.setMaxWidth(880);
         topPanelPlayerList.setMinHeight(340);
         topPanelPlayerList.setMaxHeight(340);
-        this.playerList.addTopPanel(topPanelPlayerList);
+        this.playerList.addTopPanel(topPanelPlayerList, true);
         if (this.vBoxPlayerList.getChildren().size() != 0) {
             this.vBoxPlayerList.getChildren().remove(0);
         }

@@ -64,7 +64,11 @@ public class HttpRecup {
     private static Status serverStatus = null;
 
     private static Status getInstance() {
-        if (serverStatus == null) {
+        return getInstance(false);
+    }
+
+    private static Status getInstance(boolean refresh) {
+        if (serverStatus == null || refresh) {
             try {
                 HttpRequest getRequest = HttpRequest.newBuilder()
                         .uri(new URI("https://api.mcsrvstat.us/2/"+MvWildLauncher.SERVEUR_IP))
@@ -81,18 +85,23 @@ public class HttpRecup {
     }
 
     public static String getNbCo() {
-        if (getInstance() != null) {
-            return getInstance().players.online + "/" + getInstance().players.max;
+        return getNbCo(false);
+    }
+    public static String getNbCo(boolean refresh) {
+        Status status = getInstance(refresh);
+        if (status != null) {
+            return status.players.online + "/" + getInstance().players.max;
         } else {
-            return "Impossible de se connecter";
+            return "?";
         }
 
     }
 
 
-    public static List<String> getList() {
-        if (getInstance() != null) {
-            return getInstance().players.list;
+    public static List<String> getList(boolean refresh) {
+        Status status = getInstance(refresh);
+        if (status != null) {
+            return status.players.list;
         } else {
             return new ArrayList<>();
         }
