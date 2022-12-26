@@ -7,6 +7,7 @@ import fr.fonkio.launcher.ui.panel.Panel;
 import fr.fonkio.launcher.utils.HttpRecup;
 import fr.fonkio.launcher.utils.MainPanel;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.geometry.*;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
@@ -139,8 +140,6 @@ public class PanelMain extends Panel {
         topPanelSettings.setMinHeight(340);
         topPanelSettings.setMaxHeight(340);
 
-
-
         //PLAYERLIST
         this.vBoxPlayerList = new VBox();
         GridPane.setVgrow(this.vBoxPlayerList, Priority.ALWAYS);
@@ -153,6 +152,10 @@ public class PanelMain extends Panel {
         GridPane.setVgrow(topPanelPlayerList, Priority.ALWAYS);
         GridPane.setHgrow(topPanelPlayerList, Priority.ALWAYS);
         GridPane.setValignment(topPanelPlayerList, VPos.TOP);
+        topPanelPlayerList.setMinWidth(880);
+        topPanelPlayerList.setMaxWidth(880);
+        topPanelPlayerList.setMinHeight(340);
+        topPanelPlayerList.setMaxHeight(340);
 
         //Chargement des panels
         this.home.addTopPanel(topPanel);
@@ -336,8 +339,11 @@ public class PanelMain extends Panel {
     public void setPseudo(String pseudo) {
         this.pseudo.setText(pseudo);
         String path = "https://cravatar.eu/head/"+pseudo+"/100.png";
-        Image teteJ = new Image(path);
-        this.imageViewTete.setImage(teteJ);
+        Thread t = new Thread(() -> {
+            Image teteJ = new Image(path);
+            Platform.runLater(() -> this.imageViewTete.setImage(teteJ));
+        });
+        t.start();
     }
 
     public String getRAM() {
@@ -401,7 +407,6 @@ public class PanelMain extends Panel {
             }
             case PLAYER_LIST -> {
                 this.scrollPane.setContent(vBoxPlayerList);
-                refreshList();
                 tt.setToY(70);
             }
         }
@@ -410,20 +415,11 @@ public class PanelMain extends Panel {
 
 
     public void refreshList() {
-        this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo(true) +")");
-        GridPane topPanelPlayerList = new GridPane();
-        GridPane.setVgrow(topPanelPlayerList, Priority.ALWAYS);
-        GridPane.setHgrow(topPanelPlayerList, Priority.ALWAYS);
-        GridPane.setValignment(topPanelPlayerList, VPos.TOP);
-        topPanelPlayerList.setMinWidth(880);
-        topPanelPlayerList.setMaxWidth(880);
-        topPanelPlayerList.setMinHeight(340);
-        topPanelPlayerList.setMaxHeight(340);
-        this.playerList.addTopPanel(topPanelPlayerList, true);
-        if (this.vBoxPlayerList.getChildren().size() != 0) {
-            this.vBoxPlayerList.getChildren().remove(0);
-        }
-        this.vBoxPlayerList.getChildren().add(0, topPanelPlayerList);
+        Platform.runLater(() -> this.playerListLabel.setText("Récupération..."));
+        playerList.setRefreshButtonVisible(false);
+        playerList.refreshList();
+        Platform.runLater(() -> this.playerListLabel.setText("Joueurs connectés ("+ HttpRecup.getNbCo(true) +")"));
+        playerList.setRefreshButtonVisible(true);
     }
 
     public void resetLauncher() {
@@ -433,6 +429,5 @@ public class PanelMain extends Panel {
     public boolean containsModsFolder() {
         return this.panelManager.containsModsFolder();
     }
-
 
 }

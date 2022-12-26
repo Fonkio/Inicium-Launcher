@@ -3,7 +3,7 @@ package fr.fonkio.launcher.ui.panels;
 import com.sun.webkit.WebPage;
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.MvWildLauncher;
-import fr.fonkio.launcher.launcher.Launcher;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
@@ -16,8 +16,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -43,12 +41,17 @@ public class HomeGridPane {
 
     //Affichage onglet jouer par defaut
     public void addTopPanel(GridPane pane) {
-        if (Launcher.offline) {
-            installButton = new Button("Mode Hors-Ligne");
-        } else {
-            installButton = new Button("Jouer");
-        }
-        status = new Label("Version "+this.panelMain.getVersion() + "/ Fabric : "+this.panelMain.getFabricVersion());
+
+        installButton = new Button("Jouer");
+        installButton.setDisable(true);
+
+        status = new Label("Récupération de la version du jeu ...");
+
+        Thread t = new Thread(() -> Platform.runLater(() -> {
+            status.setText("Version "+this.panelMain.getVersion() + "/ Fabric : "+this.panelMain.getFabricVersion());
+            installButton.setDisable(false);
+        }));
+        t.start();
 
         //Titre et description
         Label mvwildTitle = new Label(MvWildLauncher.SERVEUR_NAME);

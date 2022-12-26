@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'fr.fonkio'
-version '1.12'
+version '1.13'
 
 repositories {
     mavenCentral()
