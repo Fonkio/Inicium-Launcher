@@ -90,7 +90,7 @@ public class HttpRecup {
     }
     public static String getNbCo(boolean refresh) {
         Status status = getInstance(refresh);
-        if (status != null) {
+        if (status != null && status.online) {
             return status.players.online + "/" + getInstance().players.max;
         } else {
             return "?";
@@ -100,7 +100,7 @@ public class HttpRecup {
 
     public static List<String> getList(boolean refresh) {
         Status status = getInstance(refresh);
-        if (status != null) {
+        if (status != null && status.online) {
             return status.players.list;
         } else {
             return new ArrayList<>();
