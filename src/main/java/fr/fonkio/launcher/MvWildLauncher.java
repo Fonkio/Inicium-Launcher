@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 public class MvWildLauncher {
 
@@ -31,6 +33,8 @@ public class MvWildLauncher {
     private static Thread threadRP;
     public static final ILogger logger = new Logger("MvWild", FileManager.getLauncherLogPath(), true);
     private static final MvSaver saver = new MvSaver();
+
+    public static final List<String> FILE_DELETE_EXCEPTION = Arrays.asList("resourcepacks", "saves", "shaderpacks", "voxelmap");
 
 
     public void init(Stage stage) throws IOException, URISyntaxException, BuilderException {
