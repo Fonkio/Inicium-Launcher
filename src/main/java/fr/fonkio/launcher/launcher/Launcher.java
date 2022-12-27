@@ -31,10 +31,6 @@ public class Launcher {
     IProgressCallback mvCallback;
     Updater updater;
 
-    public static boolean offline = false;
-    
-
-
     public Launcher(PanelManager panelManager) throws BuilderException {
         this.panelManager = panelManager;
 
@@ -50,20 +46,24 @@ public class Launcher {
 
         mvCallback = new MvCallback(this.panelManager);
 
-        minecraftVersion = getVersion("launcher/versionMc.php", EnumSaver.VERSION_MC);
-        fabricVersion = getVersion("launcher/fabricVersion.php", EnumSaver.VERSION_FABRIC);
+        Thread t = new Thread(() -> {
+            minecraftVersion = getVersion("launcher/versionMc.php", EnumSaver.VERSION_MC);
+            fabricVersion = getVersion("launcher/fabricVersion.php", EnumSaver.VERSION_FABRIC);
 
-        try {
-            updater = new Updater(minecraftVersion, fabricVersion, mvCallback);
-        } catch (Exception e) {
-            if (!offline) {
+            try {
+                updater = new Updater(minecraftVersion, fabricVersion, mvCallback);
+            } catch (Exception e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Erreur création de la mise à jour");
+                alert.setTitle("Erreur création de l'Updater");
                 alert.setContentText(e.getMessage());
                 alert.setOnCloseRequest(event -> stop());
                 alert.show();
             }
-        }
+        });
+
+        t.start();
+
+
     }
 
     private void stop() {
@@ -72,10 +72,9 @@ public class Launcher {
     }
 
     private String getVersion(String path, EnumSaver versionProp) {
-        String version = null;
-        if (!offline) {
-            version = HttpRecup.getVersion(MvWildLauncher.SITE_URL + path);
-        }
+        String version;
+        version = HttpRecup.getVersion(MvWildLauncher.SITE_URL + path);
+
         if (version == null) {
             if (saver.get(versionProp) == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -95,50 +94,45 @@ public class Launcher {
     }
 
     private void goOffiline() {
-        this.panelManager.setInstallButtonText("Jouer hors ligne");
-        offline = true;
-        MvWildLauncher.logger.info("Mode hors ligne ...");
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Passage en mode hors ligne");
-        alert.setContentText("Impossible d'établir la connexion avec le serveur, passage en mode hors ligne");
+        alert.setContentText("Impossible d'établir la connexion avec le serveur.");
+        alert.setOnCloseRequest(event -> stop());
         alert.show();
     }
 
     public void install() {
         MvWildLauncher.updatePresence(minecraftVersion, "Lancement du jeu", "mvwildlogo", pseudo);
         this.panelManager.setDisableInstallButton(true);
-        if (offline) {
-            this.panelManager.setProgress(100, 100);
-        }
         Thread t = new Thread(() -> {
-            if (!offline) {
-                try {
-                    File modFolder = new File(String.valueOf(FileManager.getModFolderPath()));
-                    if (modFolder.isDirectory()) {
-                        List<String> name = new ArrayList<>();
-                        for (Mod mod : Updater.getMods()) {
-                            name.add(mod.getName());
-                        }
-                        if (modFolder.listFiles() != null) {
-                            for (File mod : modFolder.listFiles()) {
-                                if (mod.getName().startsWith("AI_")) {
-                                    if(!name.contains(mod.getName())) {
-                                        mod.delete();
-                                    }
+
+            try {
+                File modFolder = new File(String.valueOf(FileManager.getModFolderPath()));
+                if (modFolder.isDirectory()) {
+                    List<String> name = new ArrayList<>();
+                    for (Mod mod : Updater.getMods()) {
+                        name.add(mod.getName());
+                    }
+                    if (modFolder.listFiles() != null) {
+                        for (File mod : modFolder.listFiles()) {
+                            if (mod.getName().startsWith("AI_")) {
+                                if(!name.contains(mod.getName())) {
+                                    mod.delete();
                                 }
                             }
                         }
                     }
-                    updater.update();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                    panelManager.setInstallButtonText("Erreur");
-                    panelManager.setDisableInstallButton(true);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
                 }
-                System.out.println("Fin update");
+                updater.update();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                panelManager.setInstallButtonText("Erreur");
+                panelManager.setDisableInstallButton(true);
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
+            System.out.println("Fin update");
+
             Platform.runLater(() -> {
                 panelManager.setStatus("Lancement ...");
                 try {
@@ -149,13 +143,8 @@ public class Launcher {
                     MvWildLauncher.updatePresence(null, "Dans le launcher", "mvwildlogo", pseudo);
                     panelManager.setInstallButtonText("Relancer");
                     panelManager.setDisableInstallButton(false);
-                    if(offline) {
-                        JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu ! L'installation n'est pas complète, il est nécessaire d'être en ligne pour lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }
+                    JOptionPane.showMessageDialog(null, "Impossible de lancer le jeu !", "Erreur", JOptionPane.ERROR_MESSAGE);
                     panelManager.setStatus("");
-
                 }
             });
         });
@@ -166,8 +155,6 @@ public class Launcher {
 
         GameFolder gameFolder = GameFolder.FLOW_UPDATER_1_19_SUP;
         AuthInfos authInfos = panelManager.getMvAuth().getAuthInfos();
-
-
 
         //Gestion param RAM
         List<String> args = new ArrayList<>();
@@ -265,7 +252,7 @@ public class Launcher {
 
     public String checkVersion() {
         String version = HttpRecup.getVersion(MvWildLauncher.SITE_URL +"launcher/version.php");
-        if (version != null && (!Launcher.offline) && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
+        if (version != null && !version.equals(MvWildLauncher.LAUNCHER_VERSION)) {
             return version;
         }
         return null;

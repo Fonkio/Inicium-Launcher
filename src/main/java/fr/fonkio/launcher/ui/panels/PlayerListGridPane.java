@@ -2,6 +2,7 @@ package fr.fonkio.launcher.ui.panels;
 
 import fr.fonkio.launcher.Main;
 import fr.fonkio.launcher.utils.HttpRecup;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -23,16 +24,15 @@ public class PlayerListGridPane {
     private final PanelMain panelMain;
     private ListView<Player> listeConnecte;
 
+    private Button buttonRefresh;
+
 
     public PlayerListGridPane(PanelMain panelMain) {
         this.panelMain = panelMain;
     }
 
     //Affichage onglet liste des joueurs
-    public void addTopPanel(GridPane topPanel) {
-        addTopPanel(topPanel, false);
-    }
-    public void addTopPanel(GridPane topPanel, boolean refresh) {
+    public void addTopPanel(GridPane topPanelListPlayer) {
         Label playerListTitle = new Label("Liste des joueurs");
         GridPane.setVgrow(playerListTitle, Priority.ALWAYS);
         GridPane.setHgrow(playerListTitle, Priority.ALWAYS);
@@ -44,7 +44,7 @@ public class PlayerListGridPane {
         ImageView imageRefresh = new ImageView(refreshImage);
         imageRefresh.setFitHeight(30);
         imageRefresh.setFitWidth(30);
-        Button buttonRefresh = new Button();
+        buttonRefresh = new Button();
         buttonRefresh.setBackground(Background.EMPTY);
         buttonRefresh.setGraphic(imageRefresh);
         GridPane.setVgrow(buttonRefresh, Priority.ALWAYS);
@@ -54,14 +54,31 @@ public class PlayerListGridPane {
         buttonRefresh.setTranslateY(20);
         buttonRefresh.setOnMouseEntered(e->this.panelMain.getLayout().setCursor(Cursor.HAND));
         buttonRefresh.setOnMouseExited(e->this.panelMain.getLayout().setCursor(Cursor.DEFAULT));
-        buttonRefresh.setOnMouseClicked(e->this.panelMain.refreshList());
-        createGridConnect(refresh);
-        topPanel.getChildren().addAll(playerListTitle, buttonRefresh, this.listeConnecte);
+        buttonRefresh.setOnMouseClicked(e-> {
+            Thread t = new Thread(this.panelMain::refreshList);
+            t.start();
+        });
+        createGridConnect();
+        topPanelListPlayer.getChildren().addAll(playerListTitle, buttonRefresh, this.listeConnecte);
 
     }
 
+    public void refreshList() {
+        List<String> playersNames = HttpRecup.getList(true);
+        ObservableList<Player> playerList = FXCollections.observableArrayList();
 
-    private void createGridConnect(boolean refresh) {
+        namesToPlayerList(playersNames, playerList);
+        Platform.runLater(() -> listeConnecte.setItems(playerList));
+    }
+
+    private void namesToPlayerList(List<String> playersNames, ObservableList<Player> playerList) {
+        for (String str : playersNames) {
+            playerList.add(new Player(str,new ImageView("https://mc-heads.net/avatar/"+str+"/50")));
+        }
+    }
+
+
+    private void createGridConnect() {
         //ListeConnectés
         this.listeConnecte = new ListView<>();
         this.listeConnecte.setMaxHeight(550);
@@ -74,13 +91,11 @@ public class PlayerListGridPane {
         GridPane.setHalignment(listeConnecte, HPos.LEFT);
         listeConnecte.setTranslateY(80);
         listeConnecte.setStyle("-fx-background-color: transparent;");
-        List<String> playersNames = HttpRecup.getList(refresh);
+        List<String> playersNames = HttpRecup.getList(false);
 
         ObservableList<Player> playerList = FXCollections.observableArrayList();
 
-        for (String str : playersNames) {
-            playerList.add(new Player(str,new ImageView("https://mc-heads.net/avatar/"+str+"/50")));
-        }
+        namesToPlayerList(playersNames, playerList);
 
         listeConnecte.setCellFactory(listView -> new ListCell<>() {
             @Override
@@ -110,6 +125,10 @@ public class PlayerListGridPane {
         });
 
         listeConnecte.setItems(playerList);
+    }
+
+    public void setRefreshButtonVisible(boolean visible) {
+        buttonRefresh.setVisible(visible);
     }
 
     private class Player {

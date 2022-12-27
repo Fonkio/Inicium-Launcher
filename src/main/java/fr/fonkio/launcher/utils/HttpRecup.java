@@ -18,6 +18,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class HttpRecup {
 
@@ -89,18 +90,17 @@ public class HttpRecup {
     }
     public static String getNbCo(boolean refresh) {
         Status status = getInstance(refresh);
-        if (status != null) {
+        if (status != null && status.online) {
             return status.players.online + "/" + getInstance().players.max;
         } else {
             return "?";
         }
-
     }
 
 
     public static List<String> getList(boolean refresh) {
         Status status = getInstance(refresh);
-        if (status != null) {
+        if (status != null && status.online) {
             return status.players.list;
         } else {
             return new ArrayList<>();
@@ -118,10 +118,7 @@ public class HttpRecup {
             BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             inputline = in.readLine();
         } catch (Exception e) {
-            if (!Launcher.offline) {
-                Launcher.offline = true;
-                JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.\nPassage en mode hors-ligne", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
-            }
+            JOptionPane.showMessageDialog(null, "Erreur de récupération de la dernière version minecraft.", "Erreur url connection", JOptionPane.ERROR_MESSAGE);
             return null;
         }
         if (inputline == null) {
