@@ -202,4 +202,9 @@ public class PanelManager {
     public void connected() {
         panelLogin.connected(this);
     }
+
+    public void setResetLauncherVisible(boolean visible) {
+        panelMain.setResetLauncherVisible(visible);
+    }
+
 }

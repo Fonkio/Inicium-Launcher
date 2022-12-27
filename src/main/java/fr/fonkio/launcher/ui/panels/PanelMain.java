@@ -430,4 +430,7 @@ public class PanelMain extends Panel {
         return this.panelManager.containsModsFolder();
     }
 
+    public void setResetLauncherVisible(boolean visible) {
+        settings.setResetLauncherVisible(visible);
+    }
 }

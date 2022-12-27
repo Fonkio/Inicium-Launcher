@@ -233,21 +233,35 @@ public class Launcher {
     }
 
     public void resetLauncher() {
-        File launcherFolder = FileManager.getGameFolder();
-        System.out.println(launcherFolder.getPath());
-        deleteDirectory(launcherFolder);
+        StringBuilder stringBuilder = new StringBuilder("Vous êtes sur le point de supprimer tout le contenu du dossier %appdata%/.mvwild excepté :\n");
+        for (String exeption : MvWildLauncher.FILE_DELETE_EXCEPTION) {
+            stringBuilder.append("- ");
+            stringBuilder.append(exeption);
+            stringBuilder.append("\n");
+        }
+        stringBuilder.append("Confirmer la suppression ?");
+        int reponse = JOptionPane.showConfirmDialog(null, stringBuilder.toString(), "Reset Launcher", JOptionPane.YES_NO_OPTION);
+        if (JOptionPane.YES_OPTION == reponse) {
+            File launcherFolder = FileManager.getGameFolder();
+            deleteDirectory(launcherFolder);
+            panelManager.setResetLauncherVisible(false);
+        }
     }
 
     private void deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
-                if (!file.getName().startsWith("launcher.")) {
+                if (!file.getName().startsWith("launcher.") && !isFileException(file.getName())) {
                     deleteDirectory(file);
                 }
             }
         }
         directoryToBeDeleted.delete();
+    }
+
+    private boolean isFileException(String name) {
+        return MvWildLauncher.FILE_DELETE_EXCEPTION.contains(name);
     }
 
     public String checkVersion() {
