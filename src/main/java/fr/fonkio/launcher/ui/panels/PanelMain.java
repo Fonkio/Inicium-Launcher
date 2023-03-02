@@ -45,6 +45,8 @@ public class PanelMain extends Panel {
     ImageView imageViewTete = new ImageView();
     private Label playerListLabel;
 
+    private Button buttonPlayer;
+
 
     public PanelMain(Stage stage, PanelManager panelManager) {
         super(stage);
@@ -259,7 +261,7 @@ public class PanelMain extends Panel {
         ImageView imagePlayer = new ImageView(playersImage);
         imagePlayer.setFitHeight(50);
         imagePlayer.setFitWidth(50);
-        Button buttonPlayer = new Button();
+        buttonPlayer = new Button();
         buttonPlayer.setBackground(Background.EMPTY);
         buttonPlayer.setGraphic(imagePlayer);
         GridPane.setVgrow(buttonPlayer, Priority.ALWAYS);
@@ -267,17 +269,31 @@ public class PanelMain extends Panel {
         GridPane.setValignment(buttonPlayer, VPos.CENTER);
         buttonPlayer.setTranslateX(34);
         buttonPlayer.setTranslateY(70);
-        buttonPlayer.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
+
+        playerListLabel = new Label("Chargement de la liste...");
+
         buttonPlayer.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
-        this.playerListLabel = new Label("Joueurs connectés ("+ HttpRecup.getNbCo() +")");
+        playerListLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
+        playerListLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.WAIT));
+        buttonPlayer.setOnMouseEntered(e->this.layout.setCursor(Cursor.WAIT));
+
+        Thread t = new Thread( () ->  {
+            String nbCo = HttpRecup.getNbCo();
+            Platform.runLater(()-> {
+                playerListLabel.setText("Joueurs connectés (" + nbCo + ")");
+                playerListLabel.setOnMouseClicked(e -> afficher(MainPanel.PLAYER_LIST));
+                playerListLabel.setOnMouseEntered(e -> this.layout.setCursor(Cursor.HAND));
+                buttonPlayer.setOnMouseEntered(e -> this.layout.setCursor(Cursor.HAND));
+            });
+        });
+        t.start();
+
         GridPane.setVgrow(playerListLabel, Priority.ALWAYS);
         GridPane.setHgrow(playerListLabel, Priority.ALWAYS);
         GridPane.setValignment(playerListLabel, VPos.CENTER);
         playerListLabel.setTranslateX(110);
         playerListLabel.setTranslateY(70);
         playerListLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: white; -fx-font-weight: bold");
-        playerListLabel.setOnMouseEntered(e->this.layout.setCursor(Cursor.HAND));
-        playerListLabel.setOnMouseExited(e->this.layout.setCursor(Cursor.DEFAULT));
 
         //Update
 
@@ -313,7 +329,7 @@ public class PanelMain extends Panel {
         buttonSetting.setOnMouseClicked(e-> afficher(MainPanel.PARAMETRES));
         settingLabel.setOnMouseClicked(e-> afficher(MainPanel.PARAMETRES));
         buttonPlayer.setOnMouseClicked(e-> afficher(MainPanel.PLAYER_LIST));
-        playerListLabel.setOnMouseClicked(e-> afficher(MainPanel.PLAYER_LIST));
+
         buttonUpdate.setOnMouseClicked(e-> update());
         updateLabel.setOnMouseClicked(e-> update());
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'fr.fonkio'
-version '1.13'
+version '1.13.1'
 
 repositories {
     mavenCentral()
@@ -26,9 +26,9 @@ javafx {
 dependencies {
     api 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
     api 'club.minnced:java-discord-rpc:2.0.1'
-    api 'fr.flowarg:flowupdater:1.7.2'
+    api 'fr.flowarg:flowupdater:1.7.4'
     api 'fr.flowarg:openlauncherlib:3.2.5'
-    api files('libs/openauth-1.1.3.jar')
+    implementation 'com.github.Litarvan:OpenAuth:master-SNAPSHOT'
     implementation 'com.google.code.gson:gson:2.10'
 }
 

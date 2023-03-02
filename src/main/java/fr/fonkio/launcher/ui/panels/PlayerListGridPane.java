@@ -22,7 +22,7 @@ import java.util.List;
 public class PlayerListGridPane {
 
     private final PanelMain panelMain;
-    private ListView<Player> listeConnecte;
+    private final ListView<Player> listeConnecte = new ListView<>();
 
     private Button buttonRefresh;
 
@@ -58,7 +58,8 @@ public class PlayerListGridPane {
             Thread t = new Thread(this.panelMain::refreshList);
             t.start();
         });
-        createGridConnect();
+        Thread t = new Thread(this::createGridConnect);
+        t.start();
         topPanelListPlayer.getChildren().addAll(playerListTitle, buttonRefresh, this.listeConnecte);
 
     }
@@ -72,6 +73,9 @@ public class PlayerListGridPane {
     }
 
     private void namesToPlayerList(List<String> playersNames, ObservableList<Player> playerList) {
+        if (playersNames == null) {
+            return;
+        }
         for (String str : playersNames) {
             playerList.add(new Player(str,new ImageView("https://mc-heads.net/avatar/"+str+"/50")));
         }
@@ -80,7 +84,6 @@ public class PlayerListGridPane {
 
     private void createGridConnect() {
         //ListeConnectés
-        this.listeConnecte = new ListView<>();
         this.listeConnecte.setMaxHeight(550);
         this.listeConnecte.setMinHeight(550);
 
